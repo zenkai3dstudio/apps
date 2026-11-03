@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zenkai3D Studio</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Zenkai3D">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F2F2F0">
+<link rel="apple-touch-icon" href="icona.png">
+<link rel="icon" href="icona.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="zenkai.css">
+<style>
+:root{
+  --paper:#F2F2F0; --surface:#FFFFFF; --ink:#191A1C; --ink-soft:#6B6D72;
+  --line:#D9D9D5; --line-strong:#B6B6B1;
+  --r:3px; --brand-blue:#3E96C2; --brand-orange:#E67324;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#131416; --surface:#1B1C1F; --ink:#EDEDEA; --ink-soft:#95979C;
+    --line:#2E3033; --line-strong:#45484C;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131416; --surface:#1B1C1F; --ink:#EDEDEA; --ink-soft:#95979C;
+  --line:#2E3033; --line-strong:#45484C;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:"Archivo","Helvetica Neue",Arial,sans-serif;
+  font-size:15px; line-height:1.45; -webkit-font-smoothing:antialiased;
+  min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:28px 20px 44px;
+}
+.wrap{max-width:440px;width:100%}
+.brandbar{display:flex;align-items:center;gap:11px;margin-bottom:28px}
+.brandmark{width:44px;height:44px;border-radius:10px;display:block;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.brandname{font-size:13px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;line-height:1.3}
+.brandname b{color:var(--brand-blue)}
+.brandname i{color:var(--brand-orange);font-style:normal}
+.brandname span{display:block;color:var(--ink-soft);font-size:11px;letter-spacing:.04em;font-weight:500;text-transform:none;margin-top:2px}
+
+.apps{display:flex;flex-direction:column;gap:12px}
+a.app{
+  display:flex;align-items:center;gap:15px;
+  background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r);
+  padding:17px 18px;text-decoration:none;color:inherit;
+  transition:border-color .12s, transform .12s;
+}
+a.app:hover,a.app:active{border-color:var(--ink);transform:translateY(-1px)}
+a.app:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.app-ico{width:42px;height:42px;border-radius:9px;flex:none;object-fit:cover;box-shadow:0 0 0 1px rgba(0,0,0,.07)}
+.app-txt{flex:1;min-width:0}
+.app-txt b{display:block;font-size:16.5px;font-weight:600;letter-spacing:-.015em}
+.app-txt span{display:block;color:var(--ink-soft);font-size:12.5px;margin-top:2px;line-height:1.35}
+.arrow{flex:none;color:var(--ink-soft);font-size:19px}
+a.app:hover .arrow{color:var(--ink)}
+
+footer{margin-top:26px;color:var(--ink-soft);font-size:12px;line-height:1.5}
+footer button{
+  background:none;border:0;color:var(--ink-soft);text-decoration:underline;
+  cursor:pointer;font:inherit;padding:2px 0;
+}
+footer button:hover{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){a.app{transition:none}}
+.beta{display:inline-block;margin-top:6px;color:var(--brand-blue);font-weight:600}
+
+.state{font-size:12.5px;color:var(--ink-soft);margin:14px 0 0;text-align:center;line-height:1.5}
+.state[hidden]{display:none}
+.state b{color:var(--ink)}
+.skel{height:76px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);opacity:.55}
+a.app.nova{border-color:var(--brand-blue)}
+a.app .tag{font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--brand-blue);display:block;margin-bottom:2px}
+#repo-box{margin-top:14px;text-align:left}
+#repo-box p{font-size:12px;color:var(--ink-soft);margin:0 0 7px;line-height:1.45}
+#repo-box input{width:100%;padding:8px 10px;border:1px solid var(--line-strong);border-radius:var(--r);
+  font:inherit;font-size:14px;background:var(--surface);color:var(--ink);margin-bottom:8px}
+#repo-box button{font-size:12.5px}
+footer button{background:none;border:0;color:var(--ink-soft);text-decoration:underline;cursor:pointer;font:inherit;font-size:12px;padding:3px 2px}
+footer button:hover{color:var(--ink)}
+
+[hidden]{display:none!important}
+@media(max-width:430px){
+  a.app{padding:15px 14px;gap:12px}
+  a.app .app-ico{width:40px;height:40px}
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="brandbar">
+    <img class="brandmark" src="icona.png" alt="">
+    <div class="brandname"><b>ZENKAI</b><i>3D STUDIO</i>
+      <span>Les teves eines</span>
+    </div>
+  </div>
+
+  <nav class="apps" id="apps"></nav>
+  <p class="state" id="state" hidden></p>
+
+  <footer>
+    Les dades es desen al Drive del compte amb què entres a cada app.
+    <br><button type="button" id="refresh">Torna a buscar apps</button> ·
+    <button type="button" id="reset-cid">Canvia el Client ID de Google</button>
+    <div id="repo-box" hidden>
+      <p>No he pogut endevinar de quin repositori surt aquesta pàgina. Escriu-l'hi tu, un sol cop:</p>
+      <input type="text" id="repo-in" placeholder="usuari/repositori" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button type="button" id="repo-save">Desa</button>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+"use strict";
+
+/* Les apps que ja conec: nom maco, descripció i ordre al menú.
+   Les que no són aquí també surten — el nom se'l treu del seu <title>. */
+var CONEGUDES = {
+  "inventari.html":   { n:"Inventari de filament",   d:"Bobines, colors, què s'acaba i què cal demanar", o:1 },
+  "pressupost.html":  { n:"Pressupost d'impressió",  d:"Filament i resina, amb pintat i preu d'amic",     o:2 },
+  "collabs.html":     { n:"Col·laboracions",         d:"Marques, entregables i què tens pendent",         o:3 },
+  "impressions.html": { n:"Registre d'impressions",  d:"Amb el fitxer del slicer o a mà: descompta el filament de l'inventari", o:4 },
+  "dossier.html":     { n:"Dossier per a marques",   d:"La pàgina pública que reben les marques, amb les xifres de cada dilluns", o:6 }
+};
+/* fitxers que mai han de sortir al menú (el propi menú i versions velles) */
+var AMAGA = ["index.html","404.html","readme.html",
+             "inventari-filament.html","pressupost-3d.html","collabs-3d.html","collaboracions.html"];
+
+var CACHE_KEY="zenkai_apps_v1", REPO_KEY="zenkai_repo", VIST_KEY="zenkai_apps_vistes";
+var $=function(id){ return document.getElementById(id); };
+var esc=function(t){ return String(t==null?"":t).replace(/[&<>"]/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
+
+function estat(html){
+  var e=$("state");
+  if(!html){ e.hidden=true; e.innerHTML=""; return; }
+  e.hidden=false; e.innerHTML=html;
+}
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+
+/* ---------- de quin repositori surt aquesta pàgina ---------- */
+function repoInfo(){
+  var manual=(lsGet(REPO_KEY)||"").trim();
+  if(manual.indexOf("/")>0){
+    var p=manual.replace(/^https?:\/\/github\.com\//i,"").replace(/\.git$/,"").split("/").filter(Boolean);
+    if(p.length>=2) return { owner:p[0], repo:p[1], dir:p.slice(2).join("/"), manual:true };
+  }
+  var h=(location.hostname||"").toLowerCase();
+  var m=h.match(/^([a-z0-9-]+)\.github\.io$/);
+  if(!m) return null;
+  var segs=(location.pathname||"/").split("/").filter(Boolean);
+  if(segs.length && /\.[a-z0-9]+$/i.test(segs[segs.length-1])) segs.pop();
+  if(!segs.length) return { owner:m[1], repo:m[1]+".github.io", dir:"" };
+  return { owner:m[1], repo:segs[0], dir:segs.slice(1).join("/") };
+}
+
+/* ---------- demana la llista de fitxers a GitHub ---------- */
+function descobreix(){
+  var ri=repoInfo();
+  if(!ri) return Promise.reject({code:"norepo"});
+  var url="https://api.github.com/repos/"+encodeURIComponent(ri.owner)+"/"+encodeURIComponent(ri.repo)+
+          "/contents/"+(ri.dir?ri.dir.split("/").map(encodeURIComponent).join("/"):"");
+  return fetch(url,{headers:{"Accept":"application/vnd.github+json"}}).then(function(r){
+    if(r.status===404) throw {code:"404", ri:ri};
+    if(r.status===403) throw {code:"limit"};
+    if(!r.ok) throw {code:"http", status:r.status};
+    return r.json();
+  }).then(function(list){
+    if(!Array.isArray(list)) throw {code:"format"};
+    var noms=list.filter(function(f){
+      return f && f.type==="file" && /\.html?$/i.test(f.name) && AMAGA.indexOf(f.name.toLowerCase())<0;
+    }).map(function(f){ return f.name; });
+    if(!noms.length) throw {code:"buit"};
+    return noms;
+  });
+}
+
+/* ---------- el títol d'una app que no conec ---------- */
+function fitxaDe(nom){
+  var k=nom.toLowerCase();
+  if(CONEGUDES[k]) return Promise.resolve({ titol:CONEGUDES[k].n, desc:CONEGUDES[k].d });
+  /* només el principi del fitxer: el <title> hi és dins dels primers centenars de bytes */
+  return fetch(nom,{headers:{"Range":"bytes=0-4000"}}).then(function(r){
+    if(!r.ok && r.status!==206) throw 0;
+    return r.text();
+  }).then(function(t){
+    var ti=(t.match(/<title[^>]*>([^<]*)<\/title>/i)||[])[1];
+    /* la cometa de tancament ha de ser la mateixa que la d'obertura:
+       si no, una descripció amb apòstrofs es talla pel mig */
+    var md=t.match(/<meta\s+name=["']description["']\s+content=(["'])([\s\S]*?)\1/i);
+    var de=md?md[2]:null;
+    return { titol:(ti||"").trim()||null, desc:(de||"").trim()||null };
+  }).catch(function(){ return { titol:null, desc:null }; });
+}
+function bonic(nom){
+  var t=nom.replace(/\.html?$/i,"").replace(/[-_]+/g," ").trim();
+  return t ? t.charAt(0).toUpperCase()+t.slice(1) : nom;
+}
+
+/* ---------- pintar ---------- */
+function ordena(noms){
+  return noms.slice().sort(function(a,b){
+    var ka=CONEGUDES[a.toLowerCase()], kb=CONEGUDES[b.toLowerCase()];
+    if(ka&&kb) return ka.o-kb.o;
+    if(ka) return -1;
+    if(kb) return 1;
+    return a.localeCompare(b,"ca");
+  });
+}
+function vistes(){
+  try{ var v=JSON.parse(lsGet(VIST_KEY)||"[]"); return Array.isArray(v)?v:[]; }catch(e){ return []; }
+}
+function pinta(noms){
+  noms=ordena(noms);
+  var ja=vistes(), primera=!ja.length;
+  $("apps").innerHTML = noms.map(function(nom){
+    var k=nom.toLowerCase(), c=CONEGUDES[k];
+    var nova = !primera && ja.indexOf(k)<0;
+    return '<a class="app'+(nova?' nova':'')+'" href="'+esc(nom)+'" data-f="'+esc(k)+'">'+
+      '<img class="app-ico" src="'+LOGO_SRC+'" alt="">'+
+      '<span class="app-txt">'+
+        (nova?'<span class="tag">nova</span>':'')+
+        '<b>'+esc(c?c.n:bonic(nom))+'</b>'+
+        '<span>'+esc(c?c.d:"")+'</span>'+
+      '</span><span class="arrow">›</span></a>';
+  }).join("");
+  lsSet(VIST_KEY, JSON.stringify(noms.map(function(n){ return n.toLowerCase(); })));
+  /* omple el nom de les que no conec */
+  noms.forEach(function(nom){
+    if(CONEGUDES[nom.toLowerCase()]) return;
+    fitxaDe(nom).then(function(f){
+      var a=$("apps").querySelector('a[data-f="'+nom.toLowerCase().replace(/"/g,'')+'"]');
+      if(!a) return;
+      if(f.titol) a.querySelector("b").textContent=f.titol;
+      if(f.desc)  a.querySelector(".app-txt > span:last-child").textContent=f.desc;
+    });
+  });
+}
+function esquelet(n){
+  var h=""; for(var i=0;i<n;i++) h+='<div class="skel"></div>';
+  $("apps").innerHTML=h;
+}
+
+/* ---------- arrencada ---------- */
+var LOGO_SRC="";
+function arrenca(forcat){
+  LOGO_SRC=document.querySelector(".brandmark").src;
+  var cau=null;
+  try{ cau=JSON.parse(lsGet(CACHE_KEY)||"null"); }catch(e){}
+  if(cau && cau.apps && cau.apps.length && !forcat){ pinta(cau.apps); estat(""); }
+  else esquelet(4);
+
+  descobreix().then(function(noms){
+    lsSet(CACHE_KEY, JSON.stringify({t:Date.now(), apps:noms}));
+    pinta(noms);
+    estat(forcat ? noms.length+" app"+(noms.length===1?"":"s")+" trobades al repositori." : "");
+    if(forcat) setTimeout(function(){ estat(""); }, 3500);
+  }).catch(function(e){
+    var base = (cau && cau.apps && cau.apps.length) ? cau.apps : Object.keys(CONEGUDES);
+    pinta(base);
+    var c=(e&&e.code)||"";
+    if(c==="norepo"){
+      estat("No sé de quin repositori surt aquesta pàgina, així que ensenyo la llista de sempre.");
+      $("repo-box").hidden=false;
+    }
+    else if(c==="404"){
+      estat("GitHub no em deixa veure aquest repositori (o és privat). Ensenyo la llista de sempre.");
+      $("repo-box").hidden=false;
+    }
+    else if(c==="limit") estat("GitHub m'ha tallat per massa consultes seguides. Ensenyo l'última llista que tenia; torna-ho a provar d'aquí una estona.");
+    else if(c==="buit")  estat("Al repositori no hi he trobat cap altra pàgina.");
+    else estat("No he pogut comprovar si hi ha apps noves. Ensenyo l'última llista que tenia.");
+  });
+}
+
+$("refresh").onclick=function(){ estat("Buscant…"); arrenca(true); };
+$("repo-save").onclick=function(){
+  var v=$("repo-in").value.trim();
+  if(v.indexOf("/")<0){ estat("Escriu-ho com <b>usuari/repositori</b>."); return; }
+  lsSet(REPO_KEY, v);
+  $("repo-box").hidden=true;
+  estat("Buscant…"); arrenca(true);
+};
+$("reset-cid").onclick=function(){
+  try{
+    localStorage.removeItem("g_client_id");
+    localStorage.removeItem("g_skip_login");
+    this.textContent="Fet — torna a entrar a qualsevol app per posar-lo";
+    this.disabled=true;
+  }catch(e){ this.textContent="No s'ha pogut (emmagatzematge bloquejat)"; }
+};
+
+arrenca(false);
+</script>
+<script src="zenkai-nav.js"></script>
+</body>
+</html>
