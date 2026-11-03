@@ -1,0 +1,2546 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Registre d'impressions</title>
+<meta name="description" content="Amb el fitxer del slicer o a mà: descompta el filament de l'inventari">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Impressions">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F2F2F0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<link rel="apple-touch-icon" href="icona.png">
+<link rel="icon" href="icona.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<link rel="stylesheet" href="zenkai.css">
+<style>
+:root{
+  --paper:#F2F2F0; --surface:#FFFFFF; --ink:#191A1C; --ink-soft:#6B6D72;
+  --line:#D9D9D5; --line-strong:#B6B6B1; --alert:#C4362B; --good:#3F7D4C; --hub:#F2F2F0;
+  --r:3px; --brand-blue:#3E96C2; --brand-orange:#E67324;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#131416; --surface:#1B1C1F; --ink:#EDEDEA; --ink-soft:#95979C;
+    --line:#2E3033; --line-strong:#45484C; --alert:#F0796B; --good:#6FBF7F; --hub:#131416;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131416; --surface:#1B1C1F; --ink:#EDEDEA; --ink-soft:#95979C;
+  --line:#2E3033; --line-strong:#45484C; --alert:#F0796B; --good:#6FBF7F; --hub:#131416;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink); font-family:"Archivo","Helvetica Neue",Arial,sans-serif;
+  font-size:15px; line-height:1.45; font-variant-numeric:tabular-nums; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:900px;margin:0 auto;padding:0 20px 90px}
+button{font:inherit;color:inherit}
+
+header{padding:34px 0 18px}
+.brandbar{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.brandmark{width:30px;height:30px;border-radius:7px;display:block;object-fit:cover;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.brandname{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.brandname b{color:var(--brand-blue)}
+.brandname i{color:var(--brand-orange);font-style:normal}
+h1{font-size:clamp(26px,5.5vw,38px);font-weight:700;letter-spacing:-.026em;line-height:1.03;margin:0}
+.sub{color:var(--ink-soft);font-size:13.5px;margin:6px 0 0}
+.ver{display:inline-block;margin-left:7px;padding:2px 9px;border-radius:999px;background:var(--brand-blue);
+  color:#fff;font-size:11px;font-weight:700;letter-spacing:.04em;white-space:nowrap;vertical-align:1px}
+
+nav{display:flex;gap:0;border-bottom:1px solid var(--line-strong);margin:26px 0 0;overflow-x:auto}
+nav button{background:none;border:0;border-bottom:2px solid transparent;padding:9px 14px 8px;margin-bottom:-1px;cursor:pointer;white-space:nowrap;color:var(--ink-soft);font-weight:500}
+nav button:hover{color:var(--ink)}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+/* ---- les pestanyes al mòbil: totes a la vista, en files ---- */
+@media(max-width:560px){
+  nav{flex-wrap:wrap;overflow-x:visible;border-bottom:0;gap:6px;margin:20px 0 0;padding:0 0 2px}
+  nav button{border:1px solid var(--line-strong);border-radius:20px;border-bottom-width:1px;
+    margin-bottom:0;padding:6px 11px;font-size:12.5px;line-height:1.15}
+  nav button[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  nav button[aria-selected="true"] .ncount{color:var(--paper);opacity:.8}
+  .navwrap::after{display:none}
+}
+nav button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.seg button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+section[hidden]{display:none}
+section{padding-top:24px}
+h2{font-size:18px;font-weight:600;letter-spacing:-.02em;margin:30px 0 4px}
+h2:first-child{margin-top:0}
+.hint{color:var(--ink-soft);font-size:13px;margin:0 0 14px;max-width:64ch}
+
+input[type=text],input[type=number],input[type=search],select,textarea{
+  background:var(--surface);border:1px solid var(--line-strong);color:var(--ink);
+  padding:7px 9px;border-radius:var(--r);font:inherit;width:100%;
+}
+textarea{min-height:70px;resize:vertical}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink-soft)}
+label.f.full{grid-column:1/-1}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:520px){.grid3{grid-template-columns:1fr 1fr}}
+
+.btn{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r);padding:8px 13px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.primary:hover{opacity:.86}
+.btn.danger{color:var(--alert);border-color:var(--line-strong)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0}
+.spacer{flex:1}
+
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:var(--r);overflow:hidden}
+.seg button{padding:9px 18px;background:var(--surface);border:0;cursor:pointer;font-weight:600;border-right:1px solid var(--line-strong)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+
+.card{border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:16px;background:var(--surface)}
+.card h3{margin:0 0 12px;font-size:14px;font-weight:600;letter-spacing:-.01em}
+
+table.bd{width:100%;border-collapse:collapse;font-size:14px}
+table.bd th{text-align:right;font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);padding:0 0 8px;border-bottom:1px solid var(--line-strong)}
+table.bd th:first-child{text-align:left}
+table.bd td{padding:8px 0;border-bottom:1px solid var(--line)}
+table.bd td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums;width:110px}
+table.bd tr.total td{border-bottom:0;border-top:1px solid var(--line-strong);padding-top:12px;font-weight:700;font-size:17px}
+table.bd tr.subtotal td{font-weight:600;color:var(--ink-soft);font-size:12.5px;padding-top:2px}
+table.bd tr.subtotal td:not(:first-child){font-size:12.5px}
+table.bd .neg{color:var(--ink-soft)}
+
+.qrow{display:flex;gap:12px;align-items:center;padding:13px 0;border-top:1px solid var(--line);cursor:pointer}
+.qrow:last-child{border-bottom:1px solid var(--line)}
+.qrow:hover{background:rgba(0,0,0,.015)}
+.qtype{width:8px;height:8px;border-radius:50%;flex:none}
+.qtype.fdm{background:var(--brand-blue)}
+.qtype.resina{background:var(--brand-orange)}
+.qmain{flex:1;min-width:0}
+.qmain .name{font-weight:600}
+.qmain .sub{margin-top:1px}
+.qprice{font-weight:700;flex:none;text-align:right}
+.qprice small{display:block;font-weight:400;color:var(--ink-soft);font-size:11.5px}
+
+.empty-state{border:1px dashed var(--line-strong);padding:26px;text-align:center;color:var(--ink-soft);max-width:520px}
+.empty-state b{display:block;color:var(--ink);margin-bottom:6px;font-size:16px}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.42);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.overlay[hidden]{display:none}
+.sheet{background:var(--surface);border:1px solid var(--line-strong);width:min(560px,100%);max-height:92vh;overflow:auto;padding:22px;border-radius:var(--r) var(--r) 0 0}
+@media(min-width:700px){.overlay{align-items:center}.sheet{border-radius:var(--r)}}
+.sheet h3{margin:0 0 4px;font-size:19px;font-weight:600;letter-spacing:-.02em;overflow-wrap:break-word}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:16px}
+@media(max-width:560px){.actions .spacer{flex:1 0 100%;height:0}}
+
+.chk{flex-direction:row!important;align-items:center;gap:8px!important;color:var(--ink)!important;font-size:14px!important}
+.chk input{width:auto!important}
+.lbl-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.seg.mini{transform:scale(.82);transform-origin:right center}
+.seg.mini button{padding:3px 9px;font-size:12px}
+table.bd tr.muted td{color:var(--ink-soft)}
+.presetrow{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 10px}
+.presetrow button{font-size:12px;padding:5px 10px}
+.presetrow button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.xrow{display:grid;grid-template-columns:1fr 94px 84px 36px;gap:8px;align-items:center;margin-bottom:8px}
+.xrow.xhead{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);font-weight:600;margin-bottom:5px}
+.xdel{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r);height:34px;cursor:pointer;font-size:17px;line-height:1;color:var(--ink-soft);padding:0}
+.xdel:hover{border-color:var(--alert);color:var(--alert)}
+@media(max-width:520px){.xrow{grid-template-columns:1fr 72px 62px 32px;gap:6px}.xrow input{padding:7px 6px;font-size:14px}}
+.editbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:13.5px;padding:11px 13px;margin:18px 0 0;
+  border:1px solid var(--brand-blue);border-left:3px solid var(--brand-blue);border-radius:var(--r);background:rgba(62,150,194,.08)}
+.editbar[hidden]{display:none}
+
+.gate{position:fixed;inset:0;background:var(--paper);z-index:60;display:flex;align-items:center;justify-content:center;padding:24px}
+.gate[hidden]{display:none}
+.gate-card{max-width:360px;width:100%;text-align:center}
+.gate-card img{width:64px;height:64px;border-radius:15px;margin-bottom:18px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.gate-card h2{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0 0 8px}
+.gate-card p{color:var(--ink-soft);font-size:14px;line-height:1.5;margin:0 0 20px}
+.gate-card input{margin-bottom:10px}
+.gate-card .btn{width:100%;padding:11px;font-size:14.5px}
+.gate-link{margin-top:16px;font-size:12.5px;color:var(--ink-soft);text-decoration:underline;background:none;border:0;cursor:pointer;padding:4px}
+.gate-status{margin-top:12px;font-size:12.5px;color:var(--ink-soft)}
+.acctbar{display:flex;align-items:center;gap:8px;margin-top:12px}
+/* el correu empenyia el botó de tancar sessió fora de la pantalla al mòbil. Que
+   s'escurci ell, que és el prescindible: els botons es queden on són. */
+.acctbar .note{min-width:0;flex:0 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acctbar img{width:22px;height:22px;border-radius:50%;flex:none}
+.acctbar .btn{padding:4px 10px;font-size:12px;flex:none;white-space:nowrap}
+.backlink{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:5px;
+  text-decoration:none;color:var(--ink-soft);border:1px solid var(--line-strong);
+  border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;white-space:nowrap}
+.backlink:hover{color:var(--ink);border-color:var(--ink)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:40;background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:var(--r);font-size:13.5px}
+.toast[hidden]{display:none}
+.note{font-size:13px;color:var(--ink-soft)}
+.err{color:var(--alert)}
+textarea.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ───── correccions d'interfície ───── */
+/* Una classe amb display: propi es menjava l'atribut «hidden» i deixava
+   coses a la vista que havien d'estar amagades. */
+[hidden]{display:none!important}
+
+/* Les pestanyes, al mòbil, que es vegi que n'hi ha més a la dreta */
+nav{-webkit-overflow-scrolling:touch;scrollbar-width:none;position:relative}
+nav::-webkit-scrollbar{display:none}
+
+/* Als dits els cal una mica més de superfície */
+@media(max-width:720px){
+  nav button{padding:11px 13px 10px}
+  .btn{padding:10px 14px}
+  .q{min-width:32px;height:32px}
+}
+
+/* A l'ordinador, un camp de 800 px per escriure «48» no té sentit */
+@media(min-width:760px){
+  .grid2,.grid3{max-width:760px}
+  label.f.full input[type=text]{max-width:520px}
+  label.f.full textarea{max-width:620px}
+  .xrow{max-width:620px}
+}
+/* els components externs, llegibles al mòbil */
+@media(max-width:430px){
+  .xrow{grid-template-columns:1fr 66px 54px 30px;gap:5px}
+  .xrow.xhead{font-size:10px}
+  .xdel{height:32px;font-size:15px}
+}
+/* el selector de marge no s'encavalqui amb l'etiqueta */
+.lbl-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:22px}
+.seg.mini{transform:none;margin-left:auto}
+.seg.mini button{padding:4px 9px;font-size:11.5px}
+
+@media(max-width:560px){ .toolbar .spacer{display:none} }
+
+.navwrap{position:relative}
+.navwrap::after{content:"";position:absolute;right:0;top:0;bottom:1px;width:34px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,var(--paper));opacity:0;transition:opacity .15s}
+.navwrap.hi-ha-mes::after{opacity:1}
+
+@media(max-width:560px){
+  .grid2 > label.f:has(#q-marge){grid-column:1/-1}
+  .lbl-row{justify-content:space-between}
+}
+/* ---- lector de fitxers ---- */
+.drop{border:2px dashed var(--line-strong);border-radius:12px;padding:30px 20px;text-align:center;cursor:pointer;
+  display:flex;flex-direction:column;gap:6px;align-items:center;background:var(--surface);transition:border-color .15s,background .15s}
+.drop:hover,.drop:focus-visible,.drop.over{border-color:var(--brand-blue);background:rgba(62,150,194,.06)}
+.drop b{font-size:15.5px}
+.drop span{font-size:12.5px;color:var(--ink-soft)}
+
+.warn{border:1px solid var(--brand-orange);border-left:3px solid var(--brand-orange);border-radius:var(--r);
+  background:rgba(230,115,36,.08);padding:13px 15px;margin:0 0 16px;display:flex;flex-direction:column;gap:5px}
+.warn[hidden]{display:none}
+.warn b{font-size:14px}
+.warn span{font-size:13px;line-height:1.5;color:var(--ink-soft)}
+.warn code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:var(--hub);
+  border:1px solid var(--line);border-radius:4px;padding:1px 5px;white-space:nowrap}
+.reshead{display:flex;gap:14px;align-items:flex-start}
+.reshead img{width:92px;height:92px;object-fit:contain;border-radius:8px;background:var(--hub);flex:none;border:1px solid var(--line)}
+.resmeta{min-width:0;flex:1}
+.resmeta h3{margin:0 0 6px;font-size:16px;overflow-wrap:anywhere}
+.resmeta p{margin:0 0 3px;overflow-wrap:anywhere}
+
+.sw{display:inline-block;width:20px;height:20px;border-radius:5px;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+.sw.sm{width:13px;height:13px;border-radius:3px}
+.sw-none{background:repeating-linear-gradient(45deg,var(--line) 0 4px,transparent 4px 8px)}
+.filrow{display:flex;gap:11px;padding:12px 2px;border-top:1px solid var(--line);align-items:flex-start}
+.filrow:last-child{border-bottom:1px solid var(--line)}
+.filmain{flex:1;min-width:0}
+.filtop{display:flex;align-items:baseline;gap:10px}
+.filtop b{font-size:13.5px;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.filg{margin-left:auto;font-weight:700;font-size:14.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.filg i{font-style:normal;display:block;text-align:right;font-size:10px;font-weight:400;color:var(--ink-soft);margin-top:-2px}
+.filsub{font-size:11.5px;color:var(--ink-soft);margin-top:2px;overflow-wrap:anywhere;line-height:1.35}
+.filmatch{font-size:12.5px;margin-top:6px;line-height:1.35}
+.filmatch b{font-weight:600}
+.filmatch small{display:block;color:var(--ink-soft);font-size:11px;margin-top:1px}
+.filsel{margin-top:7px}
+
+/* ---- selector de bobina ---- */
+.pick{position:relative}
+.pickbtn{display:flex;align-items:center;gap:8px;width:100%;text-align:left;cursor:pointer;
+  padding:8px 10px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface);
+  font:inherit;font-size:13.5px;color:var(--ink)}
+.pickbtn:hover{border-color:var(--brand-orange)}
+.pickbtn[aria-expanded="true"]{border-color:var(--brand-orange);box-shadow:0 0 0 2px rgba(230,115,36,.16)}
+.pickbtn:not(.te) .pickn{color:var(--ink-soft)}
+.pickn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pickc{flex:none;font-size:11.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.pickv{flex:none;font-size:10px;color:var(--ink-soft)}
+.pickpanel{position:absolute;z-index:40;left:0;right:0;top:calc(100% + 5px);
+  border:1px solid var(--line-strong);border-radius:8px;background:var(--surface);
+  box-shadow:0 10px 28px rgba(0,0,0,.16);padding:8px}
+/* la regla base d'input[type=search] val (0,1,1): per guanyar-li calen dues classes */
+.pickpanel input.pickq{width:100%;box-sizing:border-box;font:inherit;font-size:13.5px;padding:7px 9px;
+  border:1px solid var(--line);border-radius:6px;background:var(--hub);color:var(--ink);margin:0}
+.picklist{max-height:252px;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-top:7px}
+.pickit{display:flex;align-items:center;gap:8px;width:100%;text-align:left;cursor:pointer;
+  padding:8px 7px;border:0;border-radius:6px;background:transparent;font:inherit;font-size:13px;color:var(--ink)}
+.pickit:hover{background:var(--hub)}
+.pickit.tria{background:rgba(230,115,36,.12);font-weight:600}
+.pickit.buida .pickn,.pickit.buida .pickc{color:var(--ink-soft)}
+.pickbuit{margin:9px 5px;font-size:12.5px}
+.picknone{display:block;width:100%;margin-top:7px;padding:7px;cursor:pointer;font:inherit;font-size:12px;
+  color:var(--ink-soft);background:transparent;border:0;border-top:1px solid var(--line);text-align:left}
+.picknone:hover{color:var(--brand-orange)}
+
+/* ---- hi arribara o no ---- */
+.estoc{border:1px solid var(--line);border-left:3px solid var(--line-strong);border-radius:var(--r);
+  padding:13px 15px;margin:16px 0 0;display:flex;flex-direction:column;gap:7px}
+.estoc.e-be{border-color:var(--good);border-left-color:var(--good);background:rgba(63,125,76,.07)}
+.estoc.e-just,.estoc.e-canvi{border-color:var(--brand-orange);border-left-color:var(--brand-orange);
+  background:rgba(230,115,36,.08)}
+.estoc.e-curt{border-color:var(--alert);border-left-color:var(--alert);background:rgba(196,54,43,.08)}
+.etitol{font-size:14.5px}
+.estoc.e-be .etitol{color:var(--good)}
+.estoc.e-curt .etitol{color:var(--alert)}
+.ecua{font-size:12.5px;line-height:1.5;color:var(--ink-soft)}
+.ellista{list-style:none;margin:2px 0;padding:0;display:flex;flex-direction:column;gap:7px}
+.ebob{display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.35}
+.ebob>span{min-width:0}
+.ebob b{font-weight:600;display:block;overflow-wrap:anywhere}
+.ebob small{display:block;font-size:11.5px;color:var(--ink-soft);margin-top:1px;overflow-wrap:anywhere}
+.ebob small b{display:inline;font-weight:700;color:var(--ink)}
+.ebob .sw{margin-top:3px}
+.e-curt small b,.e-canvi small b{color:var(--alert)}
+
+/* ---- files posades a ma ---- */
+.filrow input.magr{width:78px;font:inherit;font-size:14px;font-weight:700;text-align:right;padding:5px 7px;
+  border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--ink);
+  font-variant-numeric:tabular-nums;margin:0}
+.filrow input.magr:focus{outline:2px solid var(--brand-orange);outline-offset:1px}
+.matreu{margin-top:7px}
+.lnk{background:0;border:0;padding:0;cursor:pointer;font:inherit;font-size:11.5px;
+  color:var(--ink-soft);text-decoration:underline}
+.lnk:hover{color:var(--brand-orange)}
+.sw.gran{width:20px;height:20px;border-radius:5px}
+
+#fail-mode{max-width:100%}
+@media(max-width:430px){
+  #fail-mode button{padding:9px 10px;font-size:13px}
+  #mode-seg button{padding:9px 12px;font-size:13.5px}
+  .pickbtn,.pickq{font-size:13px}
+  .picklist{max-height:210px}
+}
+.nomatch{color:var(--ink-soft)}
+.muted{color:var(--ink-soft)}
+
+.diag{margin-top:22px;border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;background:var(--surface)}
+.diag summary{cursor:pointer;font-size:13px;font-weight:600}
+.diag pre{max-height:320px;overflow:auto;font-size:11px;line-height:1.45;background:var(--hub);
+  border:1px solid var(--line);border-radius:6px;padding:10px;margin:0 0 10px;white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* ---- historial ---- */
+.dot{width:9px;height:9px;border-radius:50%;flex:none}
+.dot.ok{background:var(--good)}
+.dot.bad{background:var(--alert)}
+.qmain{flex:1;min-width:0}
+.qmain .name{font-weight:600;font-size:14.5px;overflow-wrap:anywhere}
+.qsw{display:flex;gap:3px;flex:none}
+.bad-txt{color:var(--alert)}
+.statrow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0 18px}
+.stat{border:1px solid var(--line);border-radius:var(--r);padding:10px;background:var(--surface);text-align:center}
+.stat b{display:block;font-size:17px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat span{display:block;font-size:10.5px;color:var(--ink-soft);margin-top:2px;line-height:1.25}
+@media(max-width:520px){.statrow{grid-template-columns:1fr 1fr}}
+
+input[type=range]{width:100%;accent-color:var(--brand-blue)}
+.empty-state{text-align:center;padding:36px 20px;color:var(--ink-soft);font-size:13.5px;display:flex;flex-direction:column;gap:6px}
+.empty-state b{color:var(--ink);font-size:15px}
+.empty-state[hidden]{display:none}
+
+
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <img src="icona.png" alt="Zenkai3D Studio">
+    <div id="gate-setup">
+      <h2>Un pas, un cop</h2>
+      <p>Enganxa el Client ID que t'ha donat Google Cloud. Només cal fer-ho una vegada i val per a les tres apps.</p>
+      <input type="text" id="gate-cid" placeholder="xxxxx.apps.googleusercontent.com">
+      <button class="btn primary" id="gate-cid-save">Desa i continua</button>
+      <button type="button" class="gate-link" id="gate-skip">Fes-la servir només en aquest dispositiu, sense Google</button>
+    </div>
+    <div id="gate-login" hidden>
+      <h2>Registre d'impressions</h2>
+      <p>Inicia sessió amb Google per desar el registre al teu Drive i per poder llegir l'inventari de bobines.</p>
+      <button class="btn primary" id="gate-signin">Continua amb Google</button>
+      <button type="button" class="gate-link" id="gate-skip2">Fes-la servir només en aquest dispositiu</button>
+      <button type="button" class="gate-link" id="gate-reconfig">Canvia el Client ID</button>
+      <p class="gate-status" id="gate-status"></p>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<header>
+  <div class="brandbar">
+    <img class="brandmark" src="icona.png" alt="Zenkai3D Studio">
+    <span class="brandname"><b>ZENKAI</b><i>3D STUDIO</i></span>
+    <a class="backlink" href="index.html" title="Torna al menú">&lsaquo; Menú</a>
+  </div>
+  <div class="acctbar" id="acctbar" hidden>
+    <img id="acct-pic" alt="">
+    <span class="note" id="acct-email"></span>
+    <span class="spacer"></span>
+    <button class="btn" id="acct-signout">Tanca sessió</button>
+  </div>
+  <h1>Registre d'impressions</h1>
+  <p class="sub">Amb el fitxer del slicer o posant-ho a mà: els grams de cada filament surten de la bobina que tries de l'inventari. <span class="ver">v8 · t'avisa si et falta filament</span></p>
+</header>
+
+<div class="navwrap"><nav role="tablist">
+  <button role="tab" data-view="read" aria-selected="true">Llegeix</button>
+  <button role="tab" data-view="hist" aria-selected="false">Historial</button>
+  <button role="tab" data-view="settings" aria-selected="false">Ajustos</button>
+</nav>
+
+<main>
+<section id="view-read">
+
+  <div class="seg" id="mode-seg" style="margin-bottom:16px">
+    <button type="button" data-m="file" aria-pressed="true">Tinc el fitxer</button>
+    <button type="button" data-m="ma" aria-pressed="false">Ho poso a mà</button>
+  </div>
+
+  <div id="w-file">
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Tria el fitxer de la impressió">
+      <input type="file" id="file" hidden>
+      <b id="drop-main">Deixa anar aquí el fitxer de la impressió</b>
+      <span id="drop-sub">el que surt del slicer · .gcode.3mf o .gcode</span>
+    </div>
+    <p class="note" id="read-status"></p>
+  </div>
+
+  <div class="card" id="w-ma" hidden>
+    <h3>Dades de la impressió</h3>
+    <p class="hint" style="margin:0 0 14px">Digue'm els grams de cada filament i de quina bobina surten. La resta va igual que amb fitxer: els grams no es mouen de l'inventari fins que em diguis que la impressió ha acabat.</p>
+    <div class="grid2">
+      <label class="f">Hores <input type="number" id="m-h" min="0" step="1" inputmode="numeric" autocomplete="off" placeholder="0"></label>
+      <label class="f">Minuts <input type="number" id="m-min" min="0" max="59" step="1" inputmode="numeric" autocomplete="off" placeholder="0"></label>
+    </div>
+    <div class="grid2" style="margin-top:12px">
+      <label class="f">Impressora <input type="text" id="m-printer" autocomplete="off" placeholder="opcional"></label>
+      <label class="f">Capes en total <input type="number" id="m-capes" min="0" step="1" inputmode="numeric" autocomplete="off" placeholder="opcional"></label>
+    </div>
+    <p class="hint" style="margin:12px 0 0">Les capes són opcionals; només em fan falta si la impressió falla i em vols dir en quina capa s'ha aturat. Si no les saps, m'ho pots dir en tant per cent.</p>
+  </div>
+
+  <div id="result" hidden>
+
+    <div class="warn" id="unsliced" hidden>
+      <b>Aquest fitxer encara no porta els números.</b>
+      <span>Hi ha el model i els filaments, però els grams i el temps el Bambu Studio no els calcula fins que prems <b>Slice plate</b> — el botó gros de dalt a la dreta, el que et mostra la peça per capes i et diu quant trigarà. No parteix la peça, només calcula. Un cop fet, ves a <b>Fitxer → Exporta → Export plate sliced file</b> i passa'm aquell fitxer, que acaba en <code>.gcode.3mf</code>. Si imprimeixes per targeta, el fitxer que hi copies ja és aquest mateix.</span>
+    </div>
+
+    <div class="card reshead">
+      <img id="r-thumb" alt="" hidden>
+      <div class="resmeta">
+        <h3 id="r-name"></h3>
+        <p class="note" id="r-sub"></p>
+        <p class="note" id="r-sub2"></p>
+      </div>
+    </div>
+
+    <div id="plates-wrap" hidden>
+      <p class="hint" style="margin-bottom:8px">Aquest fitxer porta més d'una placa. Tria la que has imprès:</p>
+      <div class="seg" id="plate-seg"></div>
+    </div>
+
+    <h2>Filaments</h2>
+    <div id="fil-list"></div>
+    <div class="toolbar" id="ma-add-wrap" hidden style="margin:12px 0 0">
+      <button class="btn" id="ma-add">Afegeix un filament</button>
+    </div>
+    <div id="estoc-box" hidden></div>
+    <p class="hint" id="inv-note"></p>
+
+    <div class="card">
+      <h3>Anota-la</h3>
+      <label class="f full">Nom o projecte <input type="text" id="r-title" autocomplete="off" placeholder="com la vols trobar després"></label>
+      <div class="seg" id="res-seg" style="margin-top:14px">
+        <button type="button" data-v="ok" aria-pressed="true">Ha sortit bé</button>
+        <button type="button" data-v="fail" aria-pressed="false">Ha fallat</button>
+      </div>
+      <div id="fail-box" hidden style="margin-top:12px">
+        <div class="presetrow" id="fail-presets">
+          <button type="button" data-t="no s'ha aguantat a la base">No s'ha aguantat</button>
+          <button type="button" data-t="s'ha deformat (warping)">Deformada</button>
+          <button type="button" data-t="s'ha embossat el nas">Nas embossat</button>
+          <button type="button" data-t="s'ha acabat el filament">Filament acabat</button>
+          <button type="button" data-t="capes mal enganxades">Capes separades</button>
+          <button type="button" data-t="suports mal posats">Suports</button>
+        </div>
+        <label class="f full">Què ha passat <input type="text" id="r-failwhy" autocomplete="off" placeholder="amb les teves paraules"></label>
+
+        <h3 style="margin:16px 0 8px">Fins on va arribar</h3>
+        <p class="hint" style="margin:0 0 10px">Per descomptar de l'inventari només el filament que s'ha gastat de debò. La capa és el més exacte; el tant per cent que marca la pantalla va pel temps i no pel material, i balla una mica més.</p>
+        <div class="seg" id="fail-mode">
+          <button type="button" data-m="capa" aria-pressed="true">Per capa</button>
+          <button type="button" data-m="pct" aria-pressed="false">Per %</button>
+          <button type="button" data-m="grams" aria-pressed="false">Ho he pesat</button>
+        </div>
+        <div style="margin-top:12px">
+          <label class="f" id="w-capa">Capa on s'ha aturat <input type="number" id="f-capa" min="0" step="1" inputmode="numeric" autocomplete="off" placeholder="la que marcava la impressora"></label>
+          <!-- type=text i no number: un camp number es menja la coma, i el teclat català en dona una -->
+          <label class="f" id="w-pct" hidden>Tant per cent que portava <input type="text" id="f-pct" inputmode="decimal" autocomplete="off" placeholder="0 a 100"></label>
+          <label class="f" id="w-grams" hidden>Grams que pesa el tros que ha sortit <input type="text" id="f-grams" inputmode="decimal" autocomplete="off" placeholder="amb una bàscula de cuina"></label>
+        </div>
+        <p class="note" id="fail-calc" style="margin-top:8px"></p>
+      </div>
+      <label class="f full" style="margin-top:14px">Notes <textarea id="r-notes" placeholder="el que vulguis recordar d'aquesta impressió"></textarea></label>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn primary" id="save-print">Desa al registre</button>
+      <button class="btn" id="fes-press">Fes-ne el pressupost</button>
+      <button class="btn" id="copy-press">Copia les dades</button>
+      <button class="btn" id="clear-read">Descarta</button>
+    </div>
+
+    <details class="diag" id="diag-box">
+      <summary>Què he llegit del fitxer</summary>
+      <p class="hint" style="margin:10px 0">Si alguna dada no quadra, passa'm aquest text i ho arreglo.</p>
+      <pre class="mono" id="diag-body"></pre>
+      <button class="btn" type="button" id="copy-diag">Copia aquest text</button>
+    </details>
+
+  </div>
+</section>
+
+<section id="view-hist" hidden>
+  <h2>Impressions registrades</h2>
+  <div class="statrow" id="stats"></div>
+  <p class="hint">Toca'n una per veure-la sencera o esborrar-la.</p>
+  <div id="hist-list"></div>
+  <div class="empty-state" id="hist-empty" hidden>
+    <b>Encara no has registrat cap impressió</b>
+    Deixa anar a la pestanya Llegeix el fitxer que et dona el Bambu Studio.
+  </div>
+</section>
+
+<section id="view-settings" hidden>
+  <h2>Inventari</h2>
+  <div class="card">
+    <label class="f chk" style="margin-bottom:12px"><input type="checkbox" id="s-descompta"> <span>Descompta els grams de l'inventari quan desi una impressió</span></label>
+    <p class="hint" style="margin:0 0 12px">A cada filament tries de quina bobina ha sortit, tant si el fitxer del slicer el porta com si poses les dades a mà. Els grams no es mouen fins que desis la impressió dient-me com ha anat: si ha fallat, només es descompta el tros que s'ha arribat a imprimir. Just abans d'escriure-hi torno a llegir el fitxer del Drive, per no trepitjar res que hagis canviat a l'altra app. A la fitxa de cada impressió pots tornar els grams si t'has equivocat.</p>
+    <p class="note" id="inv-status">—</p>
+    <div class="toolbar" style="margin:12px 0 0">
+      <button class="btn" id="inv-reload">Torna a llegir l'inventari</button>
+    </div>
+  </div>
+
+  <h2>Densitats</h2>
+  <div class="card">
+    <p class="hint">Només fan falta si el fitxer et diu els metres i no els grams (Cura). Si el teu slicer ja dona grams, això no es fa servir.</p>
+    <div class="grid3">
+      <label class="f">PLA (g/cm³) <input type="number" id="d-pla" min="0" step="0.01"></label>
+      <label class="f">PETG <input type="number" id="d-petg" min="0" step="0.01"></label>
+      <label class="f">ABS / ASA <input type="number" id="d-abs" min="0" step="0.01"></label>
+    </div>
+    <div class="grid3" style="margin-top:12px">
+      <label class="f">TPU <input type="number" id="d-tpu" min="0" step="0.01"></label>
+      <label class="f">PA / Nylon <input type="number" id="d-pa" min="0" step="0.01"></label>
+      <label class="f">Diàmetre del fil (mm) <input type="number" id="d-diam" min="0" step="0.01"></label>
+    </div>
+  </div>
+
+  <h2>Còpia de seguretat</h2>
+  <div class="card">
+    <p class="hint">El registre es desa al teu Drive i també en aquest navegador. Exporta de tant en tant.</p>
+    <div class="toolbar" style="margin:0 0 12px">
+      <button class="btn" id="export-json">Exporta còpia (JSON)</button>
+      <button class="btn danger" id="wipe-all">Buida el registre</button>
+    </div>
+    <label class="f full">Enganxa aquí una còpia per restaurar-la <textarea class="mono" id="import-box" placeholder='{"registre":[...]}'></textarea></label>
+    <div class="toolbar" style="margin-top:10px">
+      <button class="btn primary" id="import-btn">Restaura des del text</button>
+    </div>
+    <p class="note" id="import-msg"></p>
+  </div>
+</section>
+</main>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Impressió registrada">
+    <h3 id="d-title"></h3>
+    <p class="note" id="d-sub"></p>
+    <div id="d-list" style="margin-top:14px"></div>
+    <div class="warn" id="d-inv" hidden></div>
+    <p class="note" id="d-notes" style="margin-top:10px"></p>
+    <div class="actions">
+      <button class="btn primary" id="d-close">Tanca</button>
+      <button class="btn" id="d-torna" hidden>Torna els grams a l'inventari</button>
+      <button class="btn" id="d-descompta" hidden>Descompta-ho ara</button>
+      <span class="spacer"></span>
+      <button class="btn danger" id="d-del">Elimina</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+"use strict";
+
+/* ---------------- estat ---------------- */
+var settings = {
+  diam: 1.75,
+  descompta: true,
+  dens: { PLA:1.24, PETG:1.27, ABS:1.04, TPU:1.21, PA:1.14 }
+};
+var registre = [];
+var inventari = [];
+var invCarregat = null;      /* null = no provat, false = no s'ha pogut, true = ok */
+var invFileId = null;
+var LS_S="impressions3d-settings-v1", LS_R="impressions3d-registre-v1";
+var LS_INV="inventari-filament-v1";   /* la mateixa clau que fa servir l'app d'inventari */
+var INV_JSON="zenkai3d-inventari.json", INV_CSV="zenkai3d-inventari.csv";
+var view="read";
+var parsed=null;             /* resultat del fitxer llegit */
+var plateIdx=0;
+var obertes={};              /* clau de grup de color -> partit per plaques */
+var resultOk=true;
+var triaBobina={};           /* slot del filament -> clau de la bobina triada ("" = no descomptar) */
+var failMode="capa";         /* capa | pct | grams */
+var mode="file";             /* file = tinc el fitxer del slicer · ma = ho poso a ma */
+var maSeq=0;                 /* per donar un slot a cada filament posat a ma */
+var picObert=null;           /* slot del selector de bobina que hi ha obert */
+var picFiltre={};            /* slot -> el que hi ha escrit al cercador */
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+function num(v){ var n=parseFloat(v); return isFinite(n)?n:0; }
+function toast(msg){ var t=$("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(function(){t.hidden=true;},2800); }
+function fmtG(g){ if(!isFinite(g)) return "—"; return (Math.round(g*10)/10).toFixed(1).replace(".",",")+" g"; }
+function fmtHM(sec){
+  sec=Math.max(0,Math.round(sec||0));
+  var h=Math.floor(sec/3600), m=Math.round((sec%3600)/60);
+  if(m===60){ h+=1; m=0; }
+  if(!h&&!m) return "—";
+  return (h?h+" h":"")+(h&&m?" ":"")+(m?m+" min":"");
+}
+function fmtDate(iso){
+  try{ return new Date(iso).toLocaleDateString("ca-ES",{day:"numeric",month:"short",year:"numeric"}); }catch(e){ return ""; }
+}
+
+/* ---------------- persistencia ---------------- */
+function saveLocal(){
+  try{
+    localStorage.setItem(LS_S, JSON.stringify(settings));
+    localStorage.setItem(LS_R, JSON.stringify(registre));
+    return true;
+  }catch(e){ return false; }
+}
+function loadLocal(){
+  try{
+    var a=localStorage.getItem(LS_S); if(a){ var o=JSON.parse(a); if(o) zdeepMerge(settings,o); }
+    var b=localStorage.getItem(LS_R); if(b){ var r=JSON.parse(b); if(Array.isArray(r)) registre=r; }
+  }catch(e){}
+}
+function persist(){
+  if(!saveLocal()) toast("Aquest navegador no deixa desar-ho localment; al Drive sí que hi va.");
+  renderHist();
+  if(typeof scheduleDriveSave==="function") scheduleDriveSave();
+}
+
+/* ---------------- color: hex -> Lab, CIEDE2000 ---------------- */
+function normHex(h){
+  if(!h) return null;
+  h=String(h).trim();
+  if(h.charAt(0)!=="#") h="#"+h;
+  if(/^#[0-9a-fA-F]{8}$/.test(h)) h=h.slice(0,7);           /* #RRGGBBAA -> #RRGGBB */
+  if(/^#[0-9a-fA-F]{3}$/.test(h)) h="#"+h[1]+h[1]+h[2]+h[2]+h[3]+h[3];
+  return /^#[0-9a-fA-F]{6}$/.test(h) ? h.toUpperCase() : null;
+}
+function hexToRgb(h){ h=normHex(h)||"#808080"; return [parseInt(h.substr(1,2),16),parseInt(h.substr(3,2),16),parseInt(h.substr(5,2),16)]; }
+function hexToLab(h){
+  var rgb=hexToRgb(h).map(function(v){ v/=255; return v<=0.04045 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4); });
+  var x=(rgb[0]*0.4124+rgb[1]*0.3576+rgb[2]*0.1805)/0.95047;
+  var y=(rgb[0]*0.2126+rgb[1]*0.7152+rgb[2]*0.0722)/1.00000;
+  var z=(rgb[0]*0.0193+rgb[1]*0.1192+rgb[2]*0.9505)/1.08883;
+  function f(t){ return t>0.008856 ? Math.cbrt(t) : (7.787*t+16/116); }
+  x=f(x); y=f(y); z=f(z);
+  return [116*y-16, 500*(x-y), 200*(y-z)];
+}
+function deltaE(h1,h2){
+  var a=hexToLab(h1), b=hexToLab(h2);
+  var L1=a[0],a1=a[1],b1=a[2],L2=b[0],a2=b[1],b2=b[2];
+  var C1=Math.sqrt(a1*a1+b1*b1), C2=Math.sqrt(a2*a2+b2*b2), Cb=(C1+C2)/2;
+  var Cb7=Math.pow(Cb,7);
+  var G=0.5*(1-Math.sqrt(Cb7/(Cb7+6103515625)));
+  var a1p=(1+G)*a1, a2p=(1+G)*a2;
+  var C1p=Math.sqrt(a1p*a1p+b1*b1), C2p=Math.sqrt(a2p*a2p+b2*b2);
+  var h1p=Math.atan2(b1,a1p)*180/Math.PI; if(h1p<0) h1p+=360;
+  var h2p=Math.atan2(b2,a2p)*180/Math.PI; if(h2p<0) h2p+=360;
+  var dLp=L2-L1, dCp=C2p-C1p, dhp=0;
+  if(C1p*C2p!==0){ dhp=h2p-h1p; if(dhp>180) dhp-=360; else if(dhp<-180) dhp+=360; }
+  var dHp=2*Math.sqrt(C1p*C2p)*Math.sin(dhp*Math.PI/360);
+  var Lbp=(L1+L2)/2, Cbp=(C1p+C2p)/2, hbp;
+  if(C1p*C2p===0) hbp=h1p+h2p;
+  else if(Math.abs(h1p-h2p)>180) hbp=(h1p+h2p+360)/2;
+  else hbp=(h1p+h2p)/2;
+  var T=1-0.17*Math.cos((hbp-30)*Math.PI/180)+0.24*Math.cos(2*hbp*Math.PI/180)
+        +0.32*Math.cos((3*hbp+6)*Math.PI/180)-0.20*Math.cos((4*hbp-63)*Math.PI/180);
+  var dTh=30*Math.exp(-Math.pow((hbp-275)/25,2));
+  var Cbp7=Math.pow(Cbp,7);
+  var Rc=2*Math.sqrt(Cbp7/(Cbp7+6103515625));
+  var Sl=1+(0.015*Math.pow(Lbp-50,2))/Math.sqrt(20+Math.pow(Lbp-50,2));
+  var Sc=1+0.045*Cbp, Sh=1+0.015*Cbp*T;
+  var Rt=-Math.sin(2*dTh*Math.PI/180)*Rc;
+  return Math.sqrt(Math.pow(dLp/Sl,2)+Math.pow(dCp/Sc,2)+Math.pow(dHp/Sh,2)+Rt*(dCp/Sc)*(dHp/Sh));
+}
+
+/* ---------------- lectura del fitxer ---------------- */
+function readSlice(file,a,b){
+  return new Promise(function(res,rej){
+    var fr=new FileReader();
+    fr.onload=function(){ res(String(fr.result||"")); };
+    fr.onerror=function(){ rej(new Error("no he pogut llegir el fitxer")); };
+    try{ fr.readAsText(file.slice(a,b)); }catch(e){ rej(e); }
+  });
+}
+function firstOf(v){
+  if(Array.isArray(v)) return v.length?v[0]:null;
+  return v==null?null:v;
+}
+function splitList(s){
+  if(s==null) return [];
+  return String(s).split(/[;,]/).map(function(x){ return x.trim(); }).filter(function(x){ return x!==""; });
+}
+function parseDur(s){
+  if(s==null) return 0;
+  s=String(s).trim();
+  /* "2h 15m 30s; total estimated time: 2h 20m" -> nomes el primer */
+  if(s.indexOf(";")>=0) s=s.split(";")[0].trim();
+  if(s==="") return 0;
+  if(/^\d+(\.\d+)?$/.test(s)) return Math.round(parseFloat(s));   /* ja son segons */
+  var tot=0, m, re=/(\d+(?:\.\d+)?)\s*([dhms])/gi, hit=false;
+  while((m=re.exec(s))){
+    hit=true;
+    var v=parseFloat(m[1]), u=m[2].toLowerCase();
+    tot += u==="d"?v*86400 : u==="h"?v*3600 : u==="m"?v*60 : v;
+  }
+  if(hit) return Math.round(tot);
+  var hms=s.match(/^(\d+):(\d{1,2})(?::(\d{1,2}))?$/);
+  if(hms) return (+hms[1])*3600+(+hms[2])*60+(+(hms[3]||0));
+  return 0;
+}
+function densityFor(type){
+  var t=String(type||"").toUpperCase();
+  var d=settings.dens;
+  if(t.indexOf("PETG")>=0||t.indexOf("PET")>=0) return d.PETG;
+  if(t.indexOf("ABS")>=0||t.indexOf("ASA")>=0) return d.ABS;
+  if(t.indexOf("TPU")>=0||t.indexOf("TPE")>=0) return d.TPU;
+  if(t.indexOf("PA")>=0||t.indexOf("NYLON")>=0) return d.PA;
+  return d.PLA;
+}
+function gramsFromMetres(metres,type){
+  var r=(settings.diam||1.75)/2;                 /* mm */
+  var cm3PerM = Math.PI*r*r*1000/1000;           /* mm2 * 1000 mm = mm3 -> /1000 = cm3 */
+  return metres * cm3PerM * densityFor(type);
+}
+
+/* ---- lector de zip propi: un .3mf es un zip i prou ----
+   Evita dependre de cap llibreria externa, aixi l'app funciona sense connexio. */
+function u16(d,o){ return d.getUint16(o,true); }
+function u32(d,o){ return d.getUint32(o,true); }
+
+function zipOpen(file){
+  var tail=Math.min(file.size, 66000);
+  return file.slice(file.size-tail).arrayBuffer().then(function(buf){
+    var dv=new DataView(buf), eocd=-1;
+    for(var i=buf.byteLength-22; i>=0; i--){
+      if(dv.getUint32(i,true)===0x06054b50){ eocd=i; break; }
+    }
+    if(eocd<0) throw new Error("no sembla un .3mf vàlid (no hi trobo l'índex del zip)");
+    var count=u16(dv,eocd+10), cdSize=u32(dv,eocd+12), cdOff=u32(dv,eocd+16);
+    if(cdOff===0xFFFFFFFF||cdSize===0xFFFFFFFF) throw new Error("aquest .3mf fa servir zip64 i aquest lector encara no hi arriba");
+    return file.slice(cdOff, cdOff+cdSize).arrayBuffer();
+  }).then(function(cdBuf){
+    var c=new DataView(cdBuf), p=0, entries={}, dec=new TextDecoder("utf-8");
+    while(p+46<=cdBuf.byteLength && u32(c,p)===0x02014b50){
+      var method=u16(c,p+10), csize=u32(c,p+20), usize=u32(c,p+24);
+      var nlen=u16(c,p+28), elen=u16(c,p+30), clen=u16(c,p+32), lho=u32(c,p+42);
+      var name=dec.decode(new Uint8Array(cdBuf,p+46,nlen));
+      entries[name]={ method:method, csize:csize, usize:usize, offset:lho, dir:/\/$/.test(name) };
+      p+=46+nlen+elen+clen;
+    }
+    return { file:file, entries:entries, names:Object.keys(entries) };
+  });
+}
+function zipRead(zip,name){
+  var e=zip.entries[name];
+  if(!e) return Promise.reject(new Error("dins del .3mf no hi ha "+name));
+  return zip.file.slice(e.offset, e.offset+30).arrayBuffer().then(function(h){
+    var d=new DataView(h);
+    if(u32(d,0)!==0x04034b50) throw new Error("capçalera del zip malmesa");
+    var start=e.offset+30+u16(d,26)+u16(d,28);
+    var blob=zip.file.slice(start, start+e.csize);
+    if(e.method===0) return blob.arrayBuffer();
+    if(e.method!==8) throw new Error("aquest .3mf va comprimit d'una manera que no sé llegir");
+    if(typeof DecompressionStream==="undefined") throw new Error("aquest navegador és massa antic per descomprimir el fitxer (cal Safari 16.4 o més nou)");
+    return new Response(blob.stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer();
+  });
+}
+function zipText(zip,name){ return zipRead(zip,name).then(function(b){ return new TextDecoder("utf-8").decode(b); }); }
+/* nomes el principi d'una entrada. El gcode de dins del 3mf fa 14 MB o mes i
+   l'unica cosa que n'hi vull es la capcalera: aturo la descompressio de seguida. */
+function zipHead(zip,name,maxBytes){
+  var e=zip.entries[name];
+  if(!e) return Promise.reject(new Error("dins del .3mf no hi ha "+name));
+  return zip.file.slice(e.offset, e.offset+30).arrayBuffer().then(function(h){
+    var d=new DataView(h);
+    if(u32(d,0)!==0x04034b50) throw new Error("capçalera del zip malmesa");
+    var start=e.offset+30+u16(d,26)+u16(d,28);
+    var blob=zip.file.slice(start, start+e.csize);
+    if(e.method===0) return blob.slice(0,maxBytes).arrayBuffer();
+    if(e.method!==8) throw new Error("aquest .3mf va comprimit d'una manera que no sé llegir");
+    if(typeof DecompressionStream==="undefined") throw new Error("aquest navegador és massa antic per descomprimir el fitxer");
+    var rd=blob.stream().pipeThrough(new DecompressionStream("deflate-raw")).getReader();
+    var trossos=[], n=0;
+    function ajunta(){
+      var u=new Uint8Array(n), o=0;
+      for(var i=0;i<trossos.length;i++){ u.set(trossos[i],o); o+=trossos[i].length; }
+      return u.buffer;
+    }
+    function seguent(){
+      return rd.read().then(function(r){
+        if(r.done) return ajunta();
+        trossos.push(r.value); n+=r.value.length;
+        if(n>=maxBytes){ try{ rd.cancel(); }catch(err){} return ajunta(); }
+        return seguent();
+      });
+    }
+    return seguent();
+  }).then(function(b){ return new TextDecoder("utf-8").decode(b); });
+}
+function zipB64(zip,name){
+  return zipRead(zip,name).then(function(b){
+    var u=new Uint8Array(b), out="", CH=0x8000;
+    for(var i=0;i<u.length;i+=CH) out+=String.fromCharCode.apply(null,u.subarray(i,i+CH));
+    return btoa(out);
+  });
+}
+function zfind(zip,re){
+  var hit=null;
+  zip.names.forEach(function(n){ if(!hit && !zip.entries[n].dir && re.test(n)) hit=n; });
+  return hit;
+}
+function zfindAll(zip,re){
+  return zip.names.filter(function(n){ return !zip.entries[n].dir && re.test(n); }).sort();
+}
+
+function parse3MF(file){
+  var out={ source:"3mf", fileName:file.name, bytes:file.size, plates:[], diag:{} };
+  return zipOpen(file).then(function(zip){
+    out.diag.entrades = zip.names.filter(function(n){ return !zip.entries[n].dir; }).slice(0,80);
+    var pSlice = zfind(zip,/slice_info\.config$/i);
+    var pProj  = zfind(zip,/project_settings\.config$/i);
+    var pModel = zfind(zip,/model_settings\.config$/i);
+    var thumbs = zfindAll(zip,/Metadata\/.*plate[_-]?\d*(_small)?\.png$/i);
+    out.diag.trobats = { slice_info:pSlice||"(cap)", project_settings:pProj||"(cap)", model_settings:pModel||"(cap)", miniatures:thumbs.length };
+    var jobs=[];
+
+    if(pSlice) jobs.push(zipText(zip,pSlice).then(function(xml){
+      out.diag.slice_info_mostra = xml.slice(0,1400);
+      var doc=new DOMParser().parseFromString(xml,"application/xml");
+      if(doc.getElementsByTagName("parsererror").length) throw new Error("el slice_info.config no s'ha pogut llegir");
+      var plates=[].slice.call(doc.getElementsByTagName("plate"));
+      plates.forEach(function(p,pi){
+        var md={};
+        [].slice.call(p.getElementsByTagName("metadata")).forEach(function(m){
+          var k=m.getAttribute("key"); if(k) md[k]=m.getAttribute("value");
+        });
+        var fils=[].slice.call(p.getElementsByTagName("filament")).map(function(f,fi){
+          var g=parseFloat(f.getAttribute("used_g")||"");
+          var mt=parseFloat(f.getAttribute("used_m")||"");
+          return {
+            slot: f.getAttribute("id")||String(fi+1),
+            type: f.getAttribute("type")||null,
+            color: normHex(f.getAttribute("color")),
+            grams: isFinite(g)?g:null,
+            metres: isFinite(mt)?mt:null,
+            tray: f.getAttribute("tray_info_idx")||null
+          };
+        });
+        var objs=[].slice.call(p.getElementsByTagName("object")).map(function(o){
+          return o.getAttribute("name")||"";
+        }).filter(Boolean);
+        /* En quines capes entra cada color. Ho diu el slice_info i em serveix per
+           saber quant filament s'havia gastat si la impressio s'atura a mitges:
+           un color que nomes surt a dalt no s'ha tocat si ha fallat a baix.
+           Els rangs van de 0 i la capa que mostra la impressora va d'1. */
+        var capesDe={}, capaMax=-1;
+        [].slice.call(p.getElementsByTagName("layer_filament_list")).forEach(function(lf){
+          var idxs=String(lf.getAttribute("filament_list")||"").trim().split(/\s+/)
+            .map(function(x){ return parseInt(x,10); })
+            .filter(function(x){ return isFinite(x) && x>=0; });
+          var rangs=String(lf.getAttribute("layer_ranges")||"").split(",").map(function(part){
+            var ab=part.trim().split(/\s+/).map(function(x){ return parseInt(x,10); });
+            return (ab.length===2 && isFinite(ab[0]) && isFinite(ab[1]) && ab[1]>=ab[0]) ? [ab[0],ab[1]] : null;
+          }).filter(Boolean);
+          rangs.forEach(function(r){ if(r[1]>capaMax) capaMax=r[1]; });
+          idxs.forEach(function(i){
+            if(!capesDe[i]) capesDe[i]=[];
+            rangs.forEach(function(r){ capesDe[i].push([r[0],r[1]]); });
+          });
+        });
+        /* ajunto els rangs que es toquen: aixi no compto dues vegades la mateixa capa */
+        Object.keys(capesDe).forEach(function(k){
+          var rs=capesDe[k].sort(function(a,b){ return a[0]-b[0] || a[1]-b[1]; }), net=[];
+          rs.forEach(function(r){
+            var u=net[net.length-1];
+            if(u && r[0]<=u[1]+1){ if(r[1]>u[1]) u[1]=r[1]; }
+            else net.push([r[0],r[1]]);
+          });
+          capesDe[k]=net;
+        });
+
+        var w=parseFloat(md.weight||"");
+        out.plates.push({
+          index: md.index||String(pi+1),
+          seconds: parseDur(md.prediction||""),
+          weight: isFinite(w)?w:null,
+          filaments: fils,
+          objects: objs,
+          capesPerFil: Object.keys(capesDe).length?capesDe:null,
+          totalCapes: capaMax>=0 ? capaMax+1 : null,
+          meta: md
+        });
+      });
+    }));
+
+    if(pProj) jobs.push(zipText(zip,pProj).then(function(txt){
+      var ps={};
+      try{ ps=JSON.parse(txt); }catch(e){ out.diag.project_settings_error="no és JSON vàlid"; return; }
+      out.printer = firstOf(ps.printer_model) || firstOf(ps.printer_settings_id) || null;
+      out.layerHeight = firstOf(ps.layer_height);
+      out.nozzle = firstOf(ps.nozzle_diameter);
+      out.psTypes = Array.isArray(ps.filament_type)?ps.filament_type:splitList(ps.filament_type);
+      out.psColors = (Array.isArray(ps.filament_colour)?ps.filament_colour:splitList(ps.filament_colour)).map(normHex);
+      out.psVendors = Array.isArray(ps.filament_vendor)?ps.filament_vendor:splitList(ps.filament_vendor);
+      out.psNames = Array.isArray(ps.filament_settings_id)?ps.filament_settings_id:splitList(ps.filament_settings_id);
+      out.diag.project_settings = {
+        printer: out.printer, layer_height: out.layerHeight, nozzle: out.nozzle,
+        filament_type: out.psTypes, filament_colour: out.psColors, filament_vendor: out.psVendors
+      };
+    }));
+
+    if(pModel) jobs.push(zipText(zip,pModel).then(function(txt){
+      var noms=(txt.match(/key="name"\s+value="([^"]*)"/g)||[]).map(function(m){
+        var x=m.match(/value="([^"]*)"/); return x?x[1]:"";
+      }).filter(function(n){
+        return n && !/^object_?\d*$/i.test(n) && !/^wipe[_ ]?tower$/i.test(n);
+      });
+      var vistos={}, nets=[];
+      noms.forEach(function(n){ if(!vistos[n]){ vistos[n]=1; nets.push(n); } });
+      if(nets.length) out.modelNames=nets.slice(0,6);
+      var ext=[];
+      (txt.match(/key="extruder"\s+value="(\d+)"/g)||[]).forEach(function(m){
+        var v=parseInt((m.match(/value="(\d+)"/)||[])[1],10);
+        if(isFinite(v) && v>0 && ext.indexOf(v)<0) ext.push(v);
+      });
+      if(ext.length) out.extrudersUsed=ext.sort(function(a,b){ return a-b; });
+    }));
+
+    /* la capcalera del gcode de dins diu el nombre de capes. Al slice_info nomes
+       hi surt si la peca porta mes d'un color, i el vull sempre. */
+    var pGcode = zfind(zip,/\.gcode$/i);
+    if(pGcode) jobs.push(zipHead(zip,pGcode,9000).then(function(h){
+      out.diag.gcode_capcalera = h.slice(0,500);
+      var m=h.match(/total layer number\s*:\s*(\d+)/i);
+      if(m){ var n=parseInt(m[1],10); if(isFinite(n) && n>0) out.gcodeCapes=n; }
+    }).catch(function(e){ out.diag.gcode_capcalera_error=(e&&e.message)||"no s'ha pogut llegir"; }));
+
+    if(thumbs.length){
+      var big = thumbs.filter(function(n){ return !/_small\./i.test(n); });
+      var pick = (big.length?big:thumbs)[0];
+      jobs.push(zipB64(zip,pick).then(function(b64){
+        if(b64 && b64.length<900000) out.thumb="data:image/png;base64,"+b64;
+      }).catch(function(){}));
+    }
+
+    return Promise.all(jobs);
+  }).then(function(){
+    if(!out.plates.length){
+      /* projecte desat sense tallar: no hi ha grams ni temps, pero si model i filaments */
+      out.unsliced = true;
+      var n = Math.max((out.psColors||[]).length, (out.psTypes||[]).length);
+      if(!n) throw new Error("aquest .3mf no porta ni dades de tall ni filaments; no en puc treure res");
+      var usats = out.extrudersUsed || null;
+      var fils=[];
+      for(var i=0;i<n;i++){
+        if(usats && usats.length && usats.indexOf(i+1)<0) continue;
+        fils.push({ slot:String(i+1), type:(out.psTypes||[])[i]||null, color:(out.psColors||[])[i]||null,
+                    nom:(out.psNames||[])[i]||null, grams:null, metres:null });
+      }
+      out.plates.push({ index:"1", seconds:0, weight:null, filaments:fils, objects:out.modelNames||[], meta:{} });
+    }
+    return finishParse(out);
+  });
+}
+
+function parseGcode(file){
+  var HEAD=256*1024, TAIL=512*1024, size=file.size;
+  return Promise.all([
+    readSlice(file,0,Math.min(HEAD,size)),
+    size>HEAD ? readSlice(file,Math.max(0,size-TAIL),size) : Promise.resolve("")
+  ]).then(function(parts){
+    var txt=parts[0]+"\n"+parts[1];
+    var cm={};
+    txt.split(/\r?\n/).forEach(function(ln){
+      if(ln.charAt(0)!==";") return;
+      var m=ln.match(/^;\s*([^=:]{1,60}?)\s*[=:]\s*(.*)$/);
+      if(!m) return;
+      var k=m[1].trim().toLowerCase(), v=m[2].trim();
+      if(cm[k]===undefined && v!=="") cm[k]=v;      /* nomes la primera: "flush filament used" es una clau diferent */
+    });
+    var out={ source:"gcode", fileName:file.name, bytes:size, plates:[], diag:{} };
+    out.diag.claus = Object.keys(cm).filter(function(k){
+      return /filament|time|layer|printer|nozzle|color|colour|density|type|weight|cost/.test(k);
+    }).slice(0,40).map(function(k){ return k+" = "+String(cm[k]).slice(0,90); });
+
+    var seconds = parseDur(cm["estimated printing time (normal mode)"] || cm["total estimated time"] ||
+                           cm["model printing time"] || cm["estimated printing time"] || cm["time"] || "");
+    var types   = splitList(cm["filament_type"] || cm["filament type"] || "");
+    var colors  = splitList(cm["filament_colour"] || cm["filament_color"] || cm["extruder_colour"] || "").map(normHex);
+    var noms    = splitList(cm["filament_settings_id"] || "");
+    /* el Prusa i l'Orca ho posen al final com a "filament used [g]";
+       el Bambu ho posa a la capcalera amb un altre nom */
+    var gList   = splitList(cm["filament used [g]"] || cm["total filament weight [g]"] || "").map(parseFloat);
+    var mmList  = splitList(cm["filament used [mm]"] || cm["total filament length [mm]"] || "").map(parseFloat);
+    var totalG  = parseFloat(cm["total filament used [g]"] || "");
+
+    /* Cura: ";Filament used: 3.12m" o "0.0031m" per extrusor */
+    if(!gList.length && !mmList.length && cm["filament used"]){
+      splitList(cm["filament used"]).forEach(function(v){
+        var mm=v.match(/([\d.]+)\s*m\b/i);
+        if(mm) mmList.push(parseFloat(mm[1])*1000);
+      });
+    }
+
+    var n = Math.max(gList.length, mmList.length, colors.length, types.length, 1);
+    var fils=[];
+    for(var i=0;i<n;i++){
+      var g = isFinite(gList[i]) ? gList[i] : null;
+      var mt = isFinite(mmList[i]) ? mmList[i]/1000 : null;
+      var ty = types[i] || types[0] || null;
+      if(g==null && mt!=null) g = gramsFromMetres(mt, ty);
+      fils.push({ slot:String(i+1), type:ty, color:colors[i]||null, grams:g, metres:mt,
+                  nom:noms[i]||null, estimat:(isFinite(gList[i])?false:(mt!=null)) });
+    }
+    if(fils.length===1 && fils[0].grams==null && isFinite(totalG)) fils[0].grams=totalG;
+
+    out.printer = cm["printer_model"] || cm["printer_settings_id"] || cm["target_machine_name"] || null;
+    out.layerHeight = cm["layer_height"] || null;
+    out.nozzle = cm["nozzle_diameter"] || null;
+    var nc=parseInt(cm["total layer number"]||"",10);
+    out.plates.push({
+      index:"1", seconds:seconds,
+      weight: isFinite(totalG)?totalG:null,
+      filaments: fils, objects: [],
+      capesPerFil: null,
+      totalCapes: (isFinite(nc)&&nc>0)?nc:null,
+      meta: {}
+    });
+    return finishParse(out);
+  });
+}
+
+function finishParse(out){
+  out.plates.forEach(function(pl){
+    /* completa colors i tipus des de project_settings si al slice_info no hi eren */
+    pl.filaments.forEach(function(f,i){
+      var slot = parseInt(f.slot,10); if(!isFinite(slot)||slot<1) slot=i+1;
+      f.slot = String(slot);
+      f.idx = slot-1;            /* index de 0: aixi el trobo a capesPerFil despres de filtrar */
+      if(!f.color && out.psColors && out.psColors[slot-1]) f.color=out.psColors[slot-1];
+      if(!f.type  && out.psTypes  && out.psTypes[slot-1])  f.type=out.psTypes[slot-1];
+      if(!f.nom   && out.psNames  && out.psNames[slot-1])  f.nom=out.psNames[slot-1];
+      if(f.grams==null && f.metres!=null && f.metres>0){ f.grams=gramsFromMetres(f.metres,f.type); f.estimat=true; }
+    });
+    pl.filaments = pl.filaments.filter(function(f){ return (f.grams||0)>0 || f.color; });
+    if(pl.weight==null){
+      var s=0, any=false;
+      pl.filaments.forEach(function(f){ if(f.grams!=null){ s+=f.grams; any=true; } });
+      if(any) pl.weight=s;
+    }
+    if(!pl.totalCapes && out.gcodeCapes) pl.totalCapes=out.gcodeCapes;
+  });
+  return out;
+}
+
+/* ---------------- inventari (nomes lectura) ---------------- */
+function invColors(it){
+  if(Array.isArray(it.colors)&&it.colors.length){
+    return it.colors.map(function(c){ return normHex(c&&c.hex); }).filter(Boolean);
+  }
+  var h=normHex(it.color_hex);
+  return h?[h]:[];
+}
+function invNom(it){
+  var parts=[];
+  if(it.marca) parts.push(String(it.marca));
+  if(it.material) parts.push(String(it.material));
+  var cn=it.color_nom;
+  if(!cn && Array.isArray(it.colors)&&it.colors.length){
+    cn=it.colors.map(function(c){ return c&&c.nom; }).filter(Boolean).join(" + ");
+  }
+  if(cn) parts.push(String(cn));
+  return parts.join(" · ") || "bobina sense nom";
+}
+function invQty(it){
+  var q=(it.quantitat==null?1:Number(it.quantitat));
+  return isFinite(q)?Math.max(0,Math.round(q)):1;
+}
+/* el camp bo es pes_net_nominal_g: aixi l'anomena l'app d'inventari */
+function invNominal(it){ return Number(it.pes_net_nominal_g||it.pes_nominal_g||it.nominal_g||1000) || 1000; }
+function invStock(it){
+  var q=invQty(it);
+  if(!q) return 0;
+  return (Number(it.pes_restant_g)||0) + (q-1)*invNominal(it);
+}
+function invKey(it){ return it?(it.uid || it.id || null):null; }
+function invPerKey(k){
+  if(!k) return null;
+  for(var i=0;i<inventari.length;i++){ if(invKey(inventari[i])===k) return inventari[i]; }
+  return null;
+}
+function loadInventory(){
+  if(typeof gToken==="undefined" || !gToken){
+    invCarregat=false;
+    renderInvStatus("Per llegir l'inventari has d'entrar-hi amb el compte de Google.");
+    return Promise.resolve(false);
+  }
+  renderInvStatus("Llegint l'inventari del Drive…");
+  var q=encodeURIComponent("name='zenkai3d-inventari.json' and trashed=false");
+  return driveFetch("https://www.googleapis.com/drive/v3/files?q="+q+"&fields=files(id,name,modifiedTime)&spaces=drive")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.files || !d.files.length){
+        invCarregat=false; inventari=[];
+        renderInvStatus("No he trobat el fitxer zenkai3d-inventari.json al Drive.");
+        return false;
+      }
+      var f=d.files[0];
+      return driveLoad(f.id).then(function(data){
+        var its = Array.isArray(data.items) ? data.items : [];
+        inventari = JSON.parse(JSON.stringify(its));
+        invCarregat = true;
+        invFileId = f.id;
+        var ambEstoc=0;
+        inventari.forEach(function(it){ if(invStock(it)>0) ambEstoc++; });
+        renderInvStatus(inventari.length+" bobines llegides, "+ambEstoc+" amb estoc"+
+          (f.modifiedTime?" · actualitzat el "+fmtDate(f.modifiedTime):"")+".");
+        return true;
+      });
+    }).catch(function(){
+      invCarregat=false; inventari=[];
+      renderInvStatus("No he pogut llegir l'inventari ara mateix.");
+      return false;
+    });
+}
+function renderInvStatus(msg){ var e=$("inv-status"); if(e) e.textContent=msg; }
+
+/* ---------------- triar la bobina ---------------- */
+/* No te'n proposo cap ni te les ordeno per semblança de color: et dono
+   l'inventari sencer i el cercador. Les que no tenen estoc van al final,
+   perquè triar-les gairebé sempre és una errada, però s'hi poden triar. */
+function senseAccents(s){
+  s=String(s==null?"":s).toLowerCase();
+  if(s.normalize) s=s.normalize("NFD").replace(/[̀-ͯ]/g,"");
+  return s;
+}
+function invCerca(it){
+  var p=[it.marca,it.material,it.color_nom,it.notes,it.color_hex,it.id];
+  if(Array.isArray(it.colors)) it.colors.forEach(function(c){ if(c){ p.push(c.nom); p.push(c.hex); } });
+  return senseAccents(p.filter(Boolean).join(" "));
+}
+function invLlista(){
+  var l=[];
+  inventari.forEach(function(it){
+    if(!invKey(it)) return;
+    l.push({ it:it, estoc:invStock(it), txt:invCerca(it) });
+  });
+  l.sort(function(a,b){
+    if((a.estoc>0)!==(b.estoc>0)) return a.estoc>0?-1:1;
+    return invNom(a.it).localeCompare(invNom(b.it),"ca",{numeric:true});
+  });
+  return l;
+}
+/* una bobina de dos o tres colors porta una tira de colors, no un quadret pla */
+function swatchDe(it, cls){
+  var hs=invColors(it), c="sw sm"+(cls?" "+cls:"");
+  if(!hs.length) return '<span class="'+c+' sw-none"></span>';
+  if(hs.length===1) return '<span class="'+c+'" style="background:'+esc(hs[0])+'"></span>';
+  var pas=100/hs.length, trossos=[];
+  hs.forEach(function(h,i){
+    trossos.push(esc(h)+" "+(i*pas).toFixed(2)+"% "+((i+1)*pas).toFixed(2)+"%");
+  });
+  return '<span class="'+c+'" style="background:linear-gradient(135deg,'+trossos.join(",")+')"></span>';
+}
+function pickItemsHTML(slot){
+  var q=senseAccents(picFiltre[slot]||""), triada=triaBobina[slot], h="", n=0;
+  invLlista().forEach(function(o){
+    if(q && o.txt.indexOf(q)<0) return;
+    n++;
+    var k=invKey(o.it);
+    h+='<button type="button" class="pickit'+(k===triada?" tria":"")+(o.estoc>0?"":" buida")+'"'+
+       ' data-slot="'+esc(slot)+'" data-k="'+esc(k)+'" role="option" aria-selected="'+(k===triada)+'">'+
+       swatchDe(o.it)+'<span class="pickn">'+esc(invNom(o.it))+'</span>'+
+       '<span class="pickc">'+(o.estoc>0?Math.round(o.estoc)+" g":"sense estoc")+'</span></button>';
+  });
+  if(!n){
+    h='<p class="muted pickbuit">'+(picFiltre[slot]
+      ? 'Cap bobina no et quadra amb «'+esc(picFiltre[slot])+'».'
+      : "L'inventari és buit.")+'</p>';
+  }
+  return h;
+}
+function pickerBobina(f){
+  if(invCarregat!==true || !inventari.length) return "";
+  var slot=f.slot, k=triaBobina[slot], it=invPerKey(k), obert=(picObert===slot);
+  var h='<div class="pick" data-slot="'+esc(slot)+'">'+
+    '<button type="button" class="pickbtn'+(it?" te":"")+'" data-slot="'+esc(slot)+'"'+
+    ' aria-expanded="'+obert+'">'+
+    (it?swatchDe(it):'<span class="sw sm sw-none"></span>')+
+    '<span class="pickn">'+esc(it?invNom(it):"Tria la bobina")+'</span>'+
+    '<span class="pickc">'+(it?esc(Math.round(invStock(it))+" g"):"")+'</span>'+
+    '<span class="pickv" aria-hidden="true">▾</span></button>';
+  if(obert){
+    h+='<div class="pickpanel">'+
+      '<input type="search" class="pickq" data-slot="'+esc(slot)+'" value="'+esc(picFiltre[slot]||"")+'"'+
+      ' placeholder="marca, material o color" autocomplete="off" aria-label="Cerca una bobina">'+
+      '<div class="picklist" role="listbox">'+pickItemsHTML(slot)+'</div>'+
+      (k?'<button type="button" class="picknone" data-slot="'+esc(slot)+'">Treu-la — d\'aquest filament no descomptis res</button>':"")+
+    '</div>';
+  }
+  return h+'</div>';
+}
+/* El cercador repinta només la llista. Si repintes tota la fila a cada tecla,
+   el camp perd el focus i al mòbil se't tanca el teclat. */
+function lligaPickers(){
+  var zona=$("fil-list");
+  Array.prototype.forEach.call(zona.querySelectorAll(".pickbtn"),function(b){
+    b.onclick=function(){
+      var s=b.dataset.slot;
+      picObert = (picObert===s) ? null : s;
+      showResult();
+      if(picObert===s){
+        var q=$("fil-list").querySelector('.pickq[data-slot="'+s+'"]');
+        /* al mòbil no li poso el focus: el teclat taparia la llista */
+        if(q && !(window.matchMedia && window.matchMedia("(max-width:700px)").matches)) q.focus();
+      }
+    };
+  });
+  Array.prototype.forEach.call(zona.querySelectorAll(".pickq"),function(q){
+    q.oninput=function(){
+      var s=q.dataset.slot;
+      picFiltre[s]=q.value;
+      var l=$("fil-list").querySelector('.pick[data-slot="'+s+'"] .picklist');
+      if(l){ l.innerHTML=pickItemsHTML(s); lligaItems(l); }
+    };
+    q.onkeydown=function(e){
+      if(e.key==="Escape"){ picObert=null; showResult(); }
+      else if(e.key==="Enter"){
+        e.preventDefault();
+        var p=$("fil-list").querySelector('.pick[data-slot="'+q.dataset.slot+'"] .pickit');
+        if(p) p.click();
+      }
+    };
+  });
+  lligaItems(zona);
+  Array.prototype.forEach.call(zona.querySelectorAll(".picknone"),function(b){
+    b.onclick=function(){ triaBobina[b.dataset.slot]=""; picObert=null; showResult(); };
+  });
+}
+function lligaItems(zona){
+  Array.prototype.forEach.call(zona.querySelectorAll(".pickit"),function(b){
+    b.onclick=function(){
+      triaBobina[b.dataset.slot]=b.dataset.k;
+      picObert=null; picFiltre[b.dataset.slot]="";
+      showResult();
+    };
+  });
+}
+
+/* ---------------- quants grams s'han gastat de debo ---------------- */
+/* Si la impressio s'atura a mitges, reparteixo els grams per capes. Quan el
+   slice_info diu en quines capes entra cada color ho faig color per color:
+   provat amb una peca de tres colors, falla un 1 % de mitjana contra el que
+   diu el gcode capa per capa (un repartiment pla falla el triple). */
+function fraccioCapa(pl,f,L){
+  var tc=pl.totalCapes||0;
+  /* els grups de color porten els rangs a sobre; les files fetes a mà, no */
+  var rangs = f.capes || ((pl.capesPerFil && f.idx!=null) ? pl.capesPerFil[f.idx] : null);
+  if(!rangs || !rangs.length) return tc?Math.min(1,L/tc):0;
+  var total=0, fins=0;
+  rangs.forEach(function(r){
+    var a=r[0]+1, b=r[1]+1;        /* els rangs van de 0; la impressora compta d'1 */
+    total += b-a+1;
+    if(L>=b) fins += b-a+1;
+    else if(L>=a) fins += L-a+1;
+  });
+  if(!total) return tc?Math.min(1,L/tc):0;
+  return fins/total;
+}
+function valorFail(id){
+  var e=$(id); if(!e) return NaN;
+  return parseFloat(String(e.value).replace(",","."));
+}
+/* els grams que cal descomptar de cada filament, en el mateix ordre que pl.filaments */
+function gramsReals(pl){
+  var plens=pl.filaments.map(function(f){ return f.grams==null?null:f.grams; });
+  if(resultOk) return plens;
+  if(failMode==="grams"){
+    var g=valorFail("f-grams");
+    if(!isFinite(g)||g<0) return plens.map(function(){ return null; });
+    var tot=0; plens.forEach(function(x){ if(x!=null) tot+=x; });
+    if(!(tot>0)) return plens.map(function(){ return null; });
+    return plens.map(function(x){ return x==null?null:Math.round(x*g/tot*100)/100; });
+  }
+  if(failMode==="pct"){
+    var p=valorFail("f-pct");
+    if(!isFinite(p)||p<0) return plens.map(function(){ return null; });
+    p=Math.min(100,p)/100;
+    return plens.map(function(x){ return x==null?null:Math.round(x*p*100)/100; });
+  }
+  var L=valorFail("f-capa");
+  if(!isFinite(L)||L<0||!pl.totalCapes) return plens.map(function(){ return null; });
+  L=Math.min(Math.round(L), pl.totalCapes);
+  return pl.filaments.map(function(f){
+    if(f.grams==null) return null;
+    return Math.round(f.grams*fraccioCapa(pl,f,L)*100)/100;
+  });
+}
+function sumaGrams(arr){
+  var s=0, cap=true;
+  arr.forEach(function(x){ if(x!=null){ s+=x; cap=false; } });
+  return cap?null:Math.round(s*100)/100;
+}
+/* agrupo per bobina: dos filaments poden sortir de la mateixa */
+function movimentsDe(pl){
+  var g=gramsReals(pl), per={}, ordre=[];
+  pl.filaments.forEach(function(f,i){
+    var k=triaBobina[f.slot];
+    if(!k) return;
+    var it=invPerKey(k); if(!it) return;
+    if(g[i]==null || !(g[i]>0)) return;
+    if(!per[k]){ per[k]={ uid:k, id:it.id||null, nom:invNom(it), grams:0 }; ordre.push(k); }
+    per[k].grams += g[i];
+  });
+  return ordre.map(function(k){
+    per[k].grams=Math.round(per[k].grams*100)/100;
+    return per[k];
+  });
+}
+
+/* ---------------- escriure a l'inventari ---------------- */
+function invBuildCSV(its, st){
+  var minDef = (st && isFinite(st.min)) ? Number(st.min) : 200;
+  var cols=["id","color_nom","colors_hex","patro","familia_color","material","marca","acabat",
+            "diametre_mm","quantitat","pes_net_nominal_g","pes_restant_g","percent_restant",
+            "estoc_total_g","min_g","comprar","notes"];
+  return cols.join(",")+"\n"+its.map(function(it){
+    return cols.map(function(c){
+      var v;
+      if(c==="colors_hex") v=invColors(it).join(" ");
+      else if(c==="estoc_total_g") v=invStock(it);
+      else if(c==="quantitat") v=invQty(it);
+      else if(c==="min_g") v=(it.min_g==null?minDef:it.min_g);
+      else v=it[c];
+      v=(v==null?"":String(v));
+      return '"'+v.replace(/"/g,'""')+'"';
+    }).join(",");
+  }).join("\n");
+}
+function invEscriuCSV(its, st){
+  var q=encodeURIComponent("name='"+INV_CSV+"' and trashed=false");
+  return driveFetch("https://www.googleapis.com/drive/v3/files?q="+q+"&fields=files(id)&spaces=drive")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.files || !d.files.length) return null;   /* si no hi és, no el creo jo */
+      return driveFetch("https://www.googleapis.com/upload/drive/v3/files/"+d.files[0].id+"?uploadType=media",{
+        method:"PATCH", headers:{"Content-Type":"text/csv"}, body:invBuildCSV(its,st)
+      });
+    })
+    .catch(function(){ return null; });   /* el CSV és una còpia de comoditat */
+}
+/* els grams que de debo han sortit de cada bobina: aixi desfer-ho surt exacte
+   encara que la bobina no tingues prou grams apuntats */
+function apuntaAplicat(rec,res){
+  if(!rec || !res || !res.fets) return;
+  var per={};
+  res.fets.forEach(function(x){ if(x.uid) per[x.uid]=x.aplicat; });
+  (rec.descompte||[]).forEach(function(mv){
+    if(per[mv.uid]!=null) mv.aplicat=per[mv.uid];
+  });
+}
+/* el que cal tornar enrere: el que es va aplicar, no el que es demanava */
+function movsPerDesfer(rec){
+  return (rec.descompte||[]).map(function(mv){
+    return { uid:mv.uid, id:mv.id, nom:mv.nom,
+             grams:(mv.aplicat!=null?mv.aplicat:mv.grams) };
+  }).filter(function(mv){ return mv.grams>0; });
+}
+/* Les escriptures a l'inventari van d'una en una. Si no, desar dues impressions
+   seguides faria que les dues llegissin el mateix fitxer i la segona
+   s'empassaria el descompte de la primera sense dir-ne res. */
+var invCua = Promise.resolve();
+function aplicaInventari(moviments, signe){
+  var feina=function(){ return aplicaInventariAra(moviments, signe); };
+  var p=invCua.then(feina, feina);
+  invCua=p.catch(function(){});   /* una errada no ha de deixar la cua clavada */
+  return p;
+}
+/* signe -1 resta grams, +1 els torna.
+   Torno a llegir el fitxer del Drive just abans d'escriure'l: si l'app
+   d'inventari l'ha canviat mentrestant, no li trepitjo els canvis. */
+function aplicaInventariAra(moviments, signe){
+  if(!moviments || !moviments.length) return Promise.resolve({ fets:[], perduts:[], curts:[] });
+  if(typeof gToken==="undefined" || !gToken) return Promise.reject(new Error("no hi ha sessió de Google oberta"));
+  var q=encodeURIComponent("name='"+INV_JSON+"' and trashed=false");
+  return driveFetch("https://www.googleapis.com/drive/v3/files?q="+q+"&fields=files(id,name)&spaces=drive")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.files || !d.files.length) throw new Error("al Drive no hi ha "+INV_JSON);
+      invFileId=d.files[0].id;
+      return driveLoad(invFileId);
+    })
+    .then(function(data){
+      if(!data || typeof data!=="object") data={};
+      var its = Array.isArray(data.items) ? data.items : [];
+      var st  = (data.settings && typeof data.settings==="object") ? data.settings : {};
+      var fets=[], perduts=[], curts=[];
+      moviments.forEach(function(mv){
+        var it=null;
+        for(var i=0;i<its.length;i++){ if((its[i].uid||its[i].id)===mv.uid){ it=its[i]; break; } }
+        if(!it){ perduts.push(mv); return; }
+        var nominal=invNominal(it);
+        var abans=invStock(it);
+        var qt=invQty(it);
+        var rest=Number(it.pes_restant_g);
+        if(!isFinite(rest)) rest=qt?nominal:0;
+        rest += signe*mv.grams;
+        /* s'ha acabat la bobina oberta i en queden de precintades: n'obro una */
+        while(rest<=0 && qt>1){ qt-=1; rest+=nominal; }
+        /* tornant grams es pot omplir mes d'una bobina */
+        while(rest>nominal){ rest-=nominal; qt+=1; }
+        if(rest<0){ curts.push({ nom:mv.nom, falten:Math.round(-rest*10)/10 }); rest=0; }
+        if(rest>0 && qt<1) qt=1;
+        /* s'ha gastat del tot i no en queden: esgotada, com fa l'app d'inventari */
+        if(rest<=0 && qt<=1) qt=0;
+        qt=Math.max(0,Math.min(99,qt));
+        it.quantitat=qt;
+        it.pes_restant_g=Math.round(rest*10)/10;
+        it.percent_restant=Math.round(it.pes_restant_g/nominal*100);
+        if(qt===0){ it.pes_restant_g=0; it.percent_restant=0; it.comprar=true; }
+        else if(signe>0 && it.comprar) it.comprar=false;
+        /* el que ha canviat de debo pot ser menys del que demanava el moviment
+           (si la bobina no tenia prou grams apuntats). Ho guardo per poder
+           desfer-ho exactament. */
+        var queda=invStock(it);
+        fets.push({ uid:mv.uid, nom:invNom(it), abans:abans, queda:queda,
+                    grams:mv.grams, aplicat:Math.round(Math.abs(queda-abans)*100)/100 });
+      });
+      data.items=its; data.settings=st; data.updatedAt=new Date().toISOString();
+      return driveFetch("https://www.googleapis.com/upload/drive/v3/files/"+invFileId+"?uploadType=media",{
+        method:"PATCH", headers:{"Content-Type":"application/json"}, body:JSON.stringify(data)
+      }).then(function(){
+        inventari=JSON.parse(JSON.stringify(its));
+        invCarregat=true;
+        /* i a aquest navegador, perque l'app d'inventari ho vegi sense recarregar del Drive */
+        try{ localStorage.setItem(LS_INV, JSON.stringify(its)); }catch(e){}
+        return invEscriuCSV(its, st);
+      }).then(function(){
+        return { fets:fets, perduts:perduts, curts:curts };
+      });
+    });
+}
+
+/* ---------------- hi arribarà o es plantarà a mitges? ---------------- */
+/* Miro la bobina OBERTA, no l'estoc total: amb 40 g oberts i tres bobines
+   precintades l'estoc diu 3040 g, però la impressió es plantarà als 40 g si no
+   ets tu qui la canvia a mitja feina. I compto la peça sencera encara que
+   hagis marcat que ha fallat: la pregunta és si hi arribaria. */
+var MARGE_JUST = 25;   /* g de coixí per sota dels quals ho dono per just */
+
+function comprovaEstoc(pl){
+  if(invCarregat!==true || !inventari.length || !pl) return null;
+  var per={}, ordre=[];
+  pl.filaments.forEach(function(f){
+    var k=triaBobina[f.slot];
+    if(!k || f.grams==null || !(f.grams>0)) return;
+    var it=invPerKey(k); if(!it) return;
+    if(!per[k]){
+      var q=invQty(it);
+      per[k]={ it:it, nom:invNom(it), cal:0, nominal:invNominal(it),
+               obert:(q>0 ? (Number(it.pes_restant_g)||0) : 0),
+               precintades:Math.max(0,q-1) };
+      ordre.push(k);
+    }
+    per[k].cal += f.grams;
+  });
+  if(!ordre.length) return null;
+  var ordrePes={ be:0, just:1, canvi:2, curt:3 }, pitjor="be";
+  var files=ordre.map(function(k){
+    var b=per[k];
+    b.cal=Math.round(b.cal*100)/100;
+    b.queda=Math.round((b.obert-b.cal)*100)/100;
+    b.total=b.obert + b.precintades*b.nominal;
+    b.falta=Math.round((b.cal-b.obert)*100)/100;
+    b.faltaTot=Math.round((b.cal-b.total)*100)/100;
+    b.estat = (b.cal<=b.obert) ? (b.queda<MARGE_JUST ? "just" : "be")
+            : (b.cal<=b.total ? "canvi" : "curt");
+    if(ordrePes[b.estat]>ordrePes[pitjor]) pitjor=b.estat;
+    return b;
+  });
+  return { estat:pitjor, files:files };
+}
+function pintaEstoc(pl, cru){
+  var box=$("estoc-box");
+  if(!box) return;
+  var v = cru ? null : comprovaEstoc(pl);
+  if(!v){ box.hidden=true; box.innerHTML=""; return; }
+  box.hidden=false;
+
+  var titol, cua="";
+  if(v.estat==="be"){
+    var menys=null;
+    v.files.forEach(function(b){ if(menys==null || b.queda<menys) menys=b.queda; });
+    titol = v.files.length===1 ? "Sí, hi arribes." : "Sí, hi arribes amb totes.";
+    cua = "Després d'imprimir-la, a la bobina més justa li quedaran "+fmtG(menys)+".";
+  } else if(v.estat==="just"){
+    titol = "Hi arribes, però just.";
+    cua = "El pes que tens apuntat a l'inventari és a ull: si falla una mica, et pots quedar a mitges. Val més pesar la bobina abans de començar.";
+  } else if(v.estat==="canvi"){
+    titol = "A la bobina oberta no li arriba.";
+    cua = "En tens de precintades, però l'hauràs de canviar tu a mitja impressió. Si la impressora no t'avisa que s'ha acabat el filament, la peça es farà malbé.";
+  } else {
+    titol = "No en tens prou.";
+    cua = "Amb el que tens apuntat no s'acabarà. Demana'n o tria una altra bobina.";
+  }
+
+  var files=v.files.map(function(b){
+    var txt;
+    if(b.estat==="curt"){
+      txt = "en calen "+fmtG(b.cal)+" i en tens "+fmtG(b.total)+
+            " · <b>et falten "+fmtG(b.faltaTot)+"</b>";
+    } else if(b.estat==="canvi"){
+      txt = "en calen "+fmtG(b.cal)+" i a l'oberta n'hi ha "+fmtG(b.obert)+
+            " · <b>li falten "+fmtG(b.falta)+"</b>, i en tens "+b.precintades+
+            " de precintad"+(b.precintades===1?"a":"es");
+    } else {
+      txt = "en calen "+fmtG(b.cal)+" de "+fmtG(b.obert)+" · queden "+fmtG(b.queda);
+      if(b.precintades) txt += " (i "+b.precintades+" de precintad"+(b.precintades===1?"a":"es")+")";
+    }
+    return '<li class="ebob e-'+b.estat+'">'+swatchDe(b.it)+
+           '<span><b>'+esc(b.nom)+'</b><small>'+txt+'</small></span></li>';
+  }).join("");
+
+  box.className="estoc e-"+v.estat;
+  box.innerHTML='<b class="etitol">'+esc(titol)+'</b><ul class="ellista">'+files+'</ul>'+
+                '<span class="ecua">'+cua+'</span>';
+}
+
+/* ---------------- pintar el resultat ---------------- */
+function esMa(){ return !!(parsed && parsed.source==="ma"); }
+
+/* ---------------- posar-ho a mà ---------------- */
+function filamentNouMa(){
+  maSeq++;
+  return { slot:"m"+maSeq, idx:null, type:null, color:null, nom:null, grams:null, manual:true };
+}
+function creaManual(){
+  maSeq=0; triaBobina={}; picObert=null; picFiltre={}; obertes={};
+  parsed={
+    source:"ma", fileName:null, bytes:null, printer:null, layerHeight:null, nozzle:null,
+    modelNames:[], thumb:null, unsliced:false, diag:{},
+    plates:[{ index:"1", seconds:0, weight:null, filaments:[filamentNouMa()],
+              objects:[], capesPerFil:null, totalCapes:null, meta:{} }]
+  };
+  plateIdx=0;
+}
+/* passo al plat el que hi ha escrit als camps de dalt */
+function sincronitzaMa(){
+  if(!esMa()) return;
+  var pl=currentPlate(); if(!pl) return;
+  var h=num($("m-h").value), m=num($("m-min").value);
+  pl.seconds=Math.max(0, Math.round(h*3600 + m*60));
+  var c=Math.round(num($("m-capes").value));
+  pl.totalCapes = (isFinite(c) && c>0) ? c : null;
+  parsed.printer = $("m-printer").value.trim() || null;
+  var tot=0, cap=true;
+  pl.filaments.forEach(function(f){
+    if(f.grams!=null){ tot+=f.grams; cap=false; }
+    /* el color i el material surten de la bobina: així la fitxa, el CSV i el
+       pressupost no es queden amb un "?" al mig */
+    var it=invPerKey(triaBobina[f.slot]);
+    if(it){
+      var hs=invColors(it);
+      f.color = hs.length ? hs[0] : null;
+      f.type = it.material || null;
+      f.nom = invNom(it);
+    } else { f.color=null; f.type=null; f.nom=null; }
+  });
+  pl.weight = cap ? null : Math.round(tot*100)/100;
+}
+function setMode(m){
+  mode=m;
+  Array.prototype.forEach.call($("mode-seg").querySelectorAll("button"),function(b){
+    b.setAttribute("aria-pressed", String(b.dataset.m===m));
+  });
+  $("w-file").hidden = m!=="file";
+  $("w-ma").hidden   = m!=="ma";
+  clearRead();
+}
+
+/* ---------------- pintar el resultat ---------------- */
+/* ---------------- les plaques, sumades per color ---------------- */
+/* Mateix color i mateix material és la mateixa bobina, vingui de la placa que
+   vingui. Un filament sense color al fitxer va a part: no sé si és el mateix
+   que cap altre, i ajuntar-los seria endevinar. */
+function clauColor(f){
+  if(!f.color) return "s:"+f.slot;
+  return "c:"+String(f.color).toLowerCase()+"|"+String(f.type||"").toLowerCase();
+}
+/* els rangs de capes dels membres, ajuntats: dos slots del mateix color poden
+   entrar en capes diferents i les dues franges compten */
+function rangsUnits(membres, pl){
+  if(!pl || !pl.capesPerFil) return null;
+  var tots=[];
+  membres.forEach(function(m){
+    var r = (m.f.idx!=null) ? pl.capesPerFil[m.f.idx] : null;
+    if(r) r.forEach(function(x){ tots.push([x[0],x[1]]); });
+  });
+  if(!tots.length) return null;
+  tots.sort(function(a,b){ return a[0]-b[0] || a[1]-b[1]; });
+  var net=[];
+  tots.forEach(function(r){
+    var u=net[net.length-1];
+    if(u && r[0]<=u[1]+1){ if(r[1]>u[1]) u[1]=r[1]; }
+    else net.push([r[0],r[1]]);
+  });
+  return net;
+}
+function filDeGrup(g, membres, plaques, slot, partit, pl1, ultim){
+  var grams=null, est=false, nom=null;
+  membres.forEach(function(m){
+    if(m.f.grams!=null) grams=(grams||0)+m.f.grams;
+    if(m.f.estimat) est=true;
+    if(!nom && m.f.nom) nom=m.f.nom;
+  });
+  return { slot:slot, grup:g.clau, color:g.color, type:g.type, nom:nom,
+           grams:(grams==null?null:Math.round(grams*100)/100), estimat:est,
+           plaques:plaques.slice(), totesPlaques:g.plaques.slice(),
+           partit:partit, ultimTros:!!ultim, potPartir:(g.plaques.length>1),
+           capes: rangsUnits(membres, pl1), idx:null };
+}
+function fusiona(){
+  var ps=parsed.plates, pl1=(ps.length===1?ps[0]:null);
+  var grups={}, ordre=[];
+  ps.forEach(function(p){
+    (p.filaments||[]).forEach(function(f){
+      var ck=clauColor(f);
+      if(!grups[ck]){ grups[ck]={ clau:ck, color:f.color||null, type:f.type||null,
+                                  membres:[], plaques:[] }; ordre.push(ck); }
+      var g=grups[ck];
+      g.membres.push({ placa:p.index, f:f });
+      if(g.plaques.indexOf(p.index)<0) g.plaques.push(p.index);
+      if(!g.color && f.color) g.color=f.color;
+      if(!g.type && f.type) g.type=f.type;
+    });
+  });
+  var fils=[];
+  ordre.forEach(function(ck){
+    var g=grups[ck];
+    if(!(obertes[ck] && g.plaques.length>1)){
+      fils.push(filDeGrup(g, g.membres, g.plaques, ck, false, pl1, false));
+      return;
+    }
+    g.plaques.forEach(function(px,pi){
+      var mm=g.membres.filter(function(m){ return m.placa===px; });
+      fils.push(filDeGrup(g, mm, [px], ck+"#"+px, true, pl1, pi===g.plaques.length-1));
+    });
+  });
+  return fils;
+}
+/* Una sola "placa" amb tot el fitxer dins: el temps i els grams sumats i els
+   filaments agrupats per color. Per capa només hi ha dades si el fitxer en té
+   una de sola: la capa 400 de tres plaques diferents no vol dir res. */
+function plataFusionada(){
+  var ps=parsed.plates;
+  if(!ps.length) return null;
+  var seconds=0, weight=null, objs=[];
+  ps.forEach(function(p){
+    seconds += p.seconds||0;
+    if(p.weight!=null) weight=(weight||0)+p.weight;
+    (p.objects||[]).forEach(function(o){ if(objs.indexOf(o)<0) objs.push(o); });
+  });
+  return { index: ps.map(function(p){ return p.index; }).join(", "),
+           seconds: seconds, weight:(weight==null?null:Math.round(weight*100)/100),
+           filaments: fusiona(), objects: objs, capesPerFil:null,
+           totalCapes:(ps.length===1 ? ps[0].totalCapes : null),
+           nPlaques: ps.length, meta: ps[0].meta||{} };
+}
+function currentPlate(){
+  if(!parsed || !parsed.plates.length) return null;
+  /* a mà no hi ha ni plaques ni fitxer: la fila és la que ell escriu */
+  if(esMa()) return parsed.plates[0];
+  return plataFusionada();
+}
+function textPlaques(f){
+  if(!f.plaques || !f.plaques.length) return "";
+  if(!parsed || parsed.plates.length<2) return "";
+  var p=f.plaques.map(String);
+  if(p.length===1) return "placa "+p[0];
+  return "plaques "+p.slice(0,-1).join(", ")+" i "+p[p.length-1];
+}
+/* el "en tens 820 g → 750 g" de cada fila */
+function textQueda(f, usat){
+  var it=invPerKey(triaBobina[f.slot]);
+  if(!it) return "";
+  var st=invStock(it), q=invQty(it);
+  /* amb més d'una bobina dic de quantes és el total: si no, 2040 g sembla que
+     estiguin tots a la bobina oberta, i el bloc de sota diu el contrari */
+  var dequantes = q>1 ? " en "+q+" bobines" : "";
+  if(usat==null) return "en tens "+Math.round(st)+" g"+dequantes;
+  var queda=st-usat;
+  return Math.round(st)+" g"+dequantes+" → "+Math.round(Math.max(0,queda))+" g"+
+         (queda<0 ? " · no n'hi ha prou, en falten "+Math.round(-queda) : "");
+}
+function resumSub(pl, cru){
+  var bits=[];
+  if(cru) bits.push("encara sense calcular — ni temps ni grams");
+  else {
+    /* a mà el temps és opcional: si no l'ha posat, no li ensenyo "0 min" */
+    if(!esMa() || pl.seconds>0) bits.push(fmtHM(pl.seconds));
+    bits.push(pl.weight==null ? "grams per posar" : fmtG(pl.weight));
+  }
+  if(parsed.printer) bits.push(String(parsed.printer));
+  return bits.join(" · ");
+}
+/* l'avis de sota els filaments: quantes bobines falten, quines es queden curtes… */
+function pintaNota(pl, usats, cru){
+  var senseTria=0, senseColor=0, curt=0;
+  pl.filaments.forEach(function(f,i){
+    if(!esMa() && !f.color) senseColor++;
+    if(!triaBobina[f.slot]) senseTria++;
+    else {
+      var it=invPerKey(triaBobina[f.slot]);
+      if(it && usats[i]!=null && invStock(it)-usats[i]<0) curt++;
+    }
+  });
+  var n=[];
+  if(cru){
+    n.push("Aquests són els filaments que tens carregats al projecte. Quan me'l passis amb els números calculats et diré els grams de cadascun.");
+  } else if(invCarregat!==true){
+    n.push("No tinc l'inventari carregat, per això no et puc donar la llista de bobines. Mira-ho als Ajustos.");
+  } else if(!inventari.length){
+    n.push("L'inventari és buit: afegeix-hi bobines a l'app d'inventari i aquí les tindràs a la llista.");
+  } else {
+    if(settings.descompta) n.push("Els grams no surten de les bobines fins que desis la impressió dient-me com ha anat.");
+    else n.push("El descompte automàtic el tens apagat als Ajustos: apunto quina bobina és, però no hi toco els grams.");
+    if(senseTria) n.push(senseTria+" filament"+(senseTria===1?"":"s")+" sense bobina triada — d'aquest"+(senseTria===1?"":"s")+" no descompto res.");
+    /* ha dit que ha fallat però no ha dit fins on: millor avisar-lo que no pas
+       descomptar la peça sencera o no descomptar res sense dir-ho */
+    if(!resultOk && senseTria<pl.filaments.length && sumaGrams(usats)==null){
+      n.push("<b>Digues fins on va arribar</b> aquí sota i descomptaré només el que s'ha gastat. Si ho deixes en blanc, no toco l'inventari.");
+    }
+    /* del que falta ja en parla el bloc de dalt: aquí no ho repeteixo */
+    if(curt) n.push("Les bobines que es quedin a zero passaran a la llista del que s'ha de demanar.");
+  }
+  if(senseColor) n.push(senseColor+" filament"+(senseColor===1?"":"s")+" sense color al fitxer.");
+  $("inv-note").innerHTML = n.join(" ");
+}
+function filaHTML(f, i, usats, cru){
+  var ma=esMa(), it=invPerKey(triaBobina[f.slot]);
+  var sw = ma
+    ? (it ? swatchDe(it,"gran") : '<span class="sw sw-none"></span>')
+    : (f.color ? '<span class="sw" style="background:'+esc(f.color)+'"></span>'
+               : '<span class="sw sw-none" title="el fitxer no en diu el color"></span>');
+
+  var titol, sub;
+  if(ma){
+    titol = it ? invNom(it) : "Filament "+(i+1);
+    sub = it ? [it.material||"", it.color_hex||""].filter(Boolean).join(" · ") : "tria la bobina i posa-hi els grams";
+  } else {
+    titol = f.color || "sense color";
+    var etq=[f.type||"?"];
+    if(f.nom) etq.push(String(f.nom).slice(0,34));
+    var tp=textPlaques(f);
+    if(tp) etq.push(tp);
+    sub = etq.join(" · ");
+  }
+
+  var gHTML;
+  if(ma){
+    /* type=text i no number: un camp number es menja la coma del teclat català */
+    gHTML = '<span class="filg"><input type="text" class="magr" data-slot="'+esc(f.slot)+'"'+
+            ' inputmode="decimal" autocomplete="off" placeholder="0" value="'+
+            (f.grams==null?"":esc(String(f.grams).replace(".",",")))+'" aria-label="Grams d\'aquest filament"> g</span>';
+  } else {
+    var gSub="";
+    if(!cru && usats[i]!=null && f.grams!=null && Math.abs(usats[i]-f.grams)>0.05){
+      gSub='<i>se\'n descompten '+fmtG(usats[i])+'</i>';
+    } else if(f.estimat){ gSub='<i>estimat</i>'; }
+    gHTML = '<span class="filg">'+((f.grams==null)?'—':fmtG(f.grams))+gSub+'</span>';
+  }
+
+  var blocs="";
+  if(invCarregat===true && inventari.length){
+    blocs='<div class="filsel">'+pickerBobina(f)+'</div>'+
+          '<div class="filmatch"><small id="q-'+esc(f.slot)+'">'+esc(textQueda(f,usats[i]))+'</small></div>';
+  } else if(!ma){
+    blocs='<div class="filmatch"><span class="muted">'+
+          (invCarregat===true ? "l'inventari és buit" : "inventari no carregat")+'</span></div>';
+  }
+  if(ma && usats[i]!=null && f.grams!=null && Math.abs(usats[i]-f.grams)>0.05){
+    blocs+='<div class="filmatch"><small>se\'n descompten '+fmtG(usats[i])+'</small></div>';
+  }
+  if(ma){
+    blocs+='<div class="matreu"><button type="button" class="lnk" data-treu="'+esc(f.slot)+'">Treu aquest filament</button></div>';
+  }
+  /* si el color surt de més d'una placa, es pot partir per triar-ne una d'un
+     altre color: és per això que les plaques hi surten dites */
+  if(!ma && f.potPartir && (!f.partit || f.ultimTros)){
+    blocs+='<div class="matreu"><button type="button" class="lnk" data-part="'+esc(f.grup)+'"'+
+           ' data-plaques="'+esc((f.totesPlaques||[]).join("\u0001"))+'">'+
+           (f.partit ? "Torna a ajuntar les plaques" : "Divideix per plaques")+'</button></div>';
+  }
+
+  return '<div class="filrow">'+sw+'<div class="filmain">'+
+    '<div class="filtop"><b>'+esc(titol)+'</b>'+gHTML+'</div>'+
+    '<div class="filsub">'+esc(sub)+'</div>'+
+    blocs+'</div></div>';
+}
+function lligaParticions(){
+  Array.prototype.forEach.call($("fil-list").querySelectorAll("[data-part]"),function(b){
+    b.onclick=function(){
+      var ck=b.dataset.part;
+      var plaques=String(b.dataset.plaques||"").split("\u0001").filter(Boolean);
+      if(obertes[ck]){
+        /* en tornar a ajuntar em quedo la primera bobina triada: és la que ell
+           havia posat al grup sencer abans de partir-lo */
+        var tria=null;
+        plaques.forEach(function(px){
+          var k=ck+"#"+px;
+          if(tria==null && triaBobina[k]) tria=triaBobina[k];
+          delete triaBobina[k]; delete picFiltre[k];
+        });
+        delete obertes[ck];
+        if(tria!=null) triaBobina[ck]=tria;
+      } else {
+        obertes[ck]=true;
+        /* cada tros arrenca amb la bobina que tenia el grup: només n'ha de
+           canviar la que vulgui d'un altre color */
+        var t=triaBobina[ck];
+        plaques.forEach(function(px){ if(t!=null) triaBobina[ck+"#"+px]=t; });
+        delete triaBobina[ck]; delete picFiltre[ck];
+      }
+      picObert=null;
+      showResult();
+    };
+  });
+}
+function showResult(){
+  var pl=currentPlate();
+  if(!pl){ $("result").hidden=true; $("ma-add-wrap").hidden=true; return; }
+  $("result").hidden=false;
+  var ma=esMa();
+  sincronitzaMa();
+
+  var cru = !!parsed.unsliced;
+  $("unsliced").hidden = !cru;
+  $("save-print").hidden = cru;
+  $("fes-press").hidden = cru;
+  $("copy-press").hidden = cru;
+  $("r-title").closest(".card").hidden = cru;
+  $("ma-add-wrap").hidden = !ma;
+  $("diag-box").hidden = ma;      /* a mà no hi ha cap fitxer per ensenyar */
+  $("r-thumb").hidden = true;
+
+  if(!ma && parsed.thumb){ $("r-thumb").src=parsed.thumb; $("r-thumb").hidden=false; }
+
+  var nom;
+  if(ma){
+    nom = $("r-title").value.trim() || "Impressió a mà";
+  } else {
+    var netFitxer = parsed.fileName.replace(/\.(gcode\.3mf|3mf|gcode)$/i,"");
+    /* el Bambu Studio bateja les peces "Object_1": per títol val més el nom del fitxer */
+    var objsBons = (pl.objects||[]).filter(function(x){
+      return x && !/^object_?\d*$/i.test(x) && !/^wipe[_ ]?tower$/i.test(x);
+    });
+    nom = (!cru && objsBons.length) ? objsBons.slice(0,2).join(", ") : netFitxer;
+    if(!$("r-title").value) $("r-title").value = nom;
+  }
+  $("r-name").textContent = nom;
+  $("r-sub").textContent = resumSub(pl, cru);
+
+  var bits2=[];
+  if(ma){
+    if(pl.totalCapes) bits2.push(pl.totalCapes+" capes");
+    bits2.push("posada a mà, sense fitxer");
+  } else {
+    if(parsed.modelNames && parsed.modelNames.length && parsed.modelNames.join(", ")!==nom){
+      bits2.push(parsed.modelNames.slice(0,3).join(", "));
+    }
+    if(parsed.plates.length>1) bits2.push(parsed.plates.length+" plaques sumades");
+    if(parsed.layerHeight) bits2.push("capa "+parsed.layerHeight+" mm");
+    if(parsed.nozzle) bits2.push("nas "+parsed.nozzle+" mm");
+    bits2.push(parsed.fileName);
+  }
+  $("r-sub2").textContent = bits2.join(" · ");
+
+  /* el selector de plaques ja no hi és: la llista de sota surt sumada i cada
+     fila diu de quines plaques ve */
+  $("plates-wrap").hidden=true;
+
+  var usats = cru ? pl.filaments.map(function(){ return null; }) : gramsReals(pl);
+  $("fil-list").innerHTML = pl.filaments.map(function(f,i){
+    return filaHTML(f,i,usats,cru);
+  }).join("");
+  lligaPickers();
+  lligaParticions();
+  lligaFilesMa(pl);
+  pintaEstoc(pl, cru);
+  pintaNota(pl, usats, cru);
+  renderFallada();
+  $("diag-body").textContent = diagText();
+}
+/* els grams i el botó de treure, de les files posades a mà */
+function lligaFilesMa(pl){
+  if(!esMa()) return;
+  Array.prototype.forEach.call($("fil-list").querySelectorAll(".magr"),function(e){
+    e.oninput=function(){
+      var f=null;
+      pl.filaments.forEach(function(x){ if(x.slot===e.dataset.slot) f=x; });
+      if(!f) return;
+      var v=parseFloat(String(e.value).replace(",","."));
+      f.grams = (isFinite(v) && v>=0) ? Math.round(v*100)/100 : null;
+      actualitzaMa(pl);
+    };
+  });
+  Array.prototype.forEach.call($("fil-list").querySelectorAll("[data-treu]"),function(b){
+    b.onclick=function(){
+      if(pl.filaments.length<2){ toast("Almenys n'hi ha d'haver un"); return; }
+      var s=b.dataset.treu;
+      pl.filaments=pl.filaments.filter(function(x){ return x.slot!==s; });
+      delete triaBobina[s]; delete picFiltre[s];
+      if(picObert===s) picObert=null;
+      showResult();
+    };
+  });
+}
+/* Refresco només el que depèn dels grams. Si repintés la llista a cada tecla,
+   el camp perdria el focus. */
+function actualitzaMa(pl){
+  sincronitzaMa();
+  var usats=gramsReals(pl);
+  pl.filaments.forEach(function(f,i){
+    var e=$("q-"+f.slot);
+    if(e) e.textContent=textQueda(f,usats[i]);
+  });
+  $("r-sub").textContent=resumSub(pl,false);
+  pintaEstoc(pl,false);
+  pintaNota(pl,usats,false);
+  renderFallada();
+  $("diag-body").textContent=diagText();
+}
+
+function renderFallada(){
+  var pl=currentPlate();
+  $("w-capa").hidden  = failMode!=="capa";
+  $("w-pct").hidden   = failMode!=="pct";
+  $("w-grams").hidden = failMode!=="grams";
+  Array.prototype.forEach.call($("fail-mode").querySelectorAll("button"),function(b){
+    b.setAttribute("aria-pressed", String(b.dataset.m===failMode));
+  });
+  var e=$("fail-calc");
+  if(!e || !pl) return;
+  if(failMode==="capa" && !pl.totalCapes){
+    e.innerHTML = esMa()
+      ? "Per capa em fa falta saber quantes capes tenia en total: posa-ho a dalt, o fes-ho pel tant per cent o pesa el tros."
+      : (pl.nPlaques>1
+         ? "Amb "+pl.nPlaques+" plaques sumades, dir-me una capa no serveix: la capa 300 no diu de quina placa és. Fes-ho pel tant per cent o pesa el tros."
+         : "Aquest fitxer no em diu quantes capes té, així que per capa no et puc calcular res. Fes-ho pel tant per cent o pesa el tros.");
+    return;
+  }
+  var total=sumaGrams(pl.filaments.map(function(f){ return f.grams==null?null:f.grams; }));
+  var fet=sumaGrams(gramsReals(pl));
+  if(fet==null){
+    e.textContent = failMode==="capa"
+      ? "Escriu la capa i et dic quants grams se n'han anat"+(pl.totalCapes?" (en té "+pl.totalCapes+")":"")+"."
+      : (failMode==="pct" ? "Escriu el tant per cent que marcava la pantalla."
+                          : "Pesa el que ha sortit de la impressora i escriu-ho.");
+    return;
+  }
+  var txt = "Es descomptaran "+fmtG(fet);
+  if(total) txt += " dels "+fmtG(total)+" de la peça sencera";
+  if(failMode==="capa" && pl.totalCapes) txt += " · capa "+Math.min(Math.round(valorFail("f-capa")),pl.totalCapes)+" de "+pl.totalCapes;
+  if(failMode!=="grams") txt += ". És una estimació; si el pots pesar, surt exacte.";
+  else txt += ".";
+  e.textContent = txt;
+}
+function diagText(){
+  var o={ fitxer:parsed.fileName||"(posada a mà)", bytes:parsed.bytes, origen:parsed.source,
+          impressora:parsed.printer||null, capa:parsed.layerHeight||null, nas:parsed.nozzle||null,
+          plaques:parsed.plates.map(function(p){
+            return { index:p.index, segons:p.seconds, pes:p.weight,
+                     filaments:p.filaments.map(function(f){
+                       return {slot:f.slot,type:f.type,color:f.color,grams:f.grams,metres:f.metres,estimat:!!f.estimat};
+                     }) };
+          }) };
+  o.diagnostic = parsed.diag;
+  try{ return JSON.stringify(o,null,2); }catch(e){ return "(no s'ha pogut generar)"; }
+}
+
+/* ---------------- entrada del fitxer ---------------- */
+function handleFile(file){
+  if(!file) return;
+  parsed=null; plateIdx=0;
+  $("result").hidden=true;
+  $("r-title").value="";
+  $("read-status").textContent="Llegint "+file.name+"…";
+  var low=(file.name||"").toLowerCase();
+  var p = /\.3mf$/.test(low) ? parse3MF(file) : parseGcode(file);
+  p.then(function(out){
+    parsed=out;
+    var pl=currentPlate();
+    if(out.unsliced){
+      $("read-status").textContent = "Fitxer obert: "+(pl?pl.filaments.length:0)+" filament"+((pl&&pl.filaments.length===1)?"":"s")+" carregats, però encara hi falten els grams i el temps.";
+    } else if(!pl || (!pl.seconds && !(pl.weight>0))){
+      $("read-status").textContent = "He obert el fitxer però no hi he trobat ni temps ni grams. Mira «Què he llegit del fitxer» i passa-me'l.";
+    } else {
+      $("read-status").textContent = "Llegit: "+fmtHM(pl.seconds)+" · "+fmtG(pl.weight||0)+" · "+pl.filaments.length+" filament"+(pl.filaments.length===1?"":"s")+".";
+    }
+    showResult();
+    if(invCarregat===null && typeof gToken!=="undefined" && gToken){
+      loadInventory().then(function(){ if(parsed) showResult(); });
+    }
+  }).catch(function(e){
+    parsed=null;
+    $("result").hidden=true;
+    $("read-status").textContent = "No he pogut llegir-lo: "+((e&&e.message)||e||"error desconegut");
+  });
+}
+$("file").addEventListener("change", function(){
+  var f=this.files && this.files[0];
+  handleFile(f);
+  this.value="";
+});
+$("drop").onclick=function(){ $("file").click(); };
+$("drop").onkeydown=function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); $("file").click(); } };
+["dragenter","dragover"].forEach(function(ev){
+  $("drop").addEventListener(ev,function(e){ e.preventDefault(); e.stopPropagation(); this.classList.add("over"); });
+});
+["dragleave","drop"].forEach(function(ev){
+  $("drop").addEventListener(ev,function(e){ e.preventDefault(); e.stopPropagation(); this.classList.remove("over"); });
+});
+$("drop").addEventListener("drop",function(e){
+  var dt=e.dataTransfer;
+  if(dt && dt.files && dt.files.length) handleFile(dt.files[0]);
+});
+
+/* ---------------- resultat ok / fallada ---------------- */
+function setResultOk(v){
+  resultOk=!!v;
+  Array.prototype.forEach.call($("res-seg").querySelectorAll("button"),function(b){
+    b.setAttribute("aria-pressed", String((b.dataset.v==="ok")===resultOk));
+  });
+  $("fail-box").hidden=resultOk;
+  if(parsed) showResult();
+}
+Array.prototype.forEach.call($("res-seg").querySelectorAll("button"),function(b){
+  b.onclick=function(){ setResultOk(b.dataset.v==="ok"); };
+});
+Array.prototype.forEach.call($("fail-presets").querySelectorAll("button"),function(b){
+  b.onclick=function(){ $("r-failwhy").value=b.dataset.t; };
+});
+Array.prototype.forEach.call($("fail-mode").querySelectorAll("button"),function(b){
+  b.onclick=function(){ failMode=b.dataset.m; if(parsed) showResult(); else renderFallada(); };
+});
+["f-capa","f-pct","f-grams"].forEach(function(id){
+  $(id).addEventListener("input",function(){ if(parsed) showResult(); });
+});
+
+/* ---------------- desar al registre ---------------- */
+function savePrint(){
+  var pl=currentPlate();
+  if(!pl){ toast(mode==="ma"?"Primer posa-hi les dades":"Primer llegeix un fitxer"); return; }
+  sincronitzaMa();
+  if(esMa()){
+    var ambG=pl.filaments.filter(function(f){ return f.grams!=null && f.grams>0; });
+    if(!ambG.length){ toast("Posa-hi els grams d'almenys un filament"); return; }
+    if(!$("r-title").value.trim()){ toast("Posa-li un nom per trobar-la després"); return; }
+  }
+  var usats=gramsReals(pl);
+  var movs = settings.descompta ? movimentsDe(pl) : [];
+  var atur=null;
+  if(!resultOk){
+    atur={ mode:failMode, capes:pl.totalCapes||null,
+           capa:(failMode==="capa"?Math.round(valorFail("f-capa")):null),
+           pct:(failMode==="pct"?valorFail("f-pct"):null),
+           pesat:(failMode==="grams"?valorFail("f-grams"):null) };
+    ["capa","pct","pesat"].forEach(function(k){ if(!isFinite(atur[k])) atur[k]=null; });
+  }
+  var rec={
+    uid: "I"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    data: new Date().toISOString(),
+    titol: $("r-title").value.trim() || $("r-name").textContent || "Sense nom",
+    fitxer: parsed.fileName,
+    origen: parsed.source,
+    impressora: parsed.printer||null,
+    capa: parsed.layerHeight||null,
+    placa: pl.index,
+    segons: pl.seconds||0,
+    grams: pl.weight||0,
+    gramsUsats: sumaGrams(usats),
+    filaments: pl.filaments.map(function(f,i){
+      var it=invPerKey(triaBobina[f.slot]);
+      var bo=it ? { uid:invKey(it), id:it.id||null, marca:it.marca||null,
+                    material:it.material||null, nom:invNom(it) } : null;
+      return { slot:f.slot, idx:f.idx, type:f.type||null, color:f.color||null,
+               plaques:(f.plaques&&f.plaques.length?f.plaques.slice():null),
+               grams:(f.grams==null?null:Math.round(f.grams*100)/100),
+               usats:(usats[i]==null?null:usats[i]),
+               estimat:!!f.estimat, bobina:bo };
+    }),
+    ok: resultOk,
+    aturada: atur,
+    motiu: resultOk ? "" : $("r-failwhy").value.trim(),
+    notes: $("r-notes").value.trim(),
+    descompte: movs,
+    descomptat: false,
+    descomptatEl: null
+  };
+  registre.unshift(rec);
+  persist();
+  if(!movs.length){
+    toast(resultOk?"Impressió registrada":"Fallada registrada");
+    clearRead(); go("hist"); return;
+  }
+  toast("Desada. Descomptant de l'inventari…");
+  clearRead(); go("hist");
+  aplicaInventari(movs,-1).then(function(res){
+    rec.descomptat=true;
+    rec.descomptatEl=new Date().toISOString();
+    apuntaAplicat(rec, res);
+    persist();
+    var g=0; movs.forEach(function(m){ g+=m.grams; });
+    var msg="Descomptats "+fmtG(g)+" de "+movs.length+" bobin"+(movs.length===1?"a":"es")+".";
+    if(res.perduts.length) msg+=" "+res.perduts.length+" no les he trobat a l'inventari.";
+    if(res.curts.length) msg+=" N'hi ha "+res.curts.length+" que han quedat a zero.";
+    toast(msg);
+  }).catch(function(e){
+    rec.descomptat=false;
+    persist();
+    toast("Desada, però no he pogut tocar l'inventari: "+((e&&e.message)||"error")+". Des de la fitxa ho pots tornar a provar.");
+  });
+}
+function clearRead(){
+  parsed=null; plateIdx=0; triaBobina={}; picObert=null; picFiltre={}; obertes={};
+  $("result").hidden=true;
+  $("ma-add-wrap").hidden=true;
+  $("estoc-box").hidden=true; $("estoc-box").innerHTML="";
+  $("read-status").textContent="";
+  $("r-title").value=""; $("r-notes").value=""; $("r-failwhy").value="";
+  $("f-capa").value=""; $("f-pct").value=""; $("f-grams").value="";
+  $("m-h").value=""; $("m-min").value=""; $("m-printer").value=""; $("m-capes").value="";
+  failMode="capa";
+  setResultOk(true);
+  if(mode==="ma"){ creaManual(); showResult(); }
+  else renderFallada();
+}
+Array.prototype.forEach.call($("mode-seg").querySelectorAll("button"),function(b){
+  b.onclick=function(){ if(mode!==b.dataset.m) setMode(b.dataset.m); };
+});
+$("ma-add").onclick=function(){
+  var pl=currentPlate();
+  if(!pl || !esMa()) return;
+  if(pl.filaments.length>=8){ toast("Vuit filaments ja són molts"); return; }
+  pl.filaments.push(filamentNouMa());
+  showResult();
+};
+["m-h","m-min","m-printer","m-capes"].forEach(function(id){
+  $(id).addEventListener("input",function(){
+    var pl=currentPlate();
+    if(pl && esMa()) actualitzaMa(pl);
+  });
+});
+$("r-title").addEventListener("input",function(){
+  if(esMa()) $("r-name").textContent = $("r-title").value.trim() || "Impressió a mà";
+});
+$("save-print").onclick=savePrint;
+$("clear-read").onclick=clearRead;
+$("copy-press").onclick=function(){
+  var pl=currentPlate();
+  if(!pl){ toast("Primer llegeix un fitxer"); return; }
+  var h=Math.floor((pl.seconds||0)/3600), m=Math.round(((pl.seconds||0)%3600)/60);
+  if(m===60){ h+=1; m=0; }
+  var l=[];
+  l.push($("r-title").value.trim()||$("r-name").textContent);
+  l.push("Temps: "+h+" h "+m+" min");
+  l.push("Material: "+((Math.round((pl.weight||0)*10)/10).toFixed(1).replace(".",","))+" g");
+  var cols=pl.filaments.filter(function(f){ return f.color; }).map(function(f){
+    return f.color+" ("+(Math.round((f.grams||0)*10)/10).toFixed(1).replace(".",",")+" g)";
+  });
+  if(cols.length) l.push("Colors: "+cols.join(", "));
+  var txt=l.join("\n");
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){ toast("Copiat — enganxa-ho al pressupost"); },function(){ toast("No he pogut copiar-ho"); });
+  } else toast("Aquest navegador no deixa copiar");
+};
+$("fes-press").onclick=function(){
+  var pl=currentPlate();
+  if(!pl){ toast("Primer llegeix un fitxer"); return; }
+  var titol = $("r-title").value.trim() || $("r-name").textContent || "";
+  var linies = pl.filaments.filter(function(f){ return (f.grams||0)>0; }).map(function(f){
+    /* el nom surt de la bobina que has triat tu; si no n'hi ha cap, del color */
+    var it=invPerKey(triaBobina[f.slot]);
+    var nom = it ? invNom(it) : (f.color || "filament");
+    return "· "+nom+" — "+(Math.round((f.grams||0)*10)/10).toFixed(1).replace(".",",")+" g";
+  });
+  var dades={
+    quan: Date.now(),
+    titol: titol,
+    segons: Math.round(pl.seconds||0),
+    grams: pl.weight||0,
+    peces: 1,
+    notes: "Del registre d'impressions · "+(parsed.fileName||"posada a mà")+
+           (parsed.printer?" · "+parsed.printer:"")+
+           (linies.length>1 ? "\n"+linies.join("\n") : ""),
+    resum: "Vingut del registre d'impressions: "+(titol||parsed.fileName||"impressió a mà")+" · "+
+           fmtHM(pl.seconds)+" · "+fmtG(pl.weight||0)+
+           (pl.filaments.length>1?" · "+pl.filaments.length+" colors":"")+
+           ". Revisa les peces i el preu del material."
+  };
+  try{
+    localStorage.setItem("zenkai_pressupost_prefill", JSON.stringify(dades));
+  }catch(e){
+    toast("No he pogut passar les dades al pressupost");
+    return;
+  }
+  location.href="pressupost.html";
+};
+
+$("copy-diag").onclick=function(){
+  if(!parsed){ return; }
+  var t=diagText();
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(function(){ toast("Copiat"); },function(){ toast("No he pogut copiar-ho"); });
+  }
+};
+
+/* ---------------- historial ---------------- */
+function renderHist(){
+  var list=$("hist-list");
+  if(!list) return;
+  $("hist-empty").hidden = registre.length>0;
+  list.innerHTML = registre.map(function(rec){
+    var sw=(rec.filaments||[]).filter(function(f){ return f.color; }).slice(0,5).map(function(f){
+      return '<span class="sw sm" style="background:'+esc(f.color)+'"></span>';
+    }).join("");
+    return '<div class="qrow'+(rec.ok?'':' failed')+'" data-uid="'+esc(rec.uid)+'">'+
+      '<span class="dot '+(rec.ok?'ok':'bad')+'"></span>'+
+      '<div class="qmain"><div class="name">'+esc(rec.titol||"Sense nom")+'</div>'+
+      '<div class="sub note">'+fmtDate(rec.data)+' · '+fmtHM(rec.segons)+' · '+fmtG(rec.grams)+
+      (rec.ok?'':' · <span class="bad-txt">'+esc(rec.motiu||"va fallar")+'</span>')+'</div></div>'+
+      '<div class="qsw">'+sw+'</div></div>';
+  }).join("");
+  Array.prototype.forEach.call(list.querySelectorAll(".qrow"),function(row){
+    row.onclick=function(){ openDetail(row.dataset.uid); };
+  });
+  renderStats();
+}
+function renderStats(){
+  var el=$("stats"); if(!el) return;
+  if(!registre.length){ el.innerHTML=""; return; }
+  var n=registre.length, fails=0, g=0, sec=0;
+  registre.forEach(function(r){
+    if(!r.ok) fails++;
+    /* el material gastat de debo: d'una fallada nomes el tros que va sortir */
+    g += (r.gramsUsats!=null ? r.gramsUsats : (r.grams||0));
+    sec += (r.segons||0);
+  });
+  var pct=Math.round(fails/n*1000)/10;
+  el.innerHTML =
+    stat(n, "impressions") +
+    stat(String(pct).replace(".",",")+" %", "fallades ("+fails+")") +
+    stat(Math.round(g)+" g", "material") +
+    stat(Math.round(sec/3600)+" h", "de màquina");
+}
+function stat(v,l){ return '<div class="stat"><b>'+esc(v)+'</b><span>'+esc(l)+'</span></div>'; }
+
+function byUid(uid){ return registre.filter(function(r){ return r.uid===uid; })[0]; }
+var detailUid=null;
+function openDetail(uid){
+  var rec=byUid(uid); if(!rec) return;
+  detailUid=uid;
+  $("d-title").textContent = rec.titol||"Impressió";
+  var sub=[fmtDate(rec.data), fmtHM(rec.segons), fmtG(rec.grams)];
+  if(rec.impressora) sub.push(String(rec.impressora));
+  if(rec.capa) sub.push("capa "+rec.capa+" mm");
+  $("d-sub").textContent = sub.join(" · ");
+  $("d-list").innerHTML = (rec.filaments||[]).map(function(f){
+    var sw = f.color ? '<span class="sw" style="background:'+esc(f.color)+'"></span>' : '<span class="sw sw-none"></span>';
+    var gSub="";
+    if(f.usats!=null && f.grams!=null && Math.abs(f.usats-f.grams)>0.05) gSub='<i>n\'hi van '+fmtG(f.usats)+'</i>';
+    else if(f.estimat) gSub='<i>estimat</i>';
+    return '<div class="filrow">'+sw+'<div class="filmain">'+
+      '<div class="filtop"><b>'+esc(f.color||"sense color")+'</b>'+
+      '<span class="filg">'+fmtG(f.grams||0)+gSub+'</span></div>'+
+      '<div class="filsub">'+esc([f.type||"?"].concat(
+        (f.plaques&&f.plaques.length>1) ? ["plaques "+f.plaques.join(", ")]
+        : ((f.plaques&&f.plaques.length===1&&(rec.filaments||[]).some(function(x){
+             return x.plaques&&x.plaques.length&&x.plaques[0]!==f.plaques[0]; }))
+           ? ["placa "+f.plaques[0]] : [])).join(" · "))+'</div>'+
+      (f.bobina?'<div class="filmatch"><b>'+esc(f.bobina.nom)+'</b></div>':'')+
+      '</div></div>';
+  }).join("");
+
+  /* que s'ha fet amb l'inventari */
+  var movs=rec.descompte||[], box=$("d-inv");
+  if(!movs.length){
+    box.hidden=true;
+    $("d-torna").hidden=true; $("d-descompta").hidden=true;
+  } else {
+    var g=0; movs.forEach(function(m){ g+=m.grams||0; });
+    var llista=movs.map(function(m){ return esc(m.nom)+" ("+fmtG(m.grams||0)+")"; }).join(", ");
+    box.innerHTML = rec.descomptat
+      ? '<b>Descomptat de l\'inventari: '+fmtG(g)+'</b><span>'+llista+'</span>'
+      : '<b>Encara no s\'ha descomptat de l\'inventari</b><span>Hi hauria d\'anar: '+llista+'</span>';
+    box.hidden=false;
+    $("d-torna").hidden = !rec.descomptat;
+    $("d-descompta").hidden = !!rec.descomptat;
+  }
+
+  var notes=[];
+  if(!rec.ok){
+    var m="Va fallar: "+(rec.motiu||"sense motiu apuntat");
+    var a=rec.aturada;
+    if(a){
+      if(a.mode==="capa" && a.capa!=null) m+=" — es va aturar a la capa "+a.capa+(a.capes?" de "+a.capes:"");
+      else if(a.mode==="pct" && a.pct!=null) m+=" — portava el "+a.pct+" %";
+      else if(a.mode==="grams" && a.pesat!=null) m+=" — el tros que va sortir pesava "+fmtG(a.pesat);
+    }
+    notes.push(m);
+  }
+  if(rec.notes) notes.push(rec.notes);
+  if(rec.fitxer) notes.push(rec.fitxer);
+  $("d-notes").textContent = notes.join(" — ");
+  $("overlay").hidden=false;
+}
+function closeDetail(){ $("overlay").hidden=true; detailUid=null; }
+$("d-close").onclick=closeDetail;
+$("overlay").onclick=function(e){ if(e.target===this) closeDetail(); };
+document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&!$("overlay").hidden) closeDetail(); });
+$("d-torna").onclick=function(){
+  var rec=byUid(detailUid); if(!rec || !rec.descomptat) return;
+  var movs=movsPerDesfer(rec);
+  $("d-torna").disabled=true;
+  aplicaInventari(movs,+1).then(function(res){
+    rec.descomptat=false; rec.descomptatEl=null;
+    persist();
+    var g=0; movs.forEach(function(m){ g+=m.grams||0; });
+    toast("Tornats "+fmtG(g)+" a l'inventari."+(res.perduts.length?" "+res.perduts.length+" bobines no les he trobat.":""));
+    if(detailUid) openDetail(detailUid);
+  }).catch(function(e){
+    toast("No he pogut tornar-los: "+((e&&e.message)||"error"));
+  }).then(function(){ $("d-torna").disabled=false; });
+};
+$("d-descompta").onclick=function(){
+  var rec=byUid(detailUid); if(!rec || rec.descomptat) return;
+  var movs=rec.descompte||[];
+  $("d-descompta").disabled=true;
+  aplicaInventari(movs,-1).then(function(res){
+    rec.descomptat=true; rec.descomptatEl=new Date().toISOString();
+    apuntaAplicat(rec,res);
+    persist();
+    var g=0; movs.forEach(function(m){ g+=m.grams||0; });
+    toast("Descomptats "+fmtG(g)+" de l'inventari."+(res.curts.length?" "+res.curts.length+" bobines han quedat a zero.":""));
+    if(detailUid) openDetail(detailUid);
+  }).catch(function(e){
+    toast("No he pogut descomptar-los: "+((e&&e.message)||"error"));
+  }).then(function(){ $("d-descompta").disabled=false; });
+};
+$("d-del").onclick=function(){
+  var rec=byUid(detailUid);
+  var movs=(rec && rec.descomptat) ? movsPerDesfer(rec) : [];
+  var uid=detailUid;
+  if(movs.length){
+    var g=0; movs.forEach(function(m){ g+=m.grams||0; });
+    /* esborrar una impressio ja descomptada deixaria l'inventari curt per sempre */
+    if(confirm("D'aquesta impressió es van descomptar "+fmtG(g)+" de l'inventari.\n\nVols que els hi torni abans d'esborrar-la?")){
+      aplicaInventari(movs,+1).then(function(){
+        toast("Tornats "+fmtG(g)+" a l'inventari i esborrada del registre.");
+      }).catch(function(e){
+        toast("Esborrada, però no he pogut tornar els grams: "+((e&&e.message)||"error"));
+      });
+    }
+  }
+  registre=registre.filter(function(r){ return r.uid!==uid; });
+  closeDetail(); persist();
+  if(!movs.length) toast("Esborrada del registre");
+};
+
+/* ---------------- ajustos ---------------- */
+function fillSettings(){
+  $("d-pla").value=settings.dens.PLA; $("d-petg").value=settings.dens.PETG; $("d-abs").value=settings.dens.ABS;
+  $("d-tpu").value=settings.dens.TPU; $("d-pa").value=settings.dens.PA; $("d-diam").value=settings.diam;
+  $("s-descompta").checked = settings.descompta!==false;
+}
+$("s-descompta").addEventListener("change",function(){
+  settings.descompta=!!this.checked;
+  saveLocal();
+  if(typeof scheduleDriveSave==="function") scheduleDriveSave();
+  if(parsed) showResult();
+});
+[["d-pla","PLA"],["d-petg","PETG"],["d-abs","ABS"],["d-tpu","TPU"],["d-pa","PA"]].forEach(function(p){
+  $(p[0]).addEventListener("input",function(){
+    settings.dens[p[1]]=num(this.value)||settings.dens[p[1]];
+    saveLocal(); if(typeof scheduleDriveSave==="function") scheduleDriveSave();
+  });
+});
+$("d-diam").addEventListener("input",function(){
+  settings.diam=num(this.value)||1.75;
+  saveLocal(); if(typeof scheduleDriveSave==="function") scheduleDriveSave();
+});
+$("inv-reload").onclick=function(){
+  loadInventory().then(function(){ if(parsed) showResult(); });
+};
+
+$("export-json").onclick=function(){
+  var blob=new Blob([JSON.stringify({registre:registre, settings:settings, updatedAt:new Date().toISOString()},null,2)],{type:"application/json"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="zenkai3d-impressions-"+new Date().toISOString().slice(0,10)+".json";
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },1500);
+};
+$("wipe-all").onclick=function(){
+  if(!window.confirm("Segur que vols buidar tot el registre d'impressions?")) return;
+  registre=[]; persist(); toast("Registre buidat");
+};
+$("import-btn").onclick=function(){
+  var raw=$("import-box").value.replace(/[“”„‟]/g,'"').replace(/[‘’]/g,"'").trim();
+  var a=raw.indexOf("{"), b=raw.lastIndexOf("}");
+  if(a>=0&&b>a) raw=raw.slice(a,b+1);
+  var d;
+  try{ d=JSON.parse(raw); }catch(e){ $("import-msg").textContent="Això no és un JSON vàlid."; return; }
+  var n=0;
+  if(Array.isArray(d.registre)){ registre=JSON.parse(JSON.stringify(d.registre)); n=registre.length; }
+  else if(Array.isArray(d)){ registre=JSON.parse(JSON.stringify(d)); n=registre.length; }
+  else { $("import-msg").textContent="No hi he trobat cap llista d'impressions."; return; }
+  if(d.settings) zdeepMerge(settings,d.settings);
+  persist(); fillSettings();
+  $("import-msg").textContent="Restaurades "+n+" impressions.";
+  $("import-box").value="";
+};
+
+/* ---------------- navegacio ---------------- */
+function go(v){
+  view=v;
+  ["read","hist","settings"].forEach(function(k){ $("view-"+k).hidden=(k!==v); });
+  Array.prototype.forEach.call(document.querySelectorAll("nav button"),function(b){
+    b.setAttribute("aria-selected", String(b.dataset.view===v));
+  });
+  if(v==="settings" && invCarregat===null && typeof gToken!=="undefined" && gToken) loadInventory();
+}
+Array.prototype.forEach.call(document.querySelectorAll("nav button"),function(b){
+  b.onclick=function(){ go(b.dataset.view); };
+});
+
+/* ---------------- CSV per al Drive ---------------- */
+function buildCSV(){
+  var cols=["data","titol","fitxer","impressora","hores","minuts","grams","grams_gastats",
+            "resultat","motiu","aturada","descomptat","colors","bobines","notes"];
+  var rows=registre.map(function(r){
+    var h=Math.floor((r.segons||0)/3600), m=Math.round(((r.segons||0)%3600)/60);
+    if(m===60){ h+=1; m=0; }
+    var cols_=(r.filaments||[]).map(function(f){
+      return (f.color||"?")+" "+(Math.round((f.grams||0)*10)/10)+"g";
+    }).join(" + ");
+    var bobs=(r.descompte||[]).map(function(mv){
+      return mv.nom+" "+(Math.round((mv.aplicat!=null?mv.aplicat:mv.grams)*10)/10)+"g";
+    }).join(" + ") || (r.filaments||[]).map(function(f){ return f.bobina?f.bobina.nom:""; }).filter(Boolean).join(" + ");
+    var at="", a=r.aturada;
+    if(a){
+      if(a.mode==="capa" && a.capa!=null) at="capa "+a.capa+(a.capes?" de "+a.capes:"");
+      else if(a.mode==="pct" && a.pct!=null) at=a.pct+" %";
+      else if(a.mode==="grams" && a.pesat!=null) at="pesat "+a.pesat+" g";
+    }
+    var gastats=(r.gramsUsats!=null?r.gramsUsats:(r.grams||0));
+    var vals=[r.data, r.titol||"", r.fitxer||"", r.impressora||"", h, m,
+              Math.round((r.grams||0)*10)/10, Math.round(gastats*10)/10,
+              r.ok?"ok":"fallada", r.motiu||"", at,
+              ((r.descompte||[]).length ? (r.descomptat?"si":"pendent") : ""),
+              cols_, bobs, r.notes||""];
+    return vals.map(function(v){ return '"'+String(v==null?"":v).replace(/"/g,'""')+'"'; }).join(",");
+  });
+  return cols.join(",")+"\n"+rows.join("\n");
+}
+
+var ZCFG = {
+  nomFitxa: "impressió",
+  nomFitxes: "impressions",
+  /* el que hi ha al Drive i aquí no: ve d'haver-ho apuntat en un altre
+     aparell, i si no s'afegeix abans de desar es perd */
+  mergeRemote: function(d){
+    var noves = zFonLlista(registre, d && d.registre, null);
+    if(!noves.length) return 0;
+    noves.forEach(function(x){ registre.push(x); });
+    saveLocal(); renderHist();
+    return noves.length;
+  },
+  refreshRemote: function(d){
+    var r = d && d.registre;
+    if(!Array.isArray(r) || !r.length) return false;
+    if(JSON.stringify(r)===JSON.stringify(registre)) return false;
+    registre = JSON.parse(JSON.stringify(r));
+    saveLocal(); renderHist();
+    return true;
+  },
+  jsonName: "zenkai3d-impressions.json",
+  csvName:  "zenkai3d-impressions.csv",
+  buildCSV: function(){ return buildCSV(); },
+  getPayload: function(){ return {registre:registre, settings:settings, updatedAt:new Date().toISOString()}; },
+  applyPayload: function(d){
+    loadLocal();
+    var had=false;
+    if(Array.isArray(d.registre) && d.registre.length){ registre=JSON.parse(JSON.stringify(d.registre)); had=true; }
+    if(d.settings) zdeepMerge(settings,d.settings);
+    saveLocal();
+    return had;
+  },
+  boot: function(){
+    loadLocal();
+    fillSettings();
+    setResultOk(true);
+    renderHist();
+    if(typeof gToken!=="undefined" && gToken) loadInventory();
+    else renderInvStatus("Entra-hi amb Google per poder llegir l'inventari.");
+  }
+};
+
+</script>
+<script src="zenkai.js"></script>
+<script>if(typeof gateInit!=="function"){var _g=document.getElementById("gate-status");
+  if(_g) _g.textContent="No s'ha pogut carregar zenkai.js. Recarrega la pàgina.";}</script>
+<script src="zenkai-nav.js"></script>
+</body>
+</html>
