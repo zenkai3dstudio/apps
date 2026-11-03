@@ -1,0 +1,2372 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inventari de filament</title>
+<meta name="description" content="Bobines, colors, què s'acaba i què cal demanar">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Filament">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F2F2F0">
+<link rel="apple-touch-icon" href="icona.png">
+<link rel="icon" href="icona.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<link rel="stylesheet" href="zenkai.css">
+<style>
+:root{
+  --paper:#F2F2F0;
+  --surface:#FFFFFF;
+  --ink:#191A1C;
+  --ink-soft:#6B6D72;
+  --line:#D9D9D5;
+  --line-strong:#B6B6B1;
+  --alert:#C4362B;
+  --ok:#3E8E5A;
+  --hub:#F2F2F0;
+  --shadow:0 1px 0 rgba(0,0,0,.04);
+  --r:3px;
+  --brand-blue:#3E96C2;
+  --brand-orange:#E67324;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#131416;
+    --surface:#1B1C1F;
+    --ink:#EDEDEA;
+    --ink-soft:#95979C;
+    --line:#2E3033;
+    --line-strong:#45484C;
+    --alert:#F0796B;
+    --ok:#55B57C;
+    --hub:#131416;
+    --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131416;
+  --surface:#1B1C1F;
+  --ink:#EDEDEA;
+  --ink-soft:#95979C;
+  --line:#2E3033;
+  --line-strong:#45484C;
+  --alert:#F0796B;
+  --ok:#55B57C;
+  --hub:#131416;
+  --shadow:none;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Archivo","Helvetica Neue",Arial,sans-serif;
+  font-size:15px;
+  line-height:1.45;
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px 80px}
+a{color:inherit}
+button{font:inherit;color:inherit}
+
+/* ---------- header ---------- */
+header{padding:34px 0 18px}
+.brandbar{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.brandmark{width:30px;height:30px;border-radius:7px;display:block;object-fit:cover;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.brandname{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.brandname b{color:var(--brand-blue)}
+.brandname i{color:var(--brand-orange);font-style:normal}
+h1{
+  font-size:clamp(30px,6vw,46px);
+  font-weight:700;
+  letter-spacing:-.028em;
+  line-height:1.02;
+  margin:0 0 14px;
+}
+.meta{display:flex;flex-wrap:wrap;gap:8px 26px;align-items:baseline;color:var(--ink-soft);font-size:13.5px}
+.meta b{color:var(--ink);font-weight:600;font-size:16px}
+.stockbar{display:flex;height:14px;margin-top:18px;border:1px solid var(--line-strong);background:var(--surface);overflow:hidden}
+.stockbar span{min-width:2px;transition:flex-grow .3s}
+.stockbar.empty{background:repeating-linear-gradient(135deg,transparent,transparent 5px,var(--line) 5px,var(--line) 6px)}
+.stockbar-cap{margin-top:6px;color:var(--ink-soft);font-size:12px}
+
+/* ---------- tabs ---------- */
+nav{display:flex;gap:0;border-bottom:1px solid var(--line-strong);margin:26px 0 0;overflow-x:auto}
+nav button{
+  background:none;border:0;border-bottom:2px solid transparent;
+  padding:9px 14px 8px;margin-bottom:-1px;cursor:pointer;white-space:nowrap;
+  color:var(--ink-soft);font-weight:500;
+}
+nav button:hover{color:var(--ink)}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+/* ---- les pestanyes al mòbil: totes a la vista, en files ---- */
+@media(max-width:560px){
+  nav{flex-wrap:wrap;overflow-x:visible;border-bottom:0;gap:6px;margin:20px 0 0;padding:0 0 2px}
+  nav button{border:1px solid var(--line-strong);border-radius:20px;border-bottom-width:1px;
+    margin-bottom:0;padding:6px 11px;font-size:12.5px;line-height:1.15}
+  nav button[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  nav button[aria-selected="true"] .ncount{color:var(--paper);opacity:.8}
+  .navwrap::after{display:none}
+}
+nav button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.cardmain:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+section[hidden]{display:none}
+section{padding-top:22px}
+
+/* ---------- controls ---------- */
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:20px}
+input[type=text],input[type=search],input[type=number],select,textarea{
+  background:var(--surface);border:1px solid var(--line-strong);color:var(--ink);
+  padding:7px 9px;border-radius:var(--r);font:inherit;
+}
+input[type=search]{flex:1 1 190px;min-width:0}
+.btn{
+  background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r);
+  padding:7px 12px;cursor:pointer;font-weight:500;
+}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.primary:hover{opacity:.86}
+.btn.danger{color:var(--alert);border-color:var(--line-strong)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.spacer{flex:1}
+
+/* ---------- spool grid ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:22px 14px}
+@media(max-width:430px){.grid{grid-template-columns:1fr 1fr;gap:18px 12px}}
+@media(min-width:900px){.grid{grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:26px 20px}}
+.card{display:flex;flex-direction:column;gap:8px;height:100%}
+.cardmain .name{min-height:1.3em}
+.card .qty{margin-top:auto;padding-top:2px}
+.cardmain{
+  background:none;border:0;padding:0;cursor:pointer;text-align:left;width:100%;color:inherit;
+  display:flex;flex-direction:column;gap:9px;
+}
+.card svg{display:block;width:100%;height:auto}
+.card:hover .flange{stroke:var(--ink)}
+.qty{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.q{
+  border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);
+  border-radius:2px;cursor:pointer;min-width:26px;height:25px;padding:0 7px;font-size:13px;line-height:1;
+}
+.q:hover{border-color:var(--ink)}
+.q:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.qn{min-width:20px;text-align:center;font-weight:600;font-size:13px}
+.q.done{margin-left:auto;font-size:12px}
+.card.out{opacity:.55}
+.card.out .grams{color:var(--ink-soft)}
+/* quant en queda: el número gros, la barra i on la tens */
+.lvl{display:flex;align-items:baseline;gap:5px;margin-top:3px}
+.lvl .grams{font-size:20px;letter-spacing:-.035em;line-height:1.05}
+.lvl .of{font-size:11px;color:var(--ink-soft);letter-spacing:-.01em;white-space:nowrap}
+.lvl .pc{margin-left:auto;font-size:12px;font-weight:700;color:var(--ink-soft)}
+.bar{height:5px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--ok);border-radius:3px}
+.low .lvl .pc{color:var(--alert)}
+.low .bar i{background:var(--alert)}
+.card.out .lvl .grams{font-size:14px;font-weight:600}
+.card.out .bar i{background:transparent}
+.shelf{font-size:11.5px;font-style:italic;color:var(--ink-soft);line-height:1.3;margin-top:5px}
+.tag.dte{border-color:var(--ok);color:var(--ok);text-decoration:none;font-weight:600}
+.tag.dte:hover{background:var(--ok);color:var(--surface)}
+table.tbl td.de{white-space:nowrap;vertical-align:top;padding-top:9px}
+/* al mòbil estret hi caben dues targetes per fila i el pes nominal ja no hi cap:
+   la barra diu la proporció igualment */
+@media(max-width:380px){.lvl .of{display:none}.lvl .grams{font-size:18px}}
+.name{font-weight:600;letter-spacing:-.012em;line-height:1.2}
+.sub{color:var(--ink-soft);font-size:12.5px;line-height:1.35}
+.grams{font-weight:600}
+.low .grams{color:var(--alert)}
+.tag{display:inline-block;border:1px solid var(--line-strong);padding:0 5px;border-radius:2px;font-size:11.5px;color:var(--ink-soft)}
+.empty-state{
+  border:1px dashed var(--line-strong);padding:28px;text-align:center;color:var(--ink-soft);
+  max-width:540px;
+}
+.empty-state b{display:block;color:var(--ink);margin-bottom:6px;font-size:17px}
+
+/* ---------- lists ---------- */
+h2{font-size:19px;font-weight:600;letter-spacing:-.02em;margin:34px 0 4px}
+h2:first-child{margin-top:0}
+.hint{color:var(--ink-soft);font-size:13.5px;margin:0 0 16px;max-width:62ch}
+.row{
+  display:flex;gap:14px;align-items:center;padding:12px 0;border-top:1px solid var(--line);
+}
+.row:last-child{border-bottom:1px solid var(--line)}
+.chip{width:26px;height:26px;border:1px solid var(--line-strong);flex:none;border-radius:2px}
+.chips{display:flex;gap:3px;flex:none}
+.rowmain{flex:1;min-width:0}
+.rowmain .sub{margin-top:2px}
+.de{font-weight:600;flex:none;text-align:right}
+.de small{display:block;font-weight:400;color:var(--ink-soft);font-size:11.5px}
+
+/* ---------- import ---------- */
+textarea{width:100%;min-height:190px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.5;resize:vertical}
+.note{font-size:13px;color:var(--ink-soft)}
+.ok{color:var(--ink)}
+.err{color:var(--alert)}
+pre.prompt{
+  background:var(--surface);border:1px solid var(--line);padding:18px;
+  white-space:pre-wrap;word-wrap:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:12.5px;line-height:1.6;max-height:65vh;overflow:auto;border-radius:var(--r);
+}
+table.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+table.tbl th{text-align:left;font-weight:600;border-bottom:1px solid var(--line-strong);padding:7px 8px 7px 0}
+table.tbl td{border-bottom:1px solid var(--line);padding:7px 8px 7px 0}
+table.tbl td:last-child,table.tbl th:last-child{text-align:right;padding-right:0}
+
+/* ---------- modal ---------- */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.42);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.overlay[hidden]{display:none}
+.sheet{
+  background:var(--surface);border:1px solid var(--line-strong);width:min(560px,100%);
+  max-height:92vh;overflow:auto;padding:22px;border-radius:var(--r) var(--r) 0 0;
+}
+@media(min-width:700px){.overlay{align-items:center}.sheet{border-radius:var(--r)}}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0 20px}
+.fields label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink-soft)}
+.fields label.full,.fields .full{grid-column:1/-1}
+.chiprow{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+.chiprow.small button{font-size:11px;padding:2px 8px}
+.geobanner{position:absolute;left:0;right:0;top:0;padding:10px 12px;background:rgba(17,17,17,.86);color:#fff;font-size:13px;text-align:center;pointer-events:none}
+.geobanner b{font-weight:600}
+.ocrbar{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-soft);margin:6px 0}
+.ocrbar .pulse{width:8px;height:8px;border-radius:50%;background:var(--ink);animation:p 1.1s ease-in-out infinite}
+@keyframes p{0%,100%{opacity:.25}50%{opacity:1}}
+.foundrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;margin:4px 0}
+.foundrow .tag{cursor:default}
+.chiprow:empty{display:none}
+.chiprow button{border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);border-radius:20px;padding:3px 10px;font-size:12px;cursor:pointer;font-weight:500}
+.chiprow button:hover,.chiprow button:active{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.fields input,.fields select{width:100%}
+.colorrow{display:flex;gap:8px}
+.colorrow input[type=color]{width:42px;height:36px;padding:2px;border:1px solid var(--line-strong);background:var(--surface);border-radius:var(--r)}
+.sheet h3{margin:0;font-size:19px;font-weight:600;letter-spacing:-.02em;overflow-wrap:break-word}
+.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+/* quatre botons no caben en una línia en un mòbil estret. L'Elimina se'n va a
+   la seva pròpia fila: al costat del Cancel·la és massa fàcil equivocar-se. */
+@media(max-width:560px){
+  .actions .spacer{display:none}
+  .actions .btn{flex:1 1 auto}
+  #e-del{flex:1 1 100%;margin-top:2px}
+}
+.gate{position:fixed;inset:0;background:var(--paper);z-index:60;display:flex;align-items:center;justify-content:center;padding:24px}
+.gate[hidden]{display:none}
+.gate-card{max-width:360px;width:100%;text-align:center}
+.gate-card img{width:64px;height:64px;border-radius:15px;margin-bottom:18px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.gate-card h2{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0 0 8px}
+.gate-card p{color:var(--ink-soft);font-size:14px;line-height:1.5;margin:0 0 20px}
+.gate-card input{margin-bottom:10px}
+.gate-card .btn{width:100%;padding:11px;font-size:14.5px}
+.gate-link{margin-top:16px;font-size:12.5px;color:var(--ink-soft);text-decoration:underline;background:none;border:0;cursor:pointer;padding:4px}
+.gate-status{margin-top:12px;font-size:12.5px;color:var(--ink-soft)}
+.acctbar{display:flex;align-items:center;gap:8px;margin-top:12px}
+/* el correu empenyia el botó de tancar sessió fora de la pantalla al mòbil. Que
+   s'escurci ell, que és el prescindible: els botons es queden on són. */
+.acctbar .note{min-width:0;flex:0 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acctbar img{width:22px;height:22px;border-radius:50%;flex:none}
+.acctbar .btn{padding:4px 10px;font-size:12px;flex:none;white-space:nowrap}
+.backlink{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:5px;
+  text-decoration:none;color:var(--ink-soft);border:1px solid var(--line-strong);
+  border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;white-space:nowrap}
+.backlink:hover{color:var(--ink);border-color:var(--ink)}
+.toast{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:40;
+  background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:var(--r);font-size:13.5px;
+}
+.toast[hidden]{display:none}
+/* ---------- colors múltiples i compra ---------- */
+.swatchstrip{display:flex;gap:2px;flex:none}
+.swatchstrip span{width:14px;height:26px;border:1px solid var(--line-strong);border-left-width:0}
+.swatchstrip span:first-child{border-left-width:1px;border-radius:2px 0 0 2px}
+.swatchstrip span:last-child{border-radius:0 2px 2px 0}
+.swatchstrip span:only-child{border-radius:2px;width:26px}
+.colorlist{display:flex;flex-direction:column;gap:6px}
+.crow{display:flex;gap:6px;align-items:center}
+.crow input[type=color]{width:38px;height:34px;padding:2px;border:1px solid var(--line-strong);background:var(--surface);border-radius:var(--r);flex:none}
+.crow input[type=text]{flex:1;min-width:0}
+.chk{flex-direction:row!important;align-items:center;gap:7px!important;color:var(--ink)!important}
+.chk input{width:auto!important;flex:none}
+.buygroup{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin:22px 0 2px}
+.buygroup:first-child{margin-top:0}
+.buyrow{display:flex;gap:14px;align-items:center;padding:12px 0;border-top:1px solid var(--line);cursor:pointer}
+.buyrow:last-of-type{border-bottom:1px solid var(--line)}
+.reason{flex:none;text-align:right;font-size:12.5px;color:var(--alert);font-weight:500}
+.reason.manual{color:var(--ink-soft)}
+.card.buy .name:after{content:" ·";color:var(--alert)}
+
+/* ---------- càmera ---------- */
+#cam-video{width:100%;max-height:56vh;background:#000;border-radius:var(--r);display:block}
+#cam-canvas{width:100%;height:auto;display:block;border:1px solid var(--line-strong);border-radius:var(--r);cursor:crosshair;touch-action:manipulation}
+.shotwrap{position:relative}
+.det{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--line)}
+.det:last-child{border-bottom:1px solid var(--line)}
+.det.sel{box-shadow:inset 3px 0 0 var(--ink);padding-left:9px}
+.det .swatch{width:30px;height:30px;flex:none;border:1px solid var(--line-strong);border-radius:2px;cursor:pointer;padding:0}
+.det .swatch:hover{border-color:var(--ink)}
+.detmain{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.detmain input{width:100%}
+.detline{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:var(--ink-soft)}
+.detline input{width:auto}
+.d-mat{width:88px}
+.d-g{width:76px}
+.x{border:0;background:none;cursor:pointer;color:var(--ink-soft);font-size:19px;line-height:1;padding:3px 5px}
+.x:hover{color:var(--alert)}
+.thinking{display:flex;align-items:center;gap:9px;margin:14px 0 0}
+.pulse{width:9px;height:9px;border-radius:50%;background:var(--ink);animation:p 1.1s ease-in-out infinite}
+@keyframes p{0%,100%{opacity:.25}50%{opacity:1}}
+#e-photo{width:100%;max-height:180px;object-fit:cover;border:1px solid var(--line);border-radius:var(--r);margin-bottom:4px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.pulse{animation:none;opacity:.7}}
+
+/* ───── correccions d'interfície ───── */
+/* Una classe amb display: propi es menjava l'atribut «hidden» i deixava
+   coses a la vista que havien d'estar amagades. */
+[hidden]{display:none!important}
+
+/* Les pestanyes, al mòbil, que es vegi que n'hi ha més a la dreta */
+nav{-webkit-overflow-scrolling:touch;scrollbar-width:none;position:relative}
+nav::-webkit-scrollbar{display:none}
+
+/* Als dits els cal una mica més de superfície */
+@media(max-width:720px){
+  nav button{padding:11px 13px 10px}
+  .btn{padding:10px 14px}
+  .q{min-width:32px;height:32px}
+}
+
+/* la barra de cerca i filtres, en fila mentre hi càpiga */
+.toolbar input[type=search],.toolbar input[type=text]{flex:1 1 150px;min-width:0;width:auto}
+.toolbar select{flex:0 1 auto;width:auto;min-width:0}
+@media(max-width:560px){
+  .toolbar{gap:7px}
+  .toolbar input[type=search],.toolbar input[type=text]{flex:1 1 100%}
+  .toolbar select{flex:1 1 calc(50% - 4px);font-size:13px}
+  .toolbar .btn{flex:1 1 calc(50% - 4px)}
+}
+@media(min-width:760px){
+  .toolbar input[type=search],.toolbar input[type=text]{max-width:300px}
+  .toolbar select{max-width:200px}
+}
+
+@media(max-width:560px){ .toolbar .spacer{display:none} }
+
+.navwrap{position:relative}
+.navwrap::after{content:"";position:absolute;right:0;top:0;bottom:1px;width:34px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,var(--paper));opacity:0;transition:opacity .15s}
+.navwrap.hi-ha-mes::after{opacity:1}
+
+.ver{display:inline-block;margin-left:7px;padding:2px 9px;border-radius:999px;background:var(--brand-blue);
+  color:#fff;font-size:11px;font-weight:700;letter-spacing:.04em;white-space:nowrap;vertical-align:2px}
+
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <img src="icona.png" alt="Zenkai3D Studio">
+    <div id="gate-setup">
+      <h2>Un pas, un cop</h2>
+      <p>Enganxa el Client ID que t'ha donat Google Cloud. Només cal fer-ho una vegada i val per a les tres apps.</p>
+      <input type="text" id="gate-cid" placeholder="xxxxx.apps.googleusercontent.com">
+      <button class="btn primary" id="gate-cid-save">Desa i continua</button>
+      <button type="button" class="gate-link" id="gate-skip">Fes-la servir només en aquest dispositiu, sense Google</button>
+    </div>
+    <div id="gate-login" hidden>
+      <h2>Inventari de filament</h2>
+      <p>Inicia sessió amb Google per veure i desar les teves dades — es guarden al teu Drive, sincronitzades entre dispositius.</p>
+      <button class="btn primary" id="gate-signin">Continua amb Google</button>
+      <button type="button" class="gate-link" id="gate-skip2">Fes-la servir només en aquest dispositiu</button>
+      <button type="button" class="gate-link" id="gate-reconfig">Canvia el Client ID</button>
+      <p class="gate-status" id="gate-status"></p>
+    </div>
+  </div>
+</div>
+
+
+<div class="wrap">
+
+<header>
+  <div class="brandbar">
+    <img class="brandmark" src="icona.png" alt="Zenkai3D Studio">
+    <span class="brandname"><b>ZENKAI</b><i>3D STUDIO</i></span>
+    <a class="backlink" href="index.html" title="Torna al menú">&lsaquo; Menú</a>
+  </div>
+  <div class="acctbar" id="acctbar" hidden>
+    <img id="acct-pic" alt="">
+    <span class="note" id="acct-email"></span>
+    <span class="spacer"></span>
+    <button class="btn" id="acct-signout">Tanca sessió</button>
+  </div>
+  <h1>Inventari de filament <span class="ver">v2 · interfície revisada</span></h1>
+  <div class="meta">
+    <span><b id="t-spools">0</b> bobines</span>
+    <span><b id="t-kg">0</b> kg restants</span>
+    <span><b id="t-colors">0</b> colors diferents</span>
+    <span><b id="t-buy">0</b> per demanar</span>
+    <span><b id="t-valor">0 €</b> en estoc <small class="note" id="t-valor-nota"></small></span>
+  </div>
+  <div class="stockbar empty" id="stockbar" aria-hidden="true"></div>
+  <div class="stockbar-cap">Cada franja és una bobina, d'amplada proporcional als grams que li queden.</div>
+</header>
+
+<div class="navwrap"><nav role="tablist">
+  <button role="tab" data-view="inventari" aria-selected="true">Inventari</button>
+  <button role="tab" data-view="colors" aria-selected="false">Colors</button>
+  <button role="tab" data-view="marques" aria-selected="false">Marques</button>
+  <button role="tab" data-view="comprar" aria-selected="false">Per comprar</button>
+  <button role="tab" data-view="importa" aria-selected="false">Importa</button>
+  <button role="tab" data-view="prompt" aria-selected="false">El prompt</button>
+</nav></div>
+
+<main>
+<section id="view-inventari">
+  <div class="toolbar">
+    <input type="search" id="q" placeholder="Cerca color, marca, material…">
+    <select id="f-material"><option value="">Tots els materials</option></select>
+    <select id="f-sort">
+      <option value="color">Ordena per color</option>
+      <option value="grams">Ordena per grams</option>
+      <option value="material">Ordena per material</option>
+      <option value="nom">Ordena per nom</option>
+    </select>
+    <span class="spacer"></span>
+    <button class="btn primary" id="shoot" hidden>Fes una foto</button>
+    <button class="btn" id="add">Afegeix a mà</button>
+  </div>
+  <div id="grid" class="grid"></div>
+  <div id="empty" class="empty-state" hidden>
+    <b>Encara no hi ha cap bobina</b>
+    Fotografia les bobines i les llegeixo jo mateix: color, material, marca i els grams que queden.
+    <div style="margin-top:14px" class="actions" role="group">
+      <button class="btn primary" id="shoot2" hidden>Fes una foto</button>
+      <button class="btn" data-goto="importa">Enganxar un JSON</button>
+    </div>
+  </div>
+</section>
+
+<section id="view-colors" hidden>
+  <h2>Quant en tinc de cada color</h2>
+  <p class="hint">Els colors gairebé idèntics es compten junts: si tens dos blaus indistingibles, el que necessites saber és quant blau tens.</p>
+  <div class="toolbar">
+    <label class="note" for="tol">Marge per considerar dos colors iguals</label>
+    <input type="range" id="tol" min="1" max="20" value="8" style="flex:1 1 160px">
+    <span class="note" id="tol-val">ΔE 8 · molt semblants</span>
+    <label class="note chk" style="display:flex"><input type="checkbox" id="bymat" checked> Compta cada material a part</label>
+  </div>
+  <table class="tbl" id="groups"><tbody></tbody></table>
+
+  <h2>Possibles repetits</h2>
+  <p class="hint">Parelles de bobines diferents amb un color pràcticament igual. Comprova la marca i l'acabat abans de donar-les per intercanviables.</p>
+  <div id="pairs"></div>
+
+  <h2>Per material</h2>
+  <table class="tbl" id="materials"><tbody></tbody></table>
+</section>
+
+<section id="view-marques" hidden>
+  <h2>De qui és el que tens</h2>
+  <p class="hint">Cada marca amb el que en queda i el que val. Si és una marca de la qual tens codi de descompte, hi surt al costat: el llegeix del dossier, així no hi ha dues llistes que es puguin contradir.</p>
+  <table class="tbl" id="marques"><tbody></tbody></table>
+
+  <h2>A quina botiga has d'anar</h2>
+  <p class="hint">El mateix que hi ha a «Per comprar», però repartit per marca i amb el que costaria. Una comanda per botiga surt més barata de ports que sis comandes soltes.</p>
+  <div id="marques-buy"></div>
+</section>
+
+<section id="view-comprar" hidden>
+  <h2>Què s'ha de demanar</h2>
+  <p class="hint">Hi entra tot el que baixa del llindar i tot el que hagis marcat a mà. Cada bobina pot tenir el seu propi llindar des de la seva fitxa.</p>
+  <div class="toolbar">
+    <label class="note" for="minall">Avisa'm per sota de</label>
+    <input type="number" id="minall" min="0" step="25" style="width:92px"> <span class="note">grams</span>
+    <span class="spacer"></span>
+    <button class="btn" id="copy-buy">Copia la llista</button>
+  </div>
+  <div id="buylist"></div>
+
+  <h2>Colors amb poc marge</h2>
+  <p class="hint">Colors dels quals, sumant totes les bobines, et queda menys d'una bobina sencera.</p>
+  <table class="tbl" id="thin"><tbody></tbody></table>
+</section>
+
+<section id="view-importa" hidden>
+  <h2>Enganxa el JSON de Gemini</h2>
+  <p class="hint">Accepta el bloc JSON sencer del prompt, o només la llista de bobines. Els camps que faltin es deixen buits i els pots omplir a mà.</p>
+  <textarea id="json-in" placeholder='{ "inventari": [ { "id": "B01", "material": "PLA", "color_nom": "Negre", "color_hex": "#111111", "pes_restant_g": 640 } ] }'></textarea>
+  <div class="toolbar" style="margin-top:12px">
+    <button class="btn primary" id="imp-merge">Afegeix a l'inventari</button>
+    <button class="btn" id="imp-replace">Substitueix-ho tot</button>
+    <span class="spacer"></span>
+    <button class="btn" id="exp-json">Exporta JSON</button>
+    <button class="btn" id="exp-csv">Exporta CSV</button>
+    <button class="btn danger" id="wipe">Buida</button>
+  </div>
+  <p class="note" id="imp-msg"></p>
+</section>
+
+<section id="view-prompt" hidden>
+  <h2>Prompt per a Gemini</h2>
+  <p class="hint">Per a una bobina o dues, va més ràpid fer la foto des d'aquí mateix. Aquest prompt és per quan vulguis passar-li la prestatgeria sencera a Gemini: enganxa'l, adjunta-hi les fotos i el JSON del final entra directament a la pestanya Importa.</p>
+  <div class="toolbar"><button class="btn primary" id="copy-prompt">Copia el prompt</button></div>
+  <pre class="prompt" id="prompt-box"></pre>
+</section>
+</main>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Edita la bobina">
+    <h3 id="sheet-title">Edita la bobina</h3>
+    <img id="e-photo" alt="" hidden>
+    <div class="fields">
+      <label class="full">Nom <input type="text" id="e-nom" placeholder="Blau cel, o Arcoiris"></label>
+      <label class="full">Colors
+        <div class="colorlist" id="e-colors"></div>
+        <div style="margin-top:7px"><button type="button" class="btn" id="e-addcolor">Afegeix un color</button></div>
+      </label>
+      <label>Com es reparteixen
+        <select id="e-patro">
+          <option value="">Un sol color</option>
+          <option value="degradat">Degradat</option>
+          <option value="bicolor">Bicolor</option>
+          <option value="tricolor">Tricolor</option>
+          <option value="multicolor">Multicolor</option>
+          <option value="marbrejat">Marbrejat</option>
+          <option value="seccions">Per trams</option>
+        </select>
+      </label>
+      <label>Material <input type="text" id="e-material" list="mats" placeholder="PLA"><div class="chiprow" id="e-material-chips"></div></label>
+      <label>Marca <input type="text" id="e-marca" placeholder="Sunlu"><div class="chiprow" id="e-marca-chips"></div></label>
+      <label>Acabat
+        <select id="e-acabat">
+          <option value="">—</option><option>brillant</option><option>mat</option><option>silk</option>
+          <option>translucid</option><option>metallitzat</option><option>glow</option><option>multicolor</option>
+        </select>
+      </label>
+      <label>Diàmetre <select id="e-dia"><option value="1.75">1,75 mm</option><option value="2.85">2,85 mm</option></select></label>
+      <label>Quantes en tinc <input type="number" id="e-qty" min="0" max="99" step="1"></label>
+      <label>Grams de la que fas servir <input type="number" id="e-rest" min="0" step="5"></label>
+      <label>Pes nominal <input type="number" id="e-nom-g" min="0" step="50" placeholder="1000"></label>
+      <label>Preu de la bobina (€) <input type="number" id="e-preu" min="0" step="0.5" placeholder="20"></label>
+      <div class="full" style="margin-top:-6px"><button type="button" class="btn" id="e-mesura-btn">📐 Mesura el % amb una foto</button></div>
+      <label>Avisa'm per sota de <input type="number" id="e-min" min="0" step="25" placeholder="200"></label>
+      <label class="chk"><input type="checkbox" id="e-comprar"> Marca-la per demanar</label>
+      <label class="full">On la tens <input type="text" id="e-pos" placeholder="Prestatge C · calaix 1"></label>
+      <label class="full">Notes <input type="text" id="e-notes" placeholder="Assecada el març; nucli de cartró"></label>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="e-save">Desa</button>
+      <button class="btn" id="e-done">S'ha acabat</button>
+      <button class="btn" id="e-cancel">Cancel·la</button>
+      <span class="spacer"></span>
+      <button class="btn danger" id="e-del">Elimina</button>
+    </div>
+  </div>
+</div>
+<datalist id="mats"><option>PLA</option><option>PLA+</option><option>PLA silk</option><option>PLA mat</option><option>PETG</option><option>ABS</option><option>ASA</option><option>TPU</option><option>PA</option><option>PC</option><option>PLA-CF</option></datalist>
+<input type="file" id="file-cam" accept="image/*" capture="environment" hidden>
+<input type="file" id="file-pick" accept="image/*" hidden>
+
+<div class="overlay" id="cam" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Fotografia bobines">
+    <h3 id="cam-title">Fes una foto</h3>
+
+    <div id="cam-live" hidden>
+      <p class="note">Enquadra una o més bobines de cara, amb prou llum i sense flaix directe.</p>
+      <video id="cam-video" playsinline muted autoplay></video>
+      <div class="actions" style="margin-top:14px">
+        <button class="btn primary" id="cam-shoot">Captura</button>
+        <button class="btn" id="cam-pick">Tria un fitxer</button>
+        <span class="spacer"></span>
+        <button class="btn" id="cam-close">Tanca</button>
+      </div>
+    </div>
+
+    <div id="cam-work" hidden>
+      <div class="shotwrap"><canvas id="cam-canvas"></canvas></div>
+      <div id="cam-status"></div>
+      <div id="cam-list"></div>
+      <div class="actions" style="margin-top:16px">
+        <button class="btn primary" id="cam-add" hidden>Afegeix a l'inventari</button>
+        <button class="btn" id="cam-retry" hidden>Torna-ho a provar</button>
+        <button class="btn" id="cam-stop" hidden>Atura</button>
+        <span class="spacer"></span>
+        <button class="btn" id="cam-close2">Tanca</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="mesura" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Mesura el percentatge">
+    <h3>Mesura el % per geometria</h3>
+    <div id="mesura-pick">
+      <p class="note">Fes o tria una foto de la bobina de cara, ben centrada.</p>
+      <div class="actions">
+        <button class="btn primary" id="mesura-cam">Fes una foto</button>
+        <button class="btn" id="mesura-file">Tria un fitxer</button>
+      </div>
+      <input type="file" id="mesura-file-input" hidden accept="image/*">
+      <input type="file" id="mesura-cam-input" hidden accept="image/*" capture="environment">
+    </div>
+    <div id="mesura-work" hidden>
+      <p class="note" id="mesura-step">Toca el <b>centre</b> del forat central.</p>
+      <div class="shotwrap"><canvas id="mesura-canvas"></canvas></div>
+      <p class="note" id="mesura-result"></p>
+      <div class="actions">
+        <button class="btn" id="mesura-reset">Torna a començar</button>
+        <button class="btn primary" id="mesura-aplica" hidden>Aplica als grams</button>
+      </div>
+    </div>
+    <div class="actions"><button class="btn" id="mesura-tanca">Tanca</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script type="text/plain" id="prompt-src">
+ROL
+Ets un catalogador tècnic de materials d'impressió 3D i colorista. Converteixes fotografies de bobines de filament en un inventari estructurat, precís i verificable. No inventes res: el que no es veu, es marca com a desconegut.
+
+ENTRADA
+T'adjunto una o més fotos amb bobines de filament. Hi pot haver diverses bobines per foto, amb etiqueta visible o sense, vistes de cara o de cantell.
+
+OBJECTIU
+1) Un inventari amb una fitxa per bobina.
+2) Agrupar els colors gairebé idèntics del mateix material i dir-me quants grams tinc de cada grup.
+3) Estimar els grams que queden a cada bobina.
+4) Dir-me què he de demanar.
+
+PROCÉS (segueix-lo en aquest ordre)
+Pas 1 — Lectura. Per a cada foto, descriu breument què hi veus: quantes bobines, en quina posició, què es llegeix de cada etiqueta. Transcriu l'etiqueta literalment, sense interpretar-la.
+Pas 2 — Consolidació. Si una mateixa bobina surt a més d'una foto, compta-la un sol cop; digues en quines fotos apareix i com l'has reconegut. Assigna IDs correlatius B01, B02, B03…
+Pas 3 — Material. Llegeix-lo de l'etiqueta: PLA, PLA+, PLA silk, PLA mat, PETG, ABS, ASA, TPU, PA (nylon), PC, PLA amb fibra de carboni o fusta. Si no hi ha etiqueta llegible, posa material desconegut i explica en quines pistes et basaries (brillantor, transparència, aspecte del bobinat, tipus de bobina). No dedueixis mai el material pel color. El material forma part de la identitat de la bobina: un blau de PLA i un blau de PETG no són el mateix estoc encara que el color sigui idèntic.
+Pas 4 — Colors. Moltes bobines no són d'un sol color: n'hi ha de bicolor, tricolor, degradades, arcoiris, marbrejades o per trams. Mira bé el filament enrotllat abans de decidir.
+  - Dóna un color per cada tonalitat clarament diferent que hi vegis, fins a cinc, ordenades de la més abundant a la menys, cadascuna amb nom en llenguatge planer i hex en sRGB.
+  - Digues com es reparteixen: un sol color, degradat, bicolor, tricolor, multicolor, marbrejat o per trams.
+  - En una bobina degradada, agafa mostres ben separades del recorregut del fil, no tres punts del mateix tram.
+  - Mostreja sempre del filament bobinat, mai de l'etiqueta ni del plàstic de la bobina. Evita reflexos i ombres: agafa àrees planes de mitja llum.
+Pas 5 — Colors semblants. Calcula la diferència de color entre parelles (CIEDE2000; si no pots, distància euclidiana en CIELAB). Interpreta-la així: ΔE per sota de 2, indistingibles a ull nu; entre 2 i 5, molt semblants; entre 5 i 10, mateix to però distingibles de costat.
+  - Compara només bobines del mateix material i amb el mateix nombre de colors. Una bobina d'un sol color mai no s'agrupa amb una de multicolor.
+  - Dues bobines multicolor només són el mateix si tots els seus colors s'emparellen per sota del marge.
+  - Agrupa el que quedi per sota de ΔE 5 i suma els grams de cada grup. Agrupar no és fusionar: cada bobina física segueix sent una fila pròpia, i de cada parella semblant m'has de dir com distingir-les a la pràctica.
+Pas 6 — Pes restant. Per ordre de preferència:
+  a) Si l'etiqueta indica el pes net, fes-lo servir com a pes nominal (habitualment 1000 g, 750 g, 500 g o 250 g).
+  b) Estima la fracció que queda per geometria del bobinat. Mesura en píxels el radi exterior del filament enrotllat (Rf), el radi del nucli (Rn) i el radi de la brida (Rb). Fracció restant = (Rf² − Rn²) / (Rb² − Rn²). Grams restants = pes nominal × fracció.
+  c) Si no saps el pes nominal, calcula la massa directament: massa en grams = densitat × π × (Rf² − Rn²) × amplada interior, amb tot en centímetres i un factor d'empaquetament de 0,85. Densitats en g/cm³: PLA 1,24 · PLA silk 1,25 · PETG 1,27 · ABS 1,04 · ASA 1,07 · TPU 1,21 · PA 1,14 · PC 1,20 · PLA amb fibra de carboni 1,30 · fusta 1,20.
+  d) Si la bobina es veu de cantell o tapada, no facis números: dóna només un tram ample (per exemple 400–700 g) i marca la confiança com a baixa.
+  Arrodoneix a múltiples de 25 g i acompanya cada valor d'un marge (± g) i d'un nivell de confiança alta / mitjana / baixa.
+Pas 7 — Què s'ha de demanar. Marca per demanar tota bobina que baixi de 200 g o del 20%, i tot grup de color i material que, sumant-ho tot, no arribi a una bobina sencera. Ordena-ho de més urgent a menys i digues per què entra a la llista cada línia.
+Pas 8 — Revisió. Abans d'escriure el resultat, torna a mirar cada foto i verifica bobina per bobina que els colors, el material i el pes es corresponen amb el que es veu. Corregeix el que calgui.
+
+REGLES
+- No dedueixis la marca d'un logotip que no es llegeix clarament. Millor desconegut que equivocat.
+- Si la il·luminació de la foto és càlida o freda, avisa'm: els hex seran relatius. Si hi ha algun objecte blanc o gris a la foto, fes-lo servir de referència de balanç de blancs i digues que ho has fet.
+- El nombre de bobines de la sortida ha de coincidir amb el que has comptat al Pas 1. Si no coincideix, explica per què.
+- Marca amb confiança baixa tot el que sigui una suposició.
+
+SORTIDA (en aquest ordre, res més)
+A) Una taula amb: ID · Nom · Colors (hex) · Patró · Material · Marca · Acabat · Grams restants · % · Confiança.
+B) Els grups de color i material, amb el total de grams de cada grup i les bobines que en formen part.
+C) Les parelles de colors semblants amb el seu ΔE i com distingir-les.
+D) La llista del que s'ha de demanar, amb el motiu de cada línia.
+E) Un resum: total de bobines, total de grams, grams per material, grams per família de color.
+F) Els dubtes que tinguis i què necessites per resoldre'ls.
+G) Un únic bloc de codi JSON vàlid, sense comentaris, amb aquesta estructura exacta. Claus en ASCII, hex en majúscules, valors desconeguts a null:
+
+{
+  "inventari": [
+    {
+      "id": "B01",
+      "marca": null,
+      "material": "PLA",
+      "variant": "mat",
+      "color_nom": "Blau cel",
+      "colors": [ { "nom": "blau cel", "hex": "#7FB3D5" } ],
+      "patro": null,
+      "familia_color": "blau",
+      "acabat": "mat",
+      "diametre_mm": 1.75,
+      "pes_net_nominal_g": 1000,
+      "pes_restant_g": 620,
+      "pes_marge_g": 75,
+      "percent_restant": 62,
+      "metode": "geometria del bobinat",
+      "confianca": "mitjana",
+      "cal_demanar": false,
+      "motiu": null,
+      "bobina": "plastic",
+      "etiqueta": "text transcrit literalment",
+      "imatges": ["foto 1"],
+      "posicio": "fila de dalt, segona per l'esquerra",
+      "notes": null
+    },
+    {
+      "id": "B02",
+      "marca": null,
+      "material": "PLA silk",
+      "variant": null,
+      "color_nom": "Degradat posta de sol",
+      "colors": [
+        { "nom": "groc", "hex": "#F2C14E" },
+        { "nom": "taronja", "hex": "#E2703A" },
+        { "nom": "magenta", "hex": "#B3325E" }
+      ],
+      "patro": "degradat",
+      "familia_color": "taronja",
+      "acabat": "silk",
+      "diametre_mm": 1.75,
+      "pes_net_nominal_g": 1000,
+      "pes_restant_g": 150,
+      "pes_marge_g": 50,
+      "percent_restant": 15,
+      "metode": "geometria del bobinat",
+      "confianca": "baixa",
+      "cal_demanar": true,
+      "motiu": "queden menys de 200 g",
+      "bobina": "plastic",
+      "etiqueta": null,
+      "imatges": ["foto 2"],
+      "posicio": "a la dreta",
+      "notes": null
+    }
+  ],
+  "grups_color": [
+    { "nom": "blau cel", "material": "PLA", "hex": "#7FB3D5", "ids": ["B01","B07"], "total_g": 1180, "n_bobines": 2 }
+  ],
+  "colors_semblants": [
+    { "ids": ["B01","B07"], "delta_e": 3.4, "veredicte": "molt semblants", "com_distingir": "la B07 és un punt més fosca i la bobina és de cartró" }
+  ],
+  "per_comprar": [
+    { "id": "B02", "que": "PLA silk degradat groc-taronja-magenta", "motiu": "queden 150 g", "urgencia": "alta" }
+  ],
+  "resum": {
+    "n_bobines": 0,
+    "total_g": 0,
+    "per_material": { "PLA": 0 },
+    "per_familia": { "blau": 0 },
+    "s_acaben": ["B02"]
+  },
+  "avisos": [],
+  "preguntes": []
+}
+
+CONTINUÏTAT
+Si més endavant t'envio fotos noves, afegeix-les a aquest mateix inventari: conserva els IDs ja assignats, numera les noves a partir de l'últim i digues-me explícitament quines files són noves i quines has modificat.
+</script>
+
+<script>
+"use strict";
+
+/* ---------------- estat ---------------- */
+var items = [];
+var settings = {min:200, bymat:true, tol:8};
+var LS_KEY = "inventari-filament-v1";
+var LS_SET = "inventari-filament-set-v1";
+var dbDoc = null, remoteSeen = false, writeTimer = null, lastSerialized = "";
+var view = "inventari", editingId = null, tol = 8;
+
+/* ---------------- utilitats ---------------- */
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+function toast(msg){
+  var t=$("toast"); t.textContent=msg; t.hidden=false;
+  clearTimeout(toast._t); toast._t=setTimeout(function(){t.hidden=true;},2600);
+}
+function fmtG(g){
+  if(g==null||isNaN(g)) return "—";
+  return g>=1000 ? (g/1000).toFixed(2).replace(".",",")+" kg" : Math.round(g)+" g";
+}
+function normHex(h){
+  if(!h) return null;
+  h=String(h).trim();
+  if(h[0]!=="#") h="#"+h;
+  if(/^#[0-9a-fA-F]{3}$/.test(h)) h="#"+h[1]+h[1]+h[2]+h[2]+h[3]+h[3];
+  return /^#[0-9a-fA-F]{6}$/.test(h) ? h.toUpperCase() : null;
+}
+
+/* ---------------- color: hex -> Lab, CIEDE2000 ---------------- */
+function hexToRgb(h){ h=normHex(h)||"#808080"; return [parseInt(h.substr(1,2),16),parseInt(h.substr(3,2),16),parseInt(h.substr(5,2),16)]; }
+function hexToLab(h){
+  var rgb=hexToRgb(h).map(function(v){ v/=255; return v<=0.04045 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4); });
+  var x=(rgb[0]*0.4124+rgb[1]*0.3576+rgb[2]*0.1805)/0.95047;
+  var y=(rgb[0]*0.2126+rgb[1]*0.7152+rgb[2]*0.0722)/1.00000;
+  var z=(rgb[0]*0.0193+rgb[1]*0.1192+rgb[2]*0.9505)/1.08883;
+  function f(t){ return t>0.008856 ? Math.cbrt(t) : (7.787*t+16/116); }
+  x=f(x); y=f(y); z=f(z);
+  return [116*y-16, 500*(x-y), 200*(y-z)];
+}
+function deltaE(h1,h2){
+  var a=hexToLab(h1), b=hexToLab(h2);
+  var L1=a[0],a1=a[1],b1=a[2],L2=b[0],a2=b[1],b2=b[2];
+  var C1=Math.sqrt(a1*a1+b1*b1), C2=Math.sqrt(a2*a2+b2*b2), Cb=(C1+C2)/2;
+  var Cb7=Math.pow(Cb,7);
+  var G=0.5*(1-Math.sqrt(Cb7/(Cb7+6103515625)));
+  var a1p=(1+G)*a1, a2p=(1+G)*a2;
+  var C1p=Math.sqrt(a1p*a1p+b1*b1), C2p=Math.sqrt(a2p*a2p+b2*b2);
+  var h1p=Math.atan2(b1,a1p)*180/Math.PI; if(h1p<0) h1p+=360;
+  var h2p=Math.atan2(b2,a2p)*180/Math.PI; if(h2p<0) h2p+=360;
+  var dLp=L2-L1, dCp=C2p-C1p, dhp=0;
+  if(C1p*C2p!==0){ dhp=h2p-h1p; if(dhp>180) dhp-=360; else if(dhp<-180) dhp+=360; }
+  var dHp=2*Math.sqrt(C1p*C2p)*Math.sin(dhp*Math.PI/360);
+  var Lbp=(L1+L2)/2, Cbp=(C1p+C2p)/2, hbp;
+  if(C1p*C2p===0) hbp=h1p+h2p;
+  else if(Math.abs(h1p-h2p)>180) hbp=(h1p+h2p+360)/2;
+  else hbp=(h1p+h2p)/2;
+  var T=1-0.17*Math.cos((hbp-30)*Math.PI/180)+0.24*Math.cos(2*hbp*Math.PI/180)
+        +0.32*Math.cos((3*hbp+6)*Math.PI/180)-0.20*Math.cos((4*hbp-63)*Math.PI/180);
+  var dTh=30*Math.exp(-Math.pow((hbp-275)/25,2));
+  var Cbp7=Math.pow(Cbp,7);
+  var Rc=2*Math.sqrt(Cbp7/(Cbp7+6103515625));
+  var Sl=1+(0.015*Math.pow(Lbp-50,2))/Math.sqrt(20+Math.pow(Lbp-50,2));
+  var Sc=1+0.045*Cbp, Sh=1+0.015*Cbp*T;
+  var Rt=-Math.sin(2*dTh*Math.PI/180)*Rc;
+  return Math.sqrt(Math.pow(dLp/Sl,2)+Math.pow(dCp/Sc,2)+Math.pow(dHp/Sh,2)+Rt*(dCp/Sc)*(dHp/Sh));
+}
+function hueOf(h){
+  var rgb=hexToRgb(h), r=rgb[0]/255,g=rgb[1]/255,b=rgb[2]/255;
+  var mx=Math.max(r,g,b), mn=Math.min(r,g,b), d=mx-mn, hh=0;
+  if(d===0) hh=-1;
+  else if(mx===r) hh=((g-b)/d+6)%6*60;
+  else if(mx===g) hh=((b-r)/d+2)*60;
+  else hh=((r-g)/d+4)*60;
+  return {h:hh, s:mx===0?0:d/mx, l:(mx+mn)/2};
+}
+function familia(hex){
+  var c=hueOf(hex);
+  if(c.s<0.12) return c.l>0.8?"blanc":(c.l<0.18?"negre":"gris");
+  if(c.h<0) return "gris";
+  if(c.h<16||c.h>=345) return "vermell";
+  if(c.h<45) return c.l<0.45?"marro":"taronja";
+  if(c.h<70) return "groc";
+  if(c.h<160) return "verd";
+  if(c.h<200) return "turquesa";
+  if(c.h<255) return "blau";
+  if(c.h<290) return "lila";
+  return "rosa";
+}
+
+/* ---------------- normalització de l'import ---------------- */
+var ALIAS = {
+  id:["id","ID","codi","ref"],
+  marca:["marca","brand","fabricant","manufacturer"],
+  material:["material","tipus","type","filament"],
+  variant:["variant","subtipus"],
+  color_nom:["color_nom","color","nom_color","color_name","nombre_color","name"],
+  color_hex:["color_hex","hex","hex_color","codi_hex","rgb_hex"],
+  familia_color:["familia_color","family","familia","color_family"],
+  acabat:["acabat","finish","acabado"],
+  diametre_mm:["diametre_mm","diametro_mm","diameter_mm","diametre"],
+  pes_net_nominal_g:["pes_net_nominal_g","pes_nominal_g","peso_nominal_g","nominal_weight_g","pes_net_g","net_weight_g"],
+  pes_restant_g:["pes_restant_g","grams_restants","peso_restante_g","remaining_g","pes_g","grams"],
+  pes_marge_g:["pes_marge_g","marge_g","margin_g","error_g"],
+  preu_bobina_eur:["preu_bobina_eur","preu","preu_eur","precio","precio_eur","price","price_eur","cost","coste"],
+  percent_restant:["percent_restant","percentatge","percent","porcentaje","remaining_pct"],
+  metode:["metode","method","metodo"],
+  confianca:["confianca","confianza","confidence","confiança"],
+  bobina:["bobina","spool","spool_type","tipus_bobina"],
+  etiqueta:["etiqueta","label","text_etiqueta"],
+  posicio:["posicio","position","posicion","ubicacio"],
+  notes:["notes","note","observacions","comentaris"],
+  patro:["patro","pattern","distribucio","repartiment"],
+  comprar:["comprar","cal_demanar","reposar","restock"],
+  min_g:["min_g","llindar_g","minim_g"],
+  quantitat:["quantitat","quantity","qty","unitats","n_bobines","num_bobines"]
+};
+function pick(o,keys){
+  for(var i=0;i<keys.length;i++){ if(o[keys[i]]!==undefined && o[keys[i]]!==null && o[keys[i]]!=="") return o[keys[i]]; }
+  return null;
+}
+function num(v){
+  if(v==null) return null;
+  if(typeof v==="number") return isFinite(v)?v:null;
+  var m=String(v).replace(",",".").match(/-?\d+(\.\d+)?/);
+  return m?parseFloat(m[0]):null;
+}
+function normalize(raw, i){
+  var o={};
+  for(var k in ALIAS) o[k]=pick(raw,ALIAS[k]);
+  o.color_hex = normHex(o.color_hex) || "#9AA0A6";
+  o.pes_net_nominal_g = num(o.pes_net_nominal_g);
+  o.pes_restant_g = num(o.pes_restant_g);
+  o.percent_restant = num(o.percent_restant);
+  o.pes_marge_g = num(o.pes_marge_g);
+  o.preu_bobina_eur = num(o.preu_bobina_eur);
+  o.diametre_mm = num(o.diametre_mm) || 1.75;
+  if(o.pes_restant_g==null && o.percent_restant!=null)
+    o.pes_restant_g = Math.round((o.pes_net_nominal_g||1000)*o.percent_restant/100);
+  if(o.percent_restant==null && o.pes_restant_g!=null)
+    o.percent_restant = Math.round(o.pes_restant_g/(o.pes_net_nominal_g||1000)*100);
+  if(o.pes_net_nominal_g==null) o.pes_net_nominal_g=1000;
+  var cols = raw.colors || raw.color_list || raw.colours || null;
+  if(Array.isArray(cols) && cols.length){
+    o.colors = cols.slice(0,6).map(function(c){
+      if(typeof c === "string") return {hex:normHex(c)||"#9AA0A6", nom:null};
+      return {hex: normHex(c.hex||c.color_hex||c.color)||"#9AA0A6", nom: c.nom||c.name||c.color_nom||null};
+    });
+  } else {
+    o.colors = [{hex:o.color_hex, nom:o.color_nom||null}];
+  }
+  o.color_hex = o.colors[0].hex;
+  if(o.colors.length>1 && !o.patro) o.patro = o.colors.length===2?"bicolor":(o.colors.length===3?"tricolor":"multicolor");
+  o.comprar = (o.comprar===true||o.comprar==="true"||o.comprar==="si"||o.comprar==="sí");
+  var qv=num(o.quantitat);
+  o.quantitat = qv==null?1:Math.max(0,Math.min(99,Math.round(qv)));
+  o.min_g = num(o.min_g);
+  o.familia_color = o.familia_color || familia(o.color_hex);
+  if(!o.color_nom){
+    var nn=o.colors.map(function(c){return c.nom;}).filter(Boolean);
+    o.color_nom = nn.length ? nn.join(" i ") : (o.colors.length>1 ? "Multicolor" : "Sense nom");
+  }
+  o.material = o.material || "?";
+  o.id = o.id || ("B"+String(i+1).padStart(2,"0"));
+  o.uid = o.id+"-"+Math.random().toString(36).slice(2,7);
+  return o;
+}
+function extractList(data){
+  if(Array.isArray(data)) return data;
+  var keys=["inventari","inventario","inventory","bobines","bobinas","spools","filaments","items","rows","data"];
+  for(var i=0;i<keys.length;i++){ if(Array.isArray(data[keys[i]])) return data[keys[i]]; }
+  for(var k in data){ if(Array.isArray(data[k]) && data[k].length && typeof data[k][0]==="object") return data[k]; }
+  return null;
+}
+
+/* ---------------- persistència ---------------- */
+function saveLocal(){
+  try{
+    localStorage.setItem(LS_KEY, JSON.stringify(items));
+    localStorage.setItem(LS_SET, JSON.stringify(settings));
+    return true;
+  }catch(e){
+    var full = e && (e.name==="QuotaExceededError" || e.code===22 || e.code===1014);
+    toast(full
+      ? "No s'ha pogut desar: el navegador ha omplert l'espai per a aquesta pàgina. Elimina alguna foto o exporta i buida l'inventari."
+      : "No s'ha pogut desar als teus dispositiu (emmagatzematge bloquejat).");
+    return false;
+  }
+}
+function loadLocal(){
+  try{
+    var a=localStorage.getItem(LS_KEY);
+    if(a){ a=JSON.parse(a); if(Array.isArray(a)) items=a; }
+    var b=localStorage.getItem(LS_SET);
+    if(b){ b=JSON.parse(b); if(b&&typeof b==="object") settings=Object.assign(settings,b); }
+  }catch(e){}
+}
+function persist(){
+  saveLocal(); renderAll();
+  scheduleDriveSave();
+  if(!dbDoc) return;
+  clearTimeout(writeTimer);
+  writeTimer=setTimeout(function(){
+    var payload=JSON.stringify(items);
+    lastSerialized=payload;
+    dbDoc.set({items:items, settings:settings, updatedAt:new Date().toISOString()}).catch(function(e){
+      if(e && e.code==="quota_exceeded") toast("L'espai del servidor és ple; s'ha desat només en aquest navegador.");
+    });
+  },500);
+}
+function connectDb(){
+  if(typeof window.claude==="undefined" || !window.claude || !window.claude.use) return;
+  window.claude.use("db").then(function(db){
+    if(!db) return;
+    dbDoc=db.doc("inventari/bobines");
+    dbDoc.onSnapshot(function(snap){
+      if(!snap.exists){
+        remoteSeen=true;
+        if(items.length) persist();
+        return;
+      }
+      var d=snap.data()||{}, remote=Array.isArray(d.items)?d.items:[];
+      if(d.settings && typeof d.settings==="object") settings=Object.assign(settings,d.settings);
+      var ser=JSON.stringify(remote);
+      if(!remoteSeen){
+        remoteSeen=true;
+        if(remote.length || !items.length){ items=JSON.parse(JSON.stringify(remote)); lastSerialized=ser; saveLocal(); renderAll(); }
+        else persist();
+        return;
+      }
+      if(ser!==lastSerialized && !snap.metadata.hasPendingWrites){
+        items=JSON.parse(JSON.stringify(remote)); lastSerialized=ser; saveLocal(); renderAll();
+      }
+    }, function(){ dbDoc=null; });
+  }).catch(function(){});
+}
+
+/* ---------------- render ---------------- */
+function qtyOf(it){
+  var q=(it.quantitat==null?1:Number(it.quantitat));
+  return isFinite(q)?Math.max(0,Math.round(q)):1;
+}
+/* ---------- diners ---------- */
+function fmtEur(n){
+  if(n==null || !isFinite(n)) return "—";
+  return (Math.round(n*100)/100).toFixed(2).replace(".",",")+" €";
+}
+function preuOf(it){
+  var p = it && it.preu_bobina_eur;
+  return (p!=null && isFinite(p) && p>0) ? p : null;
+}
+/* El preu és d'una bobina sencera; el valor del que queda es prorrateja pels grams. */
+function valorOf(it){
+  var p = preuOf(it);
+  if(p==null) return null;
+  var nom = nominalOf(it);
+  if(!nom) return null;
+  return stockOf(it)/nom * p;
+}
+function valorTotal(){
+  return items.reduce(function(s,i){ return s + (valorOf(i)||0); }, 0);
+}
+function sensePreu(){
+  return items.filter(function(i){ return qtyOf(i)>0 && preuOf(i)==null; }).length;
+}
+function nominalOf(it){ return it.pes_net_nominal_g||1000; }
+/* estoc total: la bobina oberta més les que encara són precintades */
+function stockOf(it){
+  var q=qtyOf(it);
+  if(!q) return 0;
+  return (it.pes_restant_g||0) + (q-1)*nominalOf(it);
+}
+function byUid(uid){ return items.filter(function(i){ return i.uid===uid; })[0]; }
+function bump(uid,delta){
+  var it=byUid(uid); if(!it) return;
+  var was=qtyOf(it), q=Math.max(0,Math.min(99,was+delta));
+  if(q===0){ it.quantitat=0; it.pes_restant_g=0; it.percent_restant=0; it.comprar=true; }
+  else{
+    if(was===0){ it.pes_restant_g=nominalOf(it); it.percent_restant=100; it.comprar=false; }
+    it.quantitat=q;
+  }
+  persist();
+}
+function finishOne(uid){
+  var it=byUid(uid); if(!it) return;
+  var q=qtyOf(it);
+  if(q>1){
+    it.quantitat=q-1;
+    it.pes_restant_g=nominalOf(it);
+    it.percent_restant=100;
+    toast("Acabada. En queden "+(q-1)+"; compto que n'obres una de nova.");
+  }else{
+    it.quantitat=0; it.pes_restant_g=0; it.percent_restant=0; it.comprar=true;
+    toast("Esgotada. Ha passat a la llista del que s'ha de demanar.");
+  }
+  persist();
+}
+function totalG(){ return items.reduce(function(s,i){ return s+stockOf(i); },0); }
+
+function colorsOf(it){
+  if(Array.isArray(it.colors)&&it.colors.length) return it.colors;
+  return [{hex:normHex(it.color_hex)||"#9AA0A6", nom:it.color_nom||null}];
+}
+function isMulti(it){ return colorsOf(it).length>1; }
+function nomColor(it){
+  if(it.color_nom) return it.color_nom;
+  var noms=colorsOf(it).map(function(c){ return c&&c.nom; }).filter(Boolean);
+  if(noms.length) return noms.join(" + ");
+  return isMulti(it) ? "Multicolor" : "Sense nom";
+}
+function isGradient(it){ return String(it.patro||"").indexOf("degrad")>=0; }
+function gradCss(it){
+  var cs=colorsOf(it), n=cs.length;
+  if(n===1) return cs[0].hex;
+  if(isGradient(it)) return "linear-gradient(135deg,"+cs.map(function(c){return c.hex;}).join(",")+")";
+  return "linear-gradient(135deg,"+cs.map(function(c,i){
+    return c.hex+" "+(i*100/n).toFixed(1)+"% "+((i+1)*100/n).toFixed(1)+"%";
+  }).join(",")+")";
+}
+function strip(it){
+  return '<span class="swatchstrip">'+colorsOf(it).map(function(c){
+    return '<span style="background:'+esc(c.hex)+'" title="'+esc(c.hex)+'"></span>'; }).join("")+'</span>';
+}
+function minOf(it){ return it.min_g==null?settings.min:it.min_g; }
+function needsBuy(it){
+  if(qtyOf(it)===0) return true;
+  if(it.comprar) return true;
+  if(it.pes_restant_g==null) return false;
+  return stockOf(it) < minOf(it);
+}
+function buyReason(it){
+  if(qtyOf(it)===0) return {text:"esgotada", cls:""};
+  if(it.pes_restant_g!=null && stockOf(it)<minOf(it))
+    return {text:"queden "+fmtG(stockOf(it)), cls:""};
+  return {text:"marcada a mà", cls:"manual"};
+}
+
+function renderHeader(){
+  $("t-spools").textContent=items.reduce(function(s,i){ return s+qtyOf(i); },0);
+  $("t-kg").textContent=(totalG()/1000).toFixed(1).replace(".",",");
+  $("t-colors").textContent=clusters(5,settings.bymat).length;
+  $("t-buy").textContent=items.filter(needsBuy).length;
+  $("t-valor").textContent=fmtEur(valorTotal());
+  /* si hi ha bobines sense preu, el total es queda curt: val més dir-ho que amagar-ho */
+  var sp=sensePreu();
+  $("t-valor-nota").textContent = sp ? "("+sp+" sense preu)" : "";
+  var bar=$("stockbar"), total=totalG();
+  bar.innerHTML="";
+  if(!items.length||!total){ bar.classList.add("empty"); return; }
+  bar.classList.remove("empty");
+  items.slice().sort(function(a,b){ return hueOf(a.color_hex).h-hueOf(b.color_hex).h; }).forEach(function(it){
+    var sp=document.createElement("span");
+    if(!qtyOf(it)) return;
+    sp.style.flexGrow=Math.max(stockOf(it),20);
+    sp.style.background=gradCss(it);
+    sp.title=it.color_nom+" · "+it.material+" · "+fmtG(stockOf(it))+(qtyOf(it)>1?" ("+qtyOf(it)+" bobines)":"");
+    bar.appendChild(sp);
+  });
+}
+
+function sector(cx,cy,r,a0,a1,fill){
+  var t0=a0*Math.PI/180, t1=a1*Math.PI/180;
+  var x0=cx+r*Math.cos(t0), y0=cy+r*Math.sin(t0);
+  var x1=cx+r*Math.cos(t1), y1=cy+r*Math.sin(t1);
+  var large=(a1-a0)>180?1:0;
+  return '<path d="M'+cx+' '+cy+' L'+x0.toFixed(2)+' '+y0.toFixed(2)+' A'+r.toFixed(2)+' '+r.toFixed(2)+
+    ' 0 '+large+' 1 '+x1.toFixed(2)+' '+y1.toFixed(2)+' Z" fill="'+esc(fill)+'"/>';
+}
+function spoolSVG(it){
+  var f=Math.max(0,Math.min(1,(it.percent_restant==null?100:it.percent_restant)/100));
+  var rn=13, rb=44, rf=Math.sqrt(rn*rn+f*(rb*rb-rn*rn));
+  var cs=colorsOf(it), n=cs.length, defs="", body="";
+  if(n===1){
+    body='<circle cx="50" cy="50" r="'+rf.toFixed(1)+'" fill="'+esc(cs[0].hex)+'"/>';
+  }else if(isGradient(it)){
+    var gid="g"+String(it.uid||Math.random()).replace(/[^A-Za-z0-9]/g,"");
+    defs='<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="1" y2="1">'+cs.map(function(c,i){
+      return '<stop offset="'+(i/(n-1)*100).toFixed(1)+'%" stop-color="'+esc(c.hex)+'"/>';
+    }).join("")+'</linearGradient></defs>';
+    body='<circle cx="50" cy="50" r="'+rf.toFixed(1)+'" fill="url(#'+gid+')"/>';
+  }else{
+    body=cs.map(function(c,i){ return sector(50,50,rf,i*360/n-90,(i+1)*360/n-90,c.hex); }).join("");
+  }
+  return '<svg viewBox="0 0 100 100" role="img" aria-label="'+esc(it.color_nom||"bobina")+', '+Math.round(f*100)+' per cent">'+
+    defs+
+    '<circle class="flange" cx="50" cy="50" r="44" fill="none" stroke="var(--line-strong)" stroke-width="1" stroke-dasharray="2 3"/>'+
+    body+
+    '<circle cx="50" cy="50" r="'+rf.toFixed(1)+'" fill="none" stroke="rgba(0,0,0,.22)" stroke-width="0.7"/>'+
+    '<circle cx="50" cy="50" r="'+rn+'" fill="var(--hub)" stroke="var(--line-strong)" stroke-width="1"/></svg>';
+}
+
+function visible(){
+  var q=$("q").value.trim().toLowerCase(), m=$("f-material").value, so=$("f-sort").value;
+  var list=items.filter(function(it){
+    if(m && it.material!==m) return false;
+    if(!q) return true;
+    var hay=[it.color_nom,it.marca,it.material,it.familia_color,it.notes,it.id,it.patro]
+      .concat(colorsOf(it).map(function(c){ return (c.nom||"")+" "+c.hex; })).join(" ").toLowerCase();
+    return hay.indexOf(q)>=0;
+  });
+  list.sort(function(a,b){
+    if(so==="grams") return stockOf(b)-stockOf(a);
+    if(so==="material") return String(a.material).localeCompare(String(b.material));
+    if(so==="nom") return String(a.color_nom).localeCompare(String(b.color_nom),"ca");
+    var ha=hueOf(a.color_hex), hb=hueOf(b.color_hex);
+    if(ha.h<0&&hb.h<0) return hb.l-ha.l;
+    if(ha.h<0) return 1; if(hb.h<0) return -1;
+    return ha.h-hb.h || hb.l-ha.l;
+  });
+  return list;
+}
+
+function renderGrid(){
+  var g=$("grid"), list=visible();
+  $("empty").hidden = items.length>0;
+  g.innerHTML="";
+  list.forEach(function(it){
+    var q=qtyOf(it), out=(q===0);
+    var card=document.createElement("div");
+    card.className="card"+(out?" out":(needsBuy(it)?" buy low":""));
+    var pc=Math.max(0,Math.min(100,Math.round(out?0:(it.percent_restant!=null
+      ? it.percent_restant : stockOf(it)/nominalOf(it)*100))));
+    card.innerHTML='<button class="cardmain">'+spoolSVG(it)+
+      '<div><div class="name">'+esc(nomColor(it))+'</div>'+
+      '<div class="sub"><span class="tag">'+esc(it.material)+'</span> '+esc(it.marca||"")+
+      (isMulti(it)?' <span class="tag">'+esc(it.patro||"multicolor")+'</span>':'')+
+      ((it.foto_id||it.foto_data)?' <span class="tag">foto</span>':'')+'</div>'+
+      '<div class="lvl">'+(out
+        ? '<span class="grams">esgotada</span>'
+        : '<span class="grams">'+fmtG(it.pes_restant_g)+'</span>'+
+          '<span class="of">/ '+fmtG(nominalOf(it))+'</span>'+
+          '<span class="pc">'+pc+'%</span>')+'</div>'+
+      '<div class="bar"><i style="width:'+pc+'%"></i></div>'+
+      (!out&&q>1?'<div class="sub">'+q+' bobines · '+fmtG(stockOf(it))+' en total</div>':'')+
+      (it.posicio?'<div class="shelf">'+esc(it.posicio)+'</div>':'')+
+      '</div></button>'+
+      '<div class="qty">'+
+        '<button class="q" data-act="dec" title="En tinc una menys" aria-label="En tinc una menys">&minus;</button>'+
+        '<span class="qn">'+q+'</span>'+
+        '<button class="q" data-act="inc" title="N\'he comprat una més" aria-label="N\'he comprat una més">+</button>'+
+        (out?'':'<button class="q done" data-act="done" title="S\'ha acabat la bobina que feies servir">Acabada</button>')+
+      '</div>';
+    card.querySelector(".cardmain").onclick=function(){ openEditor(it.uid); };
+    Array.prototype.forEach.call(card.querySelectorAll(".q"),function(btn){
+      btn.onclick=function(e){
+        e.stopPropagation();
+        var a=btn.dataset.act;
+        if(a==="inc") bump(it.uid,1);
+        else if(a==="dec") bump(it.uid,-1);
+        else finishOne(it.uid);
+      };
+    });
+    g.appendChild(card);
+  });
+  var mats={}; items.forEach(function(i){ mats[i.material]=1; });
+  var sel=$("f-material"), cur=sel.value;
+  sel.innerHTML='<option value="">Tots els materials</option>'+Object.keys(mats).sort().map(function(m){
+    return '<option'+(m===cur?' selected':'')+'>'+esc(m)+'</option>'; }).join("");
+}
+
+/* dues bobines són "el mateix color" si tenen el mateix nombre de colors
+   i cadascun troba parella per sota del marge */
+function similar(a,b,th){
+  var A=colorsOf(a).map(function(c){return c.hex;}), B=colorsOf(b).map(function(c){return c.hex;});
+  if(A.length!==B.length) return false;
+  if(A.length===1) return deltaE(A[0],B[0])<th;
+  var used={}, ok=true;
+  A.forEach(function(h){
+    var best=-1, bd=1e9;
+    B.forEach(function(g,j){ if(used[j]) return; var d=deltaE(h,g); if(d<bd){ bd=d; best=j; } });
+    if(best<0||bd>=th) ok=false; else used[best]=1;
+  });
+  return ok;
+}
+function clusters(th,byMat){
+  var gs=[];
+  items.forEach(function(it){
+    for(var i=0;i<gs.length;i++){
+      var g=gs[i];
+      if(byMat && String(g[0].material)!==String(it.material)) continue;
+      for(var j=0;j<g.length;j++) if(similar(it,g[j],th)){ g.push(it); return; }
+    }
+    gs.push([it]);
+  });
+  return gs;
+}
+
+/* ---------- marques ---------- */
+/* Els codis de descompte viuen al dossier; si no es poden llegir, la pestanya
+   funciona igual i prou. */
+var DTES = null;
+var MARCA_DTE = { polyterra:"polymaker", panchroma:"polymaker", polylite:"polymaker" };
+function normMarca(x){
+  return String(x==null?"":x).trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+}
+function carregaDtes(){
+  fetch("dossier-config.json",{cache:"no-cache"}).then(function(r){ return r.ok?r.json():null; })
+    .then(function(c){
+      if(!c || !Array.isArray(c.afiliats)) return;
+      var d={};
+      c.afiliats.forEach(function(a){
+        if(!a || !a.marca) return;
+        /* "BIQU · BigTreeTech" és una botiga amb dos noms */
+        String(a.marca).split("\u00b7").forEach(function(n){
+          n=normMarca(n);
+          if(n) d[n]={codi:a.codi||null, pct:a.pct||null, url:a.url||null};
+        });
+      });
+      DTES=d;
+      if(view==="marques") renderMarques();
+    }).catch(function(){});
+}
+function dteDe(nom){
+  if(!DTES) return null;
+  var k=normMarca(nom);
+  return DTES[k] || DTES[MARCA_DTE[k]] || null;
+}
+function perMarca(llista){
+  var per={}, ordre=[];
+  llista.forEach(function(it){
+    var nom=String(it.marca==null?"":it.marca).trim();
+    var k=normMarca(nom);
+    if(!per[k]){ per[k]={nom:nom||"Sense marca", sense:!nom, items:[]}; ordre.push(k); }
+    per[k].items.push(it);
+  });
+  return ordre.map(function(k){
+    var g=per[k];
+    g.g=g.items.reduce(function(s,i){ return s+stockOf(i); },0);
+    g.n=g.items.reduce(function(s,i){ return s+qtyOf(i); },0);
+    g.eur=g.items.reduce(function(s,i){ return s+(valorOf(i)||0); },0);
+    g.baixes=g.items.filter(needsBuy).length;
+    g.mats=g.items.map(function(i){ return i.material; })
+                  .filter(function(v,j,a){ return v && a.indexOf(v)===j; });
+    g.dte=g.sense?null:dteDe(g.nom);
+    return g;
+  }).sort(function(a,b){ return b.g-a.g || b.items.length-a.items.length; });
+}
+function stripMarca(g){
+  var vist={}, hx=[];
+  g.items.forEach(function(i){ colorsOf(i).forEach(function(c){
+    if(c.hex && !vist[c.hex]){ vist[c.hex]=1; hx.push(c.hex); } }); });
+  return '<span class="swatchstrip">'+hx.slice(0,7).map(function(x){
+    return '<span style="background:'+esc(x)+'" title="'+esc(x)+'"></span>'; }).join("")+'</span>';
+}
+function etiquetaDte(d){
+  if(!d) return "";
+  var t=d.pct ? "-"+d.pct+" %" : (d.codi ? "codi" : "enllaç");
+  return ' <a class="tag dte" href="'+esc(d.url||"#")+'" target="_blank" rel="noopener">'+esc(t)+'</a>';
+}
+function notaDte(d){
+  if(!d) return "";
+  return '<div class="sub">'+(d.codi ? 'codi <b>'+esc(d.codi)+'</b>' : "enllaç teu d'afiliat")+'</div>';
+}
+function renderMarques(){
+  var gs=perMarca(items);
+  $("marques").querySelector("tbody").innerHTML = gs.length ? gs.map(function(g){
+    return '<tr><td style="width:1%">'+stripMarca(g)+'</td>'+
+      '<td><b'+(g.sense?' class="note"':'')+'>'+esc(g.nom)+'</b>'+etiquetaDte(g.dte)+
+      '<div class="sub">'+g.items.length+(g.items.length===1?" referència":" referències")+
+      ' · '+g.n+' bobin'+(g.n===1?"a":"es")+
+      (g.baixes?' · <span class="err">'+g.baixes+' per demanar</span>':'')+'</div>'+
+      '<div class="sub">'+esc(g.mats.join(", "))+'</div>'+notaDte(g.dte)+'</td>'+
+      '<td class="de"><b>'+fmtG(g.g)+'</b><small>'+(g.eur?esc(fmtEur(g.eur)):"&mdash;")+'</small></td></tr>';
+  }).join("") : '<tr><td class="note">Encara no hi ha res a repartir per marques.</td></tr>';
+
+  var pend=perMarca(items.filter(needsBuy));
+  $("marques-buy").innerHTML = pend.length ? pend.map(function(g){
+    var ambPreu=g.items.filter(function(i){ return preuOf(i)!=null; });
+    var cost=ambPreu.reduce(function(s,i){ return s+preuOf(i); },0);
+    var falten=g.items.length-ambPreu.length;
+    return '<div class="row"><div class="chips">'+stripMarca(g)+'</div>'+
+      '<div class="rowmain"><b'+(g.sense?' class="note"':'')+'>'+esc(g.nom)+'</b>'+etiquetaDte(g.dte)+
+      '<div class="sub">'+g.items.map(function(i){ return esc(nomColor(i)+" ("+i.material+")"); }).join(" · ")+'</div>'+
+      notaDte(g.dte)+'</div>'+
+      '<div class="de"><b>'+(cost?esc(fmtEur(cost)):"&mdash;")+'</b>'+
+      (falten?'<small>'+falten+' sense preu</small>':'')+'</div></div>';
+  }).join("") : '<p class="note">Res pendent. No has d\'anar enlloc.</p>';
+}
+function renderColors(){
+  var byMat=settings.bymat;
+  var gs=clusters(settings.tol,byMat).map(function(g){
+    return {items:g,
+            total:g.reduce(function(s,i){ return s+stockOf(i); },0),
+            n:g.reduce(function(s,i){ return s+qtyOf(i); },0)};
+  }).sort(function(a,b){ return b.total-a.total; });
+
+  $("groups").querySelector("tbody").innerHTML = gs.length ? gs.map(function(g){
+    var names={}; g.items.forEach(function(i){ names[i.color_nom]=1; });
+    var mats=g.items.map(function(i){return i.material;}).filter(function(v,k,a){return a.indexOf(v)===k;});
+    return '<tr><td style="width:1%">'+strip(g.items[0])+'</td>'+
+      '<td><b>'+esc(Object.keys(names).join(" / "))+'</b><div class="sub">'+
+      g.n+' bobin'+(g.n===1?"a":"es")+' · '+esc(mats.join(", "))+
+      (isMulti(g.items[0])?' · '+esc(g.items[0].patro||"multicolor"):'')+'</div></td>'+
+      '<td><b>'+fmtG(g.total)+'</b></td></tr>';
+  }).join("") : '<tr><td class="note">Res per calcular encara.</td></tr>';
+
+  var pairs=[];
+  for(var i=0;i<items.length;i++) for(var j=i+1;j<items.length;j++){
+    if(byMat && items[i].material!==items[j].material) continue;
+    if(colorsOf(items[i]).length!==colorsOf(items[j]).length) continue;
+    var d=pairDist(items[i],items[j]);
+    if(d<settings.tol) pairs.push({a:items[i],b:items[j],d:d});
+  }
+  pairs.sort(function(x,y){ return x.d-y.d; });
+  $("pairs").innerHTML = pairs.length ? pairs.slice(0,40).map(function(p){
+    var v = p.d<2?"indistingibles":(p.d<5?"molt semblants":"mateix to");
+    var extra = p.a.material===p.b.material ? "" : " · materials diferents";
+    return '<div class="row">'+strip(p.a)+strip(p.b)+
+      '<div class="rowmain"><div class="name">'+esc(p.a.color_nom)+' · '+esc(p.b.color_nom)+'</div>'+
+      '<div class="sub">'+esc(p.a.material+(p.a.marca?" "+p.a.marca:""))+' vs '+
+      esc(p.b.material+(p.b.marca?" "+p.b.marca:""))+extra+
+      ' · junts '+fmtG(stockOf(p.a)+stockOf(p.b))+'</div></div>'+
+      '<div class="de">ΔE '+p.d.toFixed(1)+'<small>'+v+'</small></div></div>';
+  }).join("") : '<p class="note">Cap parella per sota del marge actual.</p>';
+
+  var mats={}, cnt={};
+  items.forEach(function(i){
+    mats[i.material]=(mats[i.material]||0)+stockOf(i);
+    cnt[i.material]=(cnt[i.material]||0)+qtyOf(i);
+  });
+  var keys=Object.keys(mats).sort(function(a,b){ return mats[b]-mats[a]; });
+  $("materials").querySelector("tbody").innerHTML = keys.length ? keys.map(function(k){
+    return '<tr><td>'+esc(k)+'</td><td>'+cnt[k]+' bobines</td><td><b>'+fmtG(mats[k])+'</b></td></tr>';
+  }).join("") : '<tr><td class="note">—</td></tr>';
+}
+/* distància entre dues bobines: el pitjor emparellament de colors */
+function pairDist(a,b){
+  var A=colorsOf(a).map(function(c){return c.hex;}), B=colorsOf(b).map(function(c){return c.hex;});
+  if(A.length===1) return deltaE(A[0],B[0]);
+  var used={}, worst=0;
+  A.forEach(function(h){
+    var best=-1,bd=1e9;
+    B.forEach(function(g,j){ if(used[j]) return; var d=deltaE(h,g); if(d<bd){bd=d;best=j;} });
+    if(best>=0){ used[best]=1; worst=Math.max(worst,bd); } else worst=999;
+  });
+  return worst;
+}
+
+function renderBuy(){
+  $("minall").value=settings.min;
+  var list=items.filter(needsBuy);
+  var groups={}, order=[];
+  list.forEach(function(it){
+    var k=it.marca||"Sense marca";
+    if(!groups[k]){ groups[k]=[]; order.push(k); }
+    groups[k].push(it);
+  });
+  order.sort(function(a,b){
+    if(a==="Sense marca") return 1;
+    if(b==="Sense marca") return -1;
+    return a.localeCompare(b,"ca");
+  });
+  function buyRow(it){
+    var r=buyReason(it);
+    return '<div class="buyrow" data-uid="'+esc(it.uid)+'">'+strip(it)+
+      '<div class="rowmain"><div class="name">'+esc(it.color_nom)+'</div>'+
+      '<div class="sub">'+esc(it.material)+
+      (isMulti(it)?' · '+esc(it.patro||"multicolor"):'')+' · llindar '+fmtG(minOf(it))+'</div></div>'+
+      '<div class="reason '+r.cls+'">'+esc(r.text)+'</div>'+
+      '<button class="q" data-uid="'+esc(it.uid)+'" title="Ja l\'he comprada">+1</button></div>';
+  }
+  $("buylist").innerHTML = order.length ? order.map(function(k){
+    return '<h3 class="buygroup">'+esc(k)+'</h3>'+groups[k].map(buyRow).join("");
+  }).join("") : '<p class="note">Res pendent. Tot el que tens està per sobre del seu llindar.</p>';
+  /* què costaria reposar-ho: una bobina nova de cada una de les que falten */
+  var pend=items.filter(needsBuy), ambPreu=pend.filter(function(i){ return preuOf(i)!=null; });
+  var cost=ambPreu.reduce(function(s,i){ return s+preuOf(i); },0);
+  if(pend.length && ambPreu.length){
+    var falten=pend.length-ambPreu.length;
+    $("buylist").insertAdjacentHTML("beforeend",
+      '<p class="note" style="margin-top:14px">Reposar-ho tot, una bobina de cada una: <b>'+esc(fmtEur(cost))+'</b>'+
+      (falten? ' — i '+falten+(falten===1?' que no té preu posat':' que no tenen preu posat') : '')+'.</p>');
+  }
+  Array.prototype.forEach.call($("buylist").querySelectorAll(".buyrow"),function(row){
+    row.onclick=function(){ openEditor(row.dataset.uid); };
+    var plus=row.querySelector(".q");
+    if(plus) plus.onclick=function(e){ e.stopPropagation(); bump(plus.dataset.uid,1); toast("Afegida a l'estoc"); };
+  });
+
+  var thin=clusters(settings.tol,settings.bymat)
+    .map(function(g){ return {items:g, total:g.reduce(function(s,i){ return s+stockOf(i); },0),
+                              n:g.reduce(function(s,i){ return s+qtyOf(i); },0)}; })
+    .filter(function(g){ return g.total<1000; })
+    .sort(function(a,b){ return a.total-b.total; });
+  $("thin").querySelector("tbody").innerHTML = thin.length ? thin.map(function(g){
+    return '<tr><td style="width:1%">'+strip(g.items[0])+'</td><td>'+esc(g.items[0].color_nom)+
+      '<div class="sub">'+esc(g.items[0].material)+' · '+g.n+' bobin'+(g.n===1?"a":"es")+
+      '</div></td><td><b>'+fmtG(g.total)+'</b></td></tr>';
+  }).join("") : '<tr><td class="note">Cap color baix de tot.</td></tr>';
+}
+function buyText(){
+  var list=items.filter(needsBuy).sort(function(a,b){ return stockOf(a)-stockOf(b); });
+  if(!list.length) return "No hi ha res pendent de demanar.";
+  return "Filament per demanar ("+list.length+"):\n"+list.map(function(it){
+    var q=qtyOf(it);
+    return "- "+it.material+" "+it.color_nom+(it.marca?" ("+it.marca+")":"")+
+      (isMulti(it)?" ["+colorsOf(it).map(function(c){return c.hex;}).join(" + ")+"]":"")+
+      " · "+(q===0?"esgotada":(it.pes_restant_g==null?"sense pesar":"queden "+fmtG(stockOf(it))+(q>1?" en "+q+" bobines":"")));
+  }).join("\n");
+}
+
+function renderAll(){ renderHeader(); renderGrid(); renderColors(); renderMarques(); renderBuy(); }
+
+/* ---------------- editor ---------------- */
+var edColors=[];
+function renderColorRows(){
+  var box=$("e-colors");
+  box.innerHTML=edColors.map(function(c,i){
+    return '<div class="crow" data-i="'+i+'">'+
+      '<input type="color" value="'+esc(String(c.hex||"#808080").toLowerCase())+'">'+
+      '<input type="text" value="'+esc(c.nom||"")+'" placeholder="nom d\'aquest color">'+
+      '<button type="button" class="x" title="Treu aquest color">&times;</button></div>';
+  }).join("");
+  Array.prototype.forEach.call(box.querySelectorAll(".crow"),function(row){
+    var i=parseInt(row.dataset.i,10);
+    row.querySelector('input[type=color]').oninput=function(){ edColors[i].hex=this.value.toUpperCase(); };
+    row.querySelector('input[type=text]').oninput=function(){ edColors[i].nom=this.value.trim()||null; };
+    row.querySelector(".x").onclick=function(){
+      if(edColors.length<2){ toast("Una bobina ha de tenir com a mínim un color"); return; }
+      edColors.splice(i,1); renderColorRows(); syncPatro();
+    };
+  });
+}
+function syncPatro(){
+  var sel=$("e-patro");
+  if(edColors.length<2){ sel.value=""; return; }
+  if(!sel.value) sel.value = edColors.length===2?"bicolor":(edColors.length===3?"tricolor":"multicolor");
+}
+$("e-addcolor").onclick=function(){
+  if(edColors.length>=6){ toast("Sis colors ja són prou"); return; }
+  edColors.push({hex:"#808080",nom:null});
+  renderColorRows(); syncPatro();
+};
+
+function knownValues(field){
+  var counts={}, order=[];
+  items.forEach(function(i){
+    var v=(i[field]||"").trim();
+    if(!v || v==="?") return;
+    if(!(v in counts)) order.push(v);
+    counts[v]=(counts[v]||0)+1;
+  });
+  return order.sort(function(a,b){ return counts[b]-counts[a]; }).slice(0,8);
+}
+function renderChips(containerId,inputId,field){
+  var box=$(containerId), current=$(inputId);
+  var vals=knownValues(field);
+  box.innerHTML=vals.map(function(v){ return '<button type="button">'+esc(v)+'</button>'; }).join("");
+  Array.prototype.forEach.call(box.querySelectorAll("button"),function(b,i){
+    b.onclick=function(){ current.value=vals[i]; current.dispatchEvent(new Event("input")); };
+  });
+}
+
+function openEditor(uid){
+  editingId=uid;
+  var it = uid ? items.filter(function(i){return i.uid===uid;})[0] : null;
+  $("sheet-title").textContent = it ? "Edita la bobina" : "Nova bobina";
+  edColors = it ? colorsOf(it).map(function(c){ return {hex:c.hex, nom:c.nom||null}; })
+                : [{hex:"#808080",nom:null}];
+  renderColorRows();
+  $("e-nom").value=it?it.color_nom:"";
+  $("e-patro").value=it&&it.patro?it.patro:"";
+  $("e-material").value=it?(it.material==="?"?"":it.material):"";
+  $("e-marca").value=it&&it.marca?it.marca:"";
+  renderChips("e-material-chips","e-material","material");
+  renderChips("e-marca-chips","e-marca","marca");
+  $("e-acabat").value=it&&it.acabat?it.acabat:"";
+  $("e-dia").value=it?String(it.diametre_mm):"1.75";
+  $("e-qty").value=it?qtyOf(it):1;
+  $("e-rest").value=it&&it.pes_restant_g!=null?it.pes_restant_g:"";
+  $("e-preu").value=it&&preuOf(it)!=null?it.preu_bobina_eur:"";
+  $("e-nom-g").value=it?it.pes_net_nominal_g:1000;
+  $("e-min").value=it&&it.min_g!=null?it.min_g:"";
+  $("e-min").placeholder=String(settings.min);
+  $("e-comprar").checked=!!(it&&it.comprar);
+  $("e-pos").value=it&&it.posicio?it.posicio:"";
+  $("e-notes").value=it&&it.notes?it.notes:"";
+  var ph=$("e-photo");
+  if(it&&it.foto_id){ ph.onerror=function(){ ph.hidden=true; }; ph.src="/_blob/"+it.foto_id; ph.hidden=false; }
+  else if(it&&it.foto_data){ ph.onerror=function(){ ph.hidden=true; }; ph.src=it.foto_data; ph.hidden=false; }
+  else { ph.hidden=true; ph.removeAttribute("src"); }
+  $("e-del").hidden=!it;
+  $("e-done").hidden=!it||qtyOf(it||{})===0;
+  $("overlay").hidden=false;
+  $("e-nom").focus();
+}
+function closeEditor(){ $("overlay").hidden=true; editingId=null; }
+$("e-cancel").onclick=closeEditor;
+$("overlay").onclick=function(e){ if(e.target===this) closeEditor(); };
+document.addEventListener("keydown",function(e){
+  if(e.key!=="Escape") return;
+  if(!$("overlay").hidden) closeEditor();
+  else if(!$("cam").hidden) closeCam();
+});
+$("e-save").onclick=function(){
+  var cols=edColors.map(function(c){ return {hex:normHex(c.hex)||"#808080", nom:c.nom||null}; });
+  var nominal=num($("e-nom-g").value)||1000;
+  var rest=num($("e-rest").value);
+  var nom=$("e-nom").value.trim();
+  if(!nom){
+    var nn=cols.map(function(c){return c.nom;}).filter(Boolean);
+    nom = nn.length?nn.join(" i "):(cols.length>1?"Multicolor":"Sense nom");
+  }
+  var qv=num($("e-qty").value);
+  qv = qv==null?1:Math.max(0,Math.min(99,Math.round(qv)));
+  var data={
+    quantitat:qv,
+    color_nom:nom,
+    colors:cols,
+    color_hex:cols[0].hex,
+    patro:$("e-patro").value||null,
+    familia_color:familia(cols[0].hex),
+    material:$("e-material").value.trim()||"?",
+    marca:$("e-marca").value.trim()||null,
+    acabat:$("e-acabat").value||null,
+    diametre_mm:parseFloat($("e-dia").value),
+    pes_net_nominal_g:nominal,
+    pes_restant_g:rest,
+    preu_bobina_eur:num($("e-preu").value),
+    percent_restant: rest==null?null:Math.round(rest/nominal*100),
+    min_g:num($("e-min").value),
+    comprar:$("e-comprar").checked,
+    posicio:$("e-pos").value.trim()||null,
+    notes:$("e-notes").value.trim()||null
+  };
+  if(editingId){
+    items=items.map(function(i){ return i.uid===editingId ? Object.assign({},i,data) : i; });
+  }else{
+    data.id="B"+String(items.length+1).padStart(2,"0");
+    data.uid=data.id+"-"+Math.random().toString(36).slice(2,7);
+    items.push(data);
+  }
+  closeEditor(); persist();
+};
+$("e-done").onclick=function(){
+  var uid=editingId;
+  closeEditor();
+  finishOne(uid);
+};
+$("e-del").onclick=function(){
+  items=items.filter(function(i){ return i.uid!==editingId; });
+  closeEditor(); persist(); toast("Bobina eliminada");
+};
+$("add").onclick=function(){ openEditor(null); };
+
+/* ---------------- import / export ---------------- */
+function parseInput(){
+  var raw=$("json-in").value.trim();
+  if(!raw) throw new Error("No hi ha res per llegir.");
+  raw=raw.replace(/^```(?:json)?/i,"").replace(/```$/,"").trim();
+  var start=raw.search(/[[{]/);
+  if(start>0) raw=raw.slice(start);
+  var end=Math.max(raw.lastIndexOf("}"),raw.lastIndexOf("]"));
+  if(end>0 && end<raw.length-1) raw=raw.slice(0,end+1);
+  var data=JSON.parse(raw);
+  var list=extractList(data);
+  if(!list) throw new Error("No hi he trobat cap llista de bobines.");
+  return list.map(normalize);
+}
+function doImport(replace){
+  var msg=$("imp-msg");
+  try{
+    var list=parseInput();
+    if(replace) items=list;
+    else {
+      var n=items.length;
+      list.forEach(function(o,k){ o.id="B"+String(n+k+1).padStart(2,"0"); items.push(o); });
+    }
+    $("json-in").value="";
+    msg.className="note ok";
+    msg.textContent=(replace?"Inventari substituït: ":"Afegides ")+list.length+" bobines.";
+    persist(); go("inventari");
+  }catch(e){
+    msg.className="note err";
+    msg.textContent="No he pogut llegir el JSON: "+e.message+" Comprova que hi sigui tot el bloc, des de la primera clau fins a l'última.";
+  }
+}
+$("imp-merge").onclick=function(){ doImport(false); };
+$("imp-replace").onclick=function(){ doImport(true); };
+$("wipe").onclick=function(){
+  if(!items.length) return;
+  if(confirm("Vols esborrar les "+items.length+" bobines de l'inventari?")){ items=[]; persist(); toast("Inventari buidat"); }
+};
+function offer(filename,text,mime){
+  if(typeof window.claude!=="undefined" && window.claude && window.claude.use){
+    window.claude.use("downloads").then(function(d){
+      if(!d){ browserDownload(filename,text,mime); return; }
+      d.save({filename:filename,data:text}).catch(function(){ browserDownload(filename,text,mime); });
+    }).catch(function(){ browserDownload(filename,text,mime); });
+  } else browserDownload(filename,text,mime);
+}
+function browserDownload(filename,text,mime){
+  try{
+    var blob=new Blob([text],{type:(mime||"text/plain")+";charset=utf-8"});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement("a");
+    a.href=url; a.download=filename; a.style.display="none";
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); },1500);
+    toast("Descarregant "+filename);
+  }catch(e){ copyFallback(text); }
+}
+function copyFallback(text){
+  $("json-in").value=text;
+  try{ navigator.clipboard.writeText(text); toast("No he pogut descarregar-ho; ho he copiat al porta-retalls"); }
+  catch(e){ toast("No he pogut descarregar-ho; el tens al quadre de text"); }
+}
+$("exp-json").onclick=function(){ offer("inventari-filament.json", JSON.stringify({inventari:items},null,2), "application/json"); };
+function buildCSV(){
+  var cols=["id","color_nom","colors_hex","patro","familia_color","material","marca","acabat","diametre_mm","quantitat","pes_net_nominal_g","pes_restant_g","percent_restant","estoc_total_g","preu_bobina_eur","valor_estoc_eur","min_g","comprar","notes"];
+  return cols.join(",")+"\n"+items.map(function(it){
+    return cols.map(function(c){
+      var v;
+      if(c==="colors_hex") v=colorsOf(it).map(function(x){return x.hex;}).join(" ");
+      else if(c==="estoc_total_g") v=stockOf(it);
+      else if(c==="quantitat") v=qtyOf(it);
+      else if(c==="min_g") v=minOf(it);
+      else if(c==="valor_estoc_eur"){ var vv=valorOf(it); v = vv==null?null:Math.round(vv*100)/100; }
+      else v=it[c];
+      v=(v==null?"":String(v));
+      return '"'+v.replace(/"/g,'""')+'"';
+    }).join(",");
+  }).join("\n");
+}
+$("exp-csv").onclick=function(){
+  var csv=buildCSV();
+  offer("inventari-filament.csv", csv, "text/csv");
+};
+
+/* ---------------- prompt ---------------- */
+var promptText=$("prompt-src").textContent.trim();
+$("prompt-box").textContent=promptText;
+$("copy-prompt").onclick=function(){
+  navigator.clipboard.writeText(promptText).then(function(){ toast("Prompt copiat"); },
+    function(){ toast("Selecciona el text i copia'l a mà"); });
+};
+
+/* ---------------- navegació ---------------- */
+var VIEWS=["inventari","colors","marques","comprar","importa","prompt"];
+function go(v){
+  view=v;
+  VIEWS.forEach(function(k){ $("view-"+k).hidden = (k!==v); });
+  document.querySelectorAll("nav button").forEach(function(b){
+    b.setAttribute("aria-selected", String(b.dataset.view===v));
+  });
+}
+document.querySelectorAll("nav button").forEach(function(b){ b.onclick=function(){ go(b.dataset.view); }; });
+document.querySelectorAll("[data-goto]").forEach(function(b){ b.onclick=function(){ go(b.dataset.goto); }; });
+$("q").oninput=renderGrid;
+$("f-material").onchange=renderGrid;
+$("f-sort").onchange=renderGrid;
+function tolLabel(){
+  var t=settings.tol;
+  return "ΔE "+t+" · "+(t<=3?"idèntics":(t<=8?"molt semblants":(t<=14?"mateix to":"mateixa família")));
+}
+$("tol").oninput=function(){
+  settings.tol=parseInt(this.value,10);
+  $("tol-val").textContent=tolLabel();
+  renderColors(); renderBuy(); renderHeader(); saveLocal();
+};
+$("bymat").onchange=function(){
+  settings.bymat=this.checked;
+  renderColors(); renderBuy(); renderHeader(); persist();
+};
+$("minall").onchange=function(){
+  var v=num(this.value);
+  settings.min = (v==null||v<0)?0:v;
+  renderAll(); persist();
+};
+$("copy-buy").onclick=function(){
+  var t=buyText();
+  navigator.clipboard.writeText(t).then(function(){ toast("Llista copiada"); },function(){ toast("No he pogut copiar-ho"); });
+};
+
+/* ---------------- càmera i lectura automàtica ---------------- */
+var sampleFn=null, imgCaps=null, assetsNs=null, stream=null;
+var shot={base:null, dets:[], sel:{d:0,c:0}, ctl:null, geo:null};
+
+var VISION_PROMPT =
+"Ets un catalogador de filament d'impressio 3D. A la foto hi ha una o mes bobines de filament.\n"+
+"Fes una fitxa per cada bobina que es vegi prou sencera. No inventis res: el que no es llegeixi clarament, null. No dedueixis la marca d'un logotip borros.\n"+
+"COLORS. Moltes bobines no son d'un sol color: n'hi ha de bicolor, tricolor, degradades (el color canvia al llarg del fil), arcoiris, marbrejades o per trams. Mira be el filament enrotllat abans de decidir. Posa un element a \"colors\" per cada color clarament diferent que hi vegis, fins a 5, ordenats del mes abundant al menys, i digues a \"patro\" com es reparteixen: degradat, bicolor, tricolor, multicolor, marbrejat, seccions, o null si es d'un sol color.\n"+
+"Cada color porta el seu \"punt\": un punt que caigui just damunt d'aquell color del filament enrotllat (mai a l'etiqueta, ni a la brida, ni en un reflex ni en una ombra), en coordenades de 0 a 1000 sobre l'amplada i l'alcada de la foto. El fare servir per mesurar el color real de la imatge, aixi que ha de ser precis. En una bobina degradada, agafa punts ben separats del recorregut.\n"+
+"MATERIAL. Llegeix-lo de l'etiqueta: PLA, PLA+, PLA silk, PLA mat, PETG, ABS, ASA, TPU, PA (nylon), PC, PLA-CF o fusta. Si no hi ha etiqueta llegible posa \"?\" i explica a \"notes\" en que et basaries (brillantor, transparencia, tacte del bobinat, tipus de bobina). No dedueixis el material pel color.\n"+
+"PES RESTANT. Si l'etiqueta indica el pes net, fes-lo servir com a nominal (si no consta, 1000 g). Estima la fraccio que queda per geometria del bobinat: fraccio = (Rf^2 - Rn^2) / (Rb^2 - Rn^2), on Rf es el radi exterior del filament enrotllat, Rn el del nucli i Rb el de la brida. Arrodoneix a multiples de 25 g. Si la bobina es veu de cantell, tapada o massa lluny, posa confianca \"baixa\" i sigues conservador.\n"+
+"Densitats en g/cm3 si has de calcular la massa directament: PLA 1,24 - PETG 1,27 - ABS 1,04 - ASA 1,07 - TPU 1,21 - PA 1,14 - PLA-CF 1,30.\n"+
+"CAL DEMANAR-NE. Posa \"cal_demanar\" a true si queden menys de 200 g o menys del 20 per cent, i explica per que a \"motiu\".\n"+
+"\"confianca\" es alta, mitjana o baixa. \"acabat\" es brillant, mat, silk, translucid, metallitzat, glow o multicolor.\n"+
+"Respon nomes amb un array JSON amb aquesta forma exacta i res mes:\n"+
+'[{"color_nom":"Blau cel","colors":[{"nom":"blau cel","hex":"#7FB3D5","punt":{"x":420,"y":510}}],"patro":null,"material":"PLA","variant":null,"marca":null,"acabat":"brillant","diametre_mm":1.75,"pes_net_nominal_g":1000,"pes_restant_g":620,"percent_restant":62,"confianca":"mitjana","cal_demanar":false,"motiu":null,"etiqueta":"text llegit a l etiqueta","posicio":"a l esquerra","notes":null},'+
+'{"color_nom":"Degradat posta de sol","colors":[{"nom":"groc","hex":"#F2C14E","punt":{"x":700,"y":430}},{"nom":"taronja","hex":"#E2703A","punt":{"x":740,"y":520}},{"nom":"magenta","hex":"#B3325E","punt":{"x":690,"y":600}}],"patro":"degradat","material":"PLA silk","variant":null,"marca":null,"acabat":"silk","diametre_mm":1.75,"pes_net_nominal_g":1000,"pes_restant_g":150,"percent_restant":15,"confianca":"baixa","cal_demanar":true,"motiu":"queden menys de 200 g","etiqueta":null,"posicio":"a la dreta","notes":null}]';
+
+function connectCaps(){
+  $("shoot").hidden=false; $("shoot2").hidden=false;
+  if(typeof window.claude==="undefined"||!window.claude||!window.claude.use) return;
+  window.claude.use("sample").then(function(fn){
+    if(!fn) return;
+    sampleFn=fn;
+    if(fn.limits) fn.limits().then(function(l){ imgCaps=(l&&l.images)?l.images:null; },function(){});
+  },function(){});
+  window.claude.use("assets").then(function(a){ assetsNs=a||null; },function(){});
+}
+
+function status(html){ $("cam-status").innerHTML=html; }
+function camError(code){
+  if(code==="not_granted"||code==="sampling_disabled"||code==="not_declared"||code==="capability_disabled"||code==="capability_removed"||code==="images_unavailable")
+    return "Aquesta lectura automàtica només funciona obrint l'app des d'una conversa de Claude, no des de la icona de l'inici ni de Safari sol. El color el mesuro igualment: toca cada color del filament a la imatge i omple la resta a mà.";
+  if(code==="rate_limited") return "Massa consultes seguides. Espera un minut i torna-ho a provar.";
+  if(code==="invalid_json") return "La resposta ha arribat a mitges. Torna-ho a provar.";
+  if(code==="image_rejected") return "Aquesta imatge no es pot fer servir. Prova amb una foto més petita o en JPEG.";
+  if(code==="session_expired") return "La sessió ha caducat. Torna a entrar i prova-ho de nou.";
+  if(code==="refused"||code==="empty_completion") return "No he pogut llegir aquesta foto.";
+  return "Hi ha hagut un problema llegint la foto.";
+}
+
+function stopStream(){ if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream=null; } }
+function closeCam(){
+  stopStream();
+  if(shot.ctl){ try{ shot.ctl.abort(); }catch(e){} shot.ctl=null; }
+  $("cam").hidden=true; $("cam-list").innerHTML=""; status("");
+  shot.base=null; shot.dets=[]; shot.geo=null; geoBanner();
+}
+function openShoot(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ $("file-cam").click(); return; }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1920}}}).then(function(st){
+    stream=st;
+    $("cam").hidden=false; $("cam-live").hidden=false; $("cam-work").hidden=true;
+    $("cam-title").textContent="Fes una foto";
+    var v=$("cam-video"); v.srcObject=st; v.play().catch(function(){});
+  }).catch(function(){ $("file-cam").click(); });
+}
+function captureFromVideo(){
+  var v=$("cam-video"), w=v.videoWidth, h=v.videoHeight;
+  if(!w||!h){ toast("La càmera encara no està a punt"); return; }
+  var sc=Math.min(1,1280/Math.max(w,h));
+  var c=document.createElement("canvas");
+  c.width=Math.round(w*sc); c.height=Math.round(h*sc);
+  c.getContext("2d").drawImage(v,0,0,c.width,c.height);
+  stopStream(); useCanvas(c);
+}
+function fileToCanvas(file){
+  return new Promise(function(res,rej){
+    var url=URL.createObjectURL(file), img=new Image();
+    img.onload=function(){
+      var sc=Math.min(1,1280/Math.max(img.naturalWidth,img.naturalHeight));
+      var c=document.createElement("canvas");
+      c.width=Math.max(1,Math.round(img.naturalWidth*sc));
+      c.height=Math.max(1,Math.round(img.naturalHeight*sc));
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(url); res(c);
+    };
+    img.onerror=function(){ URL.revokeObjectURL(url); rej(new Error("imatge")); };
+    img.src=url;
+  });
+}
+function handleFile(e){
+  var f=e.target.files&&e.target.files[0];
+  e.target.value="";
+  if(!f) return;
+  fileToCanvas(f).then(useCanvas).catch(function(){ toast("No he pogut obrir aquesta imatge"); });
+}
+function useCanvas(c){
+  shot.base=c; shot.dets=[]; shot.sel={d:0,c:0}; shot.geo=null; geoBanner();
+  $("cam").hidden=false; $("cam-live").hidden=true; $("cam-work").hidden=false;
+  $("cam-title").textContent="Bobines d'aquesta foto";
+  var vis=$("cam-canvas"); vis.width=c.width; vis.height=c.height;
+  drawShot(); analyze();
+}
+function toBlob(canvas,maxSide,q){
+  return new Promise(function(res){
+    var sc=Math.min(1,maxSide/Math.max(canvas.width,canvas.height));
+    var out=canvas;
+    if(sc<1){
+      out=document.createElement("canvas");
+      out.width=Math.round(canvas.width*sc); out.height=Math.round(canvas.height*sc);
+      out.getContext("2d").drawImage(canvas,0,0,out.width,out.height);
+    }
+    out.toBlob(function(b){ res(b); },"image/jpeg",q);
+  });
+}
+
+/* mesura de color sobre el canvas */
+function sampleAt(c,x,y){
+  try{
+    var ctx=c.getContext("2d",{willReadFrequently:true});
+    var r=Math.max(3,Math.round(Math.min(c.width,c.height)*0.010));
+    var x0=Math.max(0,Math.min(c.width-1,Math.round(x)-r));
+    var y0=Math.max(0,Math.min(c.height-1,Math.round(y)-r));
+    var w=Math.min(c.width-x0,r*2+1), h=Math.min(c.height-y0,r*2+1);
+    var d=ctx.getImageData(x0,y0,w,h).data, px=[], i;
+    for(i=0;i<d.length;i+=4) px.push([d[i],d[i+1],d[i+2],0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]]);
+    if(!px.length) return null;
+    px.sort(function(a,b){ return a[3]-b[3]; });
+    var sel=px.slice(Math.floor(px.length*0.2),Math.max(1,Math.ceil(px.length*0.8)));
+    if(!sel.length) sel=px;
+    var R=0,G=0,B=0;
+    sel.forEach(function(q){ R+=q[0]; G+=q[1]; B+=q[2]; });
+    R=Math.round(R/sel.length); G=Math.round(G/sel.length); B=Math.round(B/sel.length);
+    var sd=0;
+    sel.forEach(function(q){ sd+=(q[0]-R)*(q[0]-R)+(q[1]-G)*(q[1]-G)+(q[2]-B)*(q[2]-B); });
+    sd=Math.sqrt(sd/sel.length/3);
+    return {hex:"#"+[R,G,B].map(function(v){ return ("0"+v.toString(16)).slice(-2); }).join("").toUpperCase(), spread:sd};
+  }catch(e){ return null; }
+}
+function measureColor(c){
+  if(!shot.base) return;
+  var m=sampleAt(shot.base, c.punt.x/1000*shot.base.width, c.punt.y/1000*shot.base.height);
+  if(m && (m.spread<34 || !c.hex_model)) c.hex=m.hex;
+  else if(c.hex_model) c.hex=c.hex_model;
+}
+function prepDet(raw){
+  var d=normalize(raw,0);
+  var src = Array.isArray(raw.colors)&&raw.colors.length ? raw.colors
+          : [{hex:raw.color_hex||raw.hex||null, nom:raw.color_nom||null, punt:raw.punt}];
+  d.colors = src.slice(0,5).map(function(c,k){
+    var px=c.punt?num(c.punt.x):null, py=c.punt?num(c.punt.y):null;
+    var o={
+      hex: normHex(c.hex||c.color_hex||c.color) || "#9AA0A6",
+      nom: c.nom||c.name||null,
+      hex_model: normHex(c.hex||c.color_hex||c.color),
+      punt:{ x: px==null?(400+k*90)%1000 : Math.max(0,Math.min(1000,px)),
+             y: py==null?500 : Math.max(0,Math.min(1000,py)) }
+    };
+    measureColor(o);
+    return o;
+  });
+  d.patro = raw.patro || raw.pattern || (d.colors.length>1 ? (d.colors.length===2?"bicolor":(d.colors.length===3?"tricolor":"multicolor")) : null);
+  d.color_hex = d.colors[0].hex;
+  d.familia_color = familia(d.color_hex);
+  d.comprar = (raw.cal_demanar===true||raw.comprar===true);
+  if(raw.motiu && !d.notes) d.notes = raw.motiu;
+  if(!d.color_nom || d.color_nom==="Sense nom"){
+    var nn=d.colors.map(function(c){ return c.nom; }).filter(Boolean);
+    d.color_nom = nn.length?nn.join(" i "):(d.colors.length>1?"Multicolor":"Sense nom");
+  }
+  return d;
+}
+
+function drawShot(){
+  if(!shot.base) return;
+  var vis=$("cam-canvas"), ctx=vis.getContext("2d");
+  ctx.drawImage(shot.base,0,0);
+  var rad=Math.max(10,Math.round(Math.min(vis.width,vis.height)*0.026));
+  shot.dets.forEach(function(d,i){
+    d.colors.forEach(function(c,k){
+      var x=c.punt.x/1000*vis.width, y=c.punt.y/1000*vis.height;
+      var on=(shot.sel.d===i && shot.sel.c===k), r=(k===0?rad:rad*0.78);
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+      ctx.fillStyle=c.hex; ctx.fill();
+      ctx.lineWidth=on?4:2; ctx.strokeStyle=on?"#FFFFFF":"rgba(255,255,255,.75)"; ctx.stroke();
+      ctx.lineWidth=1; ctx.strokeStyle="rgba(0,0,0,.55)"; ctx.stroke();
+      if(k===0){
+        ctx.fillStyle=hueOf(c.hex).l>0.55?"#111111":"#FFFFFF";
+        ctx.font="600 "+Math.round(r*1.05)+"px Archivo, sans-serif";
+        ctx.textAlign="center"; ctx.textBaseline="middle";
+        ctx.fillText(String(i+1),x,y+1);
+      }
+    });
+  });
+  if(shot.geo && shot.geo.pts.length){
+    var labels=["N","F","B"];
+    ctx.save();
+    ctx.strokeStyle="#FFD400"; ctx.fillStyle="#FFD400";
+    if(shot.geo.pts.length>=2){
+      var c0=toPx(shot.geo.pts[0]), c1=toPx(shot.geo.pts[1]);
+      ctx.beginPath(); ctx.arc(c0.x,c0.y,geoDist(c0,c1),0,Math.PI*2); ctx.lineWidth=2; ctx.stroke();
+    }
+    if(shot.geo.pts.length>=3){
+      var c0b=toPx(shot.geo.pts[0]), c2=toPx(shot.geo.pts[2]);
+      ctx.beginPath(); ctx.arc(c0b.x,c0b.y,geoDist(c0b,c2),0,Math.PI*2); ctx.lineWidth=2; ctx.stroke();
+    }
+    shot.geo.pts.forEach(function(p,i){
+      var px=toPx(p);
+      ctx.beginPath(); ctx.arc(px.x,px.y,7,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle="#111111"; ctx.lineWidth=1.5; ctx.stroke();
+      ctx.strokeStyle="#FFD400";
+    });
+    ctx.restore();
+  }
+  function toPx(p){ return {x:p.x/1000*vis.width, y:p.y/1000*vis.height}; }
+}
+
+function renderDets(){
+  var box=$("cam-list");
+  box.innerHTML=shot.dets.map(function(d,i){
+    var sw=d.colors.map(function(c,k){
+      return '<button class="swatch" data-k="'+k+'" style="background:'+esc(c.hex)+
+        (shot.sel.d===i&&shot.sel.c===k?';outline:2px solid var(--ink);outline-offset:1px':'')+
+        '" title="'+esc(c.hex)+' — selecciona\'l i toca la foto"></button>';
+    }).join("");
+    return '<div class="det'+(shot.sel.d===i?' sel':'')+'" data-i="'+i+'">'+
+      '<div style="display:flex;flex-direction:column;gap:3px;flex:none">'+sw+'</div>'+
+      '<div class="detmain">'+
+        '<input class="d-nom" value="'+esc(d.color_nom)+'" placeholder="Nom">'+
+        '<div class="detline">'+
+          '<input class="d-mat" value="'+esc(d.material==="?"?"":d.material)+'" placeholder="Material" list="mats">'+
+          '<input class="d-marca" value="'+esc(d.marca||"")+'" placeholder="Marca" style="width:92px">'+
+          '<input class="d-g" type="number" min="0" step="5" value="'+(d.pes_restant_g==null?"":d.pes_restant_g)+'" placeholder="g"> g'+
+        '</div>'+
+        (d.ocrLines&&d.ocrLines.length?'<div class="chiprow small d-ocr"></div>':'')+
+        '<div class="detline">'+
+          '<button class="btn d-add" type="button">Afegeix un color</button>'+
+          (d.colors.length>1?'<button class="btn d-rm" type="button">Treu el seleccionat</button>':'')+
+          '<button class="btn d-geo" type="button">Marca el nivell (3 tocs)</button>'+
+        '</div>'+
+        '<div class="detline"><span>'+(d.patro?esc(d.patro)+' · ':'')+
+          (d.percent_restant!=null?d.percent_restant+"% · ":'')+
+          'confiança '+esc(d.confianca||"?")+(d.comprar?' · per demanar':'')+'</span></div>'+
+      '</div>'+
+      '<button class="x" title="Treu la bobina">&times;</button></div>';
+  }).join("");
+
+  Array.prototype.forEach.call(box.querySelectorAll(".det"),function(row){
+    var i=parseInt(row.dataset.i,10), d=shot.dets[i];
+    Array.prototype.forEach.call(row.querySelectorAll(".swatch"),function(sw){
+      sw.onclick=function(){ shot.sel={d:i,c:parseInt(sw.dataset.k,10)}; renderDets(); drawShot(); };
+    });
+    row.querySelector(".x").onclick=function(){
+      shot.dets.splice(i,1);
+      shot.sel={d:Math.max(0,Math.min(shot.sel.d,shot.dets.length-1)),c:0};
+      $("cam-add").hidden=!shot.dets.length;
+      renderDets(); drawShot();
+    };
+    row.querySelector(".d-add").onclick=function(){
+      if(d.colors.length>=5){ toast("Cinc colors ja són prou"); return; }
+      var c={hex:"#9AA0A6", nom:null, hex_model:null, punt:{x:500,y:500}};
+      measureColor(c); d.colors.push(c);
+      d.patro=d.patro||(d.colors.length===2?"bicolor":(d.colors.length===3?"tricolor":"multicolor"));
+      shot.sel={d:i,c:d.colors.length-1};
+      renderDets(); drawShot();
+    };
+    var rm=row.querySelector(".d-rm");
+    if(rm) rm.onclick=function(){
+      if(d.colors.length<2) return;
+      var k=(shot.sel.d===i?shot.sel.c:0);
+      d.colors.splice(k,1);
+      if(d.colors.length===1) d.patro=null;
+      shot.sel={d:i,c:0};
+      renderDets(); drawShot();
+    };
+    row.querySelector(".d-nom").oninput=function(){ d.color_nom=this.value; };
+    row.querySelector(".d-mat").oninput=function(){ d.material=this.value.trim()||"?"; };
+    row.querySelector(".d-marca").oninput=function(){ d.marca=this.value.trim()||null; };
+    row.querySelector(".d-g").oninput=function(){
+      var v=num(this.value);
+      d.pes_restant_g=v;
+      d.percent_restant = v==null?null:Math.round(v/(d.pes_net_nominal_g||1000)*100);
+    };
+    var ocrBox=row.querySelector(".d-ocr");
+    if(ocrBox){
+      ocrBox.innerHTML=d.ocrLines.map(function(t,li){ return '<button type="button" data-li="'+li+'">'+esc(t)+'</button>'; }).join("");
+      Array.prototype.forEach.call(ocrBox.querySelectorAll("button"),function(b){
+        b.onclick=function(){
+          var txt=d.ocrLines[parseInt(b.dataset.li,10)];
+          if(!row.querySelector(".d-marca").value.trim()){
+            d.marca=txt; row.querySelector(".d-marca").value=txt;
+          } else {
+            d.color_nom=txt; row.querySelector(".d-nom").value=txt;
+          }
+        };
+      });
+    }
+    row.querySelector(".d-geo").onclick=function(){ startGeoTap(i); };
+  });
+}
+
+function manualDet(){
+  shot.dets=[prepDet({color_nom:"Sense nom",punt:{x:500,y:500},pes_net_nominal_g:1000})];
+  shot.sel={d:0,c:0};
+  $("cam-add").hidden=false;
+  renderDets(); drawShot();
+}
+
+function parseOCR(text){
+  var raw = (text||"").split(/\r?\n+/).map(function(s){ return s.trim(); });
+  var lines=[], seen={};
+  raw.forEach(function(l){
+    if(l.length<2||l.length>40) return;
+    var k=l.toLowerCase();
+    if(seen[k]) return;
+    seen[k]=1; lines.push(l);
+  });
+  var joined=(text||"").replace(/\s+/g," ");
+
+  var hexM=joined.match(/#([0-9A-Fa-f]{6})\b/);
+  var hex=hexM?("#"+hexM[1].toUpperCase()):null;
+
+  var matM=joined.match(/\b(PLA-CF|PLA\+|PETG|ABS|ASA|TPU|NYLON|PA6|PA12|PA|PC|HIPS|PLA)(?=[^A-Za-z]|$)/i);
+  var material=matM?matM[1].toUpperCase():(/\bINGEO\b/i.test(joined)?"PLA":null);
+  var finish=/\bMATTE?\b/i.test(joined)?"mat":(/\bSILK\b/i.test(joined)?"silk":(/\bSATIN\b/i.test(joined)?"silk":null));
+
+  var weight=null;
+  var netM=joined.match(/net\s*weight[:\s]*~?\s*(\d+(?:[.,]\d+)?)\s*(kg|g)\b/i);
+  if(netM){
+    var nkg=parseFloat(netM[1].replace(",","."));
+    weight=/kg/i.test(netM[2])?Math.round(nkg*1000):Math.round(nkg);
+  } else {
+    var kgOnly=joined.match(/\b(\d(?:[.,]\d)?)\s*kg\b/i);
+    if(kgOnly) weight=Math.round(parseFloat(kgOnly[1].replace(",","."))*1000);
+    else {
+      var gRe=/\b(\d{3,4})\s*g\b/gi, gm;
+      while((gm=gRe.exec(joined))){
+        var before=joined.slice(Math.max(0,gm.index-20),gm.index).toLowerCase();
+        if(before.indexOf("spool")<0 && before.indexOf("empty")<0 && before.indexOf("tare")<0){
+          weight=parseInt(gm[1],10); break;
+        }
+      }
+    }
+  }
+
+  return {lines:lines.slice(0,10), hex:hex, material:material, finish:finish, weight:weight};
+}
+
+function analyze(){
+  shot.dets=[]; shot.sel={d:0,c:0}; renderDets();
+  $("cam-add").hidden=true; $("cam-retry").hidden=true; $("cam-stop").hidden=true;
+  if(typeof Tesseract==="undefined"){
+    status('<p class="note err">No he pogut carregar el lector de text (revisa la connexió a internet). Toca el filament a la foto per mesurar-ne el color i omple la resta a mà.</p>');
+    manualDet(); return;
+  }
+  status('<div class="thinking"><span class="pulse"></span><span class="note">Llegint el text de l\'etiqueta…</span></div>');
+  toBlob(shot.base,1600,0.92).then(function(b){
+    return Tesseract.recognize(b,"eng");
+  }).then(function(result){
+    var text=(result&&result.data&&result.data.text)||"";
+    var found=parseOCR(text);
+    var d=prepDet({
+      color_nom: found.lines[0]||"Sense nom",
+      punt:{x:500,y:500},
+      material: found.material||"?",
+      acabat: found.finish||null,
+      pes_net_nominal_g: found.weight||1000,
+      color_hex: found.hex||null,
+      confianca:"mitjana"
+    });
+    d.ocrLines=found.lines;
+    shot.dets=[d]; shot.sel={d:0,c:0};
+    var bits=[];
+    if(found.material) bits.push("material "+found.material);
+    if(found.hex) bits.push("color "+found.hex);
+    if(found.weight) bits.push(found.weight+" g nominal");
+    status('<p class="note">'+(bits.length?"Trobat automàticament: "+bits.join(", ")+".":"No hi he trobat dades clares al text — la lletra deu ser massa estilitzada o la foto de biaix.")+
+      ' Toca el filament (no l\'etiqueta) per fixar bé el color, revisa la marca amb els botons de sota, i marca el nivell amb els 3 tocs.</p>');
+    $("cam-add").hidden=false; $("cam-retry").hidden=false;
+    renderDets(); drawShot();
+  }).catch(function(){
+    status('<p class="note err">No he pogut llegir el text de l\'etiqueta. Toca el filament per fixar el color i omple la resta a mà.</p>');
+    manualDet();
+  });
+}
+
+/* ---------------- nivell de filament: 3 tocs ---------------- */
+function geoLabel(step){
+  return step===0 ? "1/3 — Toca el centre del forat del nucli"
+       : step===1 ? "2/3 — Toca la vora del filament enrotllat"
+       : "3/3 — Toca la vora exterior de la brida";
+}
+function geoBanner(){
+  var wrap=document.querySelector(".shotwrap"); if(!wrap) return;
+  var el=document.getElementById("geo-banner");
+  if(!shot.geo){ if(el) el.remove(); return; }
+  if(!el){ el=document.createElement("div"); el.id="geo-banner"; el.className="geobanner"; wrap.appendChild(el); }
+  el.innerHTML="<b>Nivell de filament</b><br>"+geoLabel(shot.geo.step);
+}
+function startGeoTap(i){
+  shot.geo={d:i, step:0, pts:[]};
+  geoBanner();
+}
+function geoDist(a,b){ var dx=a.x-b.x, dy=a.y-b.y; return Math.sqrt(dx*dx+dy*dy); }
+function geoTap(pt){
+  var g=shot.geo; if(!g) return;
+  g.pts.push(pt);
+  if(g.pts.length<3){ g.step=g.pts.length; geoBanner(); drawShot(); return; }
+  var Rn2=geoDist(g.pts[0],g.pts[1]);   // nucli -> vora filament
+  var Rb2=geoDist(g.pts[0],g.pts[2]);   // nucli -> vora brida
+  var d=shot.dets[g.d];
+  if(d && Rb2>Rn2 && Rb2>0){
+    var frac=Math.max(0,Math.min(1,(Rn2*Rn2)/(Rb2*Rb2)));
+    d.percent_restant=Math.round(frac*100);
+    d.pes_restant_g=Math.round((d.pes_net_nominal_g||1000)*frac/25)*25;
+    toast("Nivell marcat: "+d.percent_restant+"%");
+  } else {
+    toast("Els tocs no formen un cercle vàlid — torna-ho a provar");
+  }
+  shot.geo=null; geoBanner();
+  renderDets(); drawShot();
+}
+function geoCancel(){ shot.geo=null; geoBanner(); drawShot(); }
+
+function blobToDataURL(b){
+  return new Promise(function(res,rej){
+    var r=new FileReader();
+    r.onload=function(){ res(r.result); };
+    r.onerror=rej;
+    r.readAsDataURL(b);
+  });
+}
+/* amb el backend de Claude, la foto es desa al servidor i només en guardem l'id;
+   sense servidor (per exemple publicada a GitHub Pages) la desem sencera i
+   comprimida al mateix navegador */
+function uploadPhoto(){
+  if(!shot.base) return Promise.resolve({});
+  if(assetsNs){
+    return toBlob(shot.base,640,0.72).then(function(b){
+      if(!b) return {};
+      return assetsNs.upload(b,{type:"image/jpeg"}).then(function(r){ return r&&r.id?{foto_id:r.id}:{}; },function(){ return {}; });
+    }).catch(function(){ return {}; });
+  }
+  return toBlob(shot.base,360,0.55).then(function(b){
+    if(!b) return {};
+    return blobToDataURL(b).then(function(du){ return {foto_data:du}; },function(){ return {}; });
+  }).catch(function(){ return {}; });
+}
+function addDets(){
+  if(!shot.dets.length) return;
+  var btn=$("cam-add"), dets=shot.dets.slice();
+  btn.disabled=true; btn.textContent="Desant…";
+  function finish(photo){
+    photo = photo||{};
+    dets.forEach(function(d){
+      var o=Object.assign({},d);
+      delete o.ocrLines;
+      o.colors=d.colors.map(function(c){ return {hex:c.hex, nom:c.nom||null}; });
+      o.color_hex=o.colors[0].hex;
+      o.familia_color=familia(o.color_hex);
+      o.id="B"+String(items.length+1).padStart(2,"0");
+      o.uid=o.id+"-"+Math.random().toString(36).slice(2,7);
+      if(photo.foto_id) o.foto_id=photo.foto_id;
+      if(photo.foto_data) o.foto_data=photo.foto_data;
+      items.push(o);
+    });
+    btn.disabled=false; btn.textContent="Afegeix a l'inventari";
+    closeCam(); persist(); go("inventari");
+    toast(dets.length+(dets.length===1?" bobina afegida":" bobines afegides"));
+  }
+  uploadPhoto().then(finish, function(){ finish({}); });
+}
+
+$("shoot").onclick=openShoot;
+$("shoot2").onclick=openShoot;
+$("file-cam").onchange=handleFile;
+$("file-pick").onchange=handleFile;
+$("cam-shoot").onclick=captureFromVideo;
+$("cam-pick").onclick=function(){ stopStream(); $("file-pick").click(); };
+$("cam-close").onclick=closeCam;
+$("cam-close2").onclick=closeCam;
+$("cam-retry").onclick=analyze;
+$("cam-add").onclick=addDets;
+$("cam-stop").onclick=function(){ if(shot.ctl) shot.ctl.abort(); };
+$("cam-canvas").onclick=function(e){
+  if(!shot.base) return;
+  var r=this.getBoundingClientRect();
+  var pt={x:Math.round((e.clientX-r.left)/r.width*1000), y:Math.round((e.clientY-r.top)/r.height*1000)};
+  if(shot.geo){ geoTap(pt); return; }
+  if(!shot.dets.length) return;
+  var d=shot.dets[shot.sel.d]; if(!d) return;
+  var c=d.colors[shot.sel.c]; if(!c) return;
+  c.punt=pt;
+  c.hex_model=null;
+  measureColor(c);
+  d.color_hex=d.colors[0].hex;
+  renderDets(); drawShot();
+};
+
+/* ---------------- arrencada ---------------- */
+/* ---------------- mesura del % per geometria (pur càlcul, sense IA) ---------------- */
+var mesuraImg=null, mesuraPts=[], mesuraSteps=[
+  "Toca el <b>centre</b> del forat central.",
+  "Toca la <b>vora del nucli</b> (on comença el filament enrotllat).",
+  "Toca la <b>vora del filament</b> enrotllat (on s'acaba el color).",
+  "Toca la <b>vora exterior</b> de la brida (el disc de cartró/plàstic)."
+];
+function mesuraOpen(){
+  mesuraImg=null; mesuraPts=[];
+  $("mesura-pick").hidden=false; $("mesura-work").hidden=true;
+  $("mesura-aplica").hidden=true; $("mesura-result").textContent="";
+  $("mesura").hidden=false;
+}
+function mesuraClose(){ $("mesura").hidden=true; }
+function mesuraLoadFile(file){
+  if(!file) return;
+  var url=URL.createObjectURL(file), img=new Image();
+  img.onload=function(){
+    URL.revokeObjectURL(url);
+    mesuraImg=img; mesuraPts=[];
+    var c=$("mesura-canvas");
+    var sc=Math.min(1,900/Math.max(img.naturalWidth,img.naturalHeight));
+    c.width=Math.round(img.naturalWidth*sc); c.height=Math.round(img.naturalHeight*sc);
+    $("mesura-pick").hidden=true; $("mesura-work").hidden=false;
+    $("mesura-step").innerHTML=mesuraSteps[0];
+    $("mesura-aplica").hidden=true; $("mesura-result").textContent="";
+    mesuraDraw();
+  };
+  img.src=url;
+}
+function mesuraDraw(){
+  var c=$("mesura-canvas"), ctx=c.getContext("2d");
+  ctx.drawImage(mesuraImg,0,0,c.width,c.height);
+  var labels=["centre","nucli","filament","brida"];
+  mesuraPts.forEach(function(p,i){
+    ctx.beginPath(); ctx.arc(p.x,p.y,7,0,Math.PI*2);
+    ctx.fillStyle="#E67324"; ctx.fill();
+    ctx.lineWidth=2; ctx.strokeStyle="#fff"; ctx.stroke();
+    if(i>0){
+      ctx.beginPath(); ctx.moveTo(mesuraPts[0].x,mesuraPts[0].y); ctx.lineTo(p.x,p.y);
+      ctx.strokeStyle="rgba(230,115,36,.85)"; ctx.lineWidth=1.5; ctx.stroke();
+    }
+  });
+}
+function mesuraCalc(){
+  var dist=function(a,b){ return Math.hypot(a.x-b.x,a.y-b.y); };
+  var c0=mesuraPts[0], Rn=dist(c0,mesuraPts[1]), Rf=dist(c0,mesuraPts[2]), Rb=dist(c0,mesuraPts[3]);
+  var denom=(Rb*Rb-Rn*Rn);
+  var frac = denom>0 ? Math.max(0,Math.min(1,(Rf*Rf-Rn*Rn)/denom)) : 0;
+  return Math.round(frac*100);
+}
+$("mesura-canvas").addEventListener("click",function(e){
+  if(mesuraPts.length>=4) return;
+  var r=this.getBoundingClientRect();
+  mesuraPts.push({x:(e.clientX-r.left)/r.width*this.width, y:(e.clientY-r.top)/r.height*this.height});
+  mesuraDraw();
+  if(mesuraPts.length<4){
+    $("mesura-step").innerHTML=mesuraSteps[mesuraPts.length];
+  }else{
+    var pct=mesuraCalc();
+    $("mesura-step").innerHTML="Fet.";
+    $("mesura-result").innerHTML="Filament restant: <b>"+pct+"%</b>";
+    $("mesura-aplica").hidden=false;
+    $("mesura-aplica").dataset.pct=pct;
+  }
+});
+$("e-mesura-btn").onclick=mesuraOpen;
+$("mesura-tanca").onclick=mesuraClose;
+$("mesura-reset").onclick=function(){ mesuraPts=[]; if(mesuraImg){ $("mesura-step").innerHTML=mesuraSteps[0]; $("mesura-aplica").hidden=true; $("mesura-result").textContent=""; mesuraDraw(); } };
+$("mesura-cam").onclick=function(){ $("mesura-cam-input").click(); };
+$("mesura-file").onclick=function(){ $("mesura-file-input").click(); };
+$("mesura-cam-input").onchange=function(e){ mesuraLoadFile(e.target.files[0]); e.target.value=""; };
+$("mesura-file-input").onchange=function(e){ mesuraLoadFile(e.target.files[0]); e.target.value=""; };
+$("mesura-aplica").onclick=function(){
+  var pct=parseInt(this.dataset.pct,10);
+  var nominal=num($("e-nom-g").value)||1000;
+  $("e-rest").value=Math.round(nominal*pct/100/5)*5;
+  mesuraClose();
+  toast("Aplicat: "+pct+"%");
+};
+
+function bootApp(){
+  loadLocal();
+  $("tol").value=settings.tol;
+  $("tol-val").textContent=tolLabel();
+  $("bymat").checked=settings.bymat;
+  $("minall").value=settings.min;
+  renderAll();
+  carregaDtes();
+  connectDb();
+  connectCaps();
+}
+
+var ZCFG = {
+  nomFitxa: "bobina",
+  nomFitxes: "bobines",
+  /* el que hi ha al Drive i aquí no: ve d'haver-ho apuntat en un altre
+     aparell, i si no s'afegeix abans de desar es perd */
+  mergeRemote: function(d){
+    var noves = zFonLlista(items, d && d.items, null);
+    if(!noves.length) return 0;
+    noves.forEach(function(x){ items.push(x); });
+    saveLocal(); renderAll();
+    return noves.length;
+  },
+  refreshRemote: function(d){
+    var r = d && d.items;
+    if(!Array.isArray(r) || !r.length) return false;
+    if(JSON.stringify(r)===JSON.stringify(items)) return false;
+    items = JSON.parse(JSON.stringify(r));
+    saveLocal(); renderAll();
+    return true;
+  },
+  jsonName: "zenkai3d-inventari.json",
+  csvName:  "zenkai3d-inventari.csv",
+  buildCSV: function(){ return buildCSV(); },
+  getPayload: function(){ return {items:items, settings:settings, updatedAt:new Date().toISOString()}; },
+  applyPayload: function(d){
+    loadLocal();
+    var had=false;
+    if(Array.isArray(d.items) && d.items.length){ items=d.items; had=true; }
+    if(d.settings) zdeepMerge(settings,d.settings);
+    saveLocal();
+    return had;
+  },
+  boot: function(){
+    loadLocal();
+    $("tol").value=settings.tol;
+    $("tol-val").textContent=tolLabel();
+    $("bymat").checked=settings.bymat;
+    $("minall").value=settings.min;
+    renderAll();
+    carregaDtes();
+    connectDb();
+    connectCaps();
+  }
+};
+
+</script>
+<script src="zenkai.js"></script>
+<script>if(typeof gateInit!=="function"){var _g=document.getElementById("gate-status");
+  if(_g) _g.textContent="No s'ha pogut carregar zenkai.js. Recarrega la pàgina.";}</script>
+<script src="zenkai-nav.js"></script>
+</body>
+</html>
