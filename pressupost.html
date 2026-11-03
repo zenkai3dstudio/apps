@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pressupost d'impressió 3D</title>
+<meta name="description" content="Filament i resina, amb pintat i preu d'amic">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Pressupost">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F2F2F0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<link rel="apple-touch-icon" href="icona.png">
+<link rel="icon" href="icona.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="zenkai.css">
+<style>
+:root{
+  --paper:#F2F2F0; --surface:#FFFFFF; --ink:#191A1C; --ink-soft:#6B6D72;
+  --line:#D9D9D5; --line-strong:#B6B6B1; --alert:#C4362B; --good:#3F7D4C; --hub:#F2F2F0;
+  --r:3px; --brand-blue:#3E96C2; --brand-orange:#E67324;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#131416; --surface:#1B1C1F; --ink:#EDEDEA; --ink-soft:#95979C;
+    --line:#2E3033; --line-strong:#45484C; --alert:#F0796B; --good:#6FBF7F; --hub:#131416;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131416; --surface:#1B1C1F; --ink:#EDEDEA; --ink-soft:#95979C;
+  --line:#2E3033; --line-strong:#45484C; --alert:#F0796B; --good:#6FBF7F; --hub:#131416;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink); font-family:"Archivo","Helvetica Neue",Arial,sans-serif;
+  font-size:15px; line-height:1.45; font-variant-numeric:tabular-nums; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:900px;margin:0 auto;padding:0 20px 90px}
+button{font:inherit;color:inherit}
+
+header{padding:34px 0 18px}
+.brandbar{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.brandmark{width:30px;height:30px;border-radius:7px;display:block;object-fit:cover;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.brandname{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.brandname b{color:var(--brand-blue)}
+.brandname i{color:var(--brand-orange);font-style:normal}
+h1{font-size:clamp(26px,5.5vw,38px);font-weight:700;letter-spacing:-.026em;line-height:1.03;margin:0}
+.sub{color:var(--ink-soft);font-size:13.5px;margin:6px 0 0}
+.ver{display:inline-block;margin-left:7px;padding:2px 9px;border-radius:999px;background:var(--brand-blue);
+  color:#fff;font-size:11px;font-weight:700;letter-spacing:.04em;white-space:nowrap;vertical-align:1px}
+
+nav{display:flex;gap:0;border-bottom:1px solid var(--line-strong);margin:26px 0 0;overflow-x:auto}
+nav button{background:none;border:0;border-bottom:2px solid transparent;padding:9px 14px 8px;margin-bottom:-1px;cursor:pointer;white-space:nowrap;color:var(--ink-soft);font-weight:500}
+nav button:hover{color:var(--ink)}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+/* ---- les pestanyes al mòbil: totes a la vista, en files ---- */
+@media(max-width:560px){
+  nav{flex-wrap:wrap;overflow-x:visible;border-bottom:0;gap:6px;margin:20px 0 0;padding:0 0 2px}
+  nav button{border:1px solid var(--line-strong);border-radius:20px;border-bottom-width:1px;
+    margin-bottom:0;padding:6px 11px;font-size:12.5px;line-height:1.15}
+  nav button[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  nav button[aria-selected="true"] .ncount{color:var(--paper);opacity:.8}
+  .navwrap::after{display:none}
+}
+nav button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.seg button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+section[hidden]{display:none}
+section{padding-top:24px}
+h2{font-size:18px;font-weight:600;letter-spacing:-.02em;margin:30px 0 4px}
+h2:first-child{margin-top:0}
+.hint{color:var(--ink-soft);font-size:13px;margin:0 0 14px;max-width:64ch}
+
+input[type=text],input[type=number],input[type=search],select,textarea{
+  background:var(--surface);border:1px solid var(--line-strong);color:var(--ink);
+  padding:7px 9px;border-radius:var(--r);font:inherit;width:100%;
+}
+textarea{min-height:70px;resize:vertical}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink-soft)}
+label.f.full{grid-column:1/-1}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:520px){.grid3{grid-template-columns:1fr 1fr}}
+
+.btn{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r);padding:8px 13px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.primary:hover{opacity:.86}
+.btn.danger{color:var(--alert);border-color:var(--line-strong)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0}
+.spacer{flex:1}
+
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:var(--r);overflow:hidden}
+.seg button{padding:9px 18px;background:var(--surface);border:0;cursor:pointer;font-weight:600;border-right:1px solid var(--line-strong)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+
+.card{border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:16px;background:var(--surface)}
+.card h3{margin:0 0 12px;font-size:14px;font-weight:600;letter-spacing:-.01em}
+
+table.bd{width:100%;border-collapse:collapse;font-size:14px}
+table.bd th{text-align:right;font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);padding:0 0 8px;border-bottom:1px solid var(--line-strong)}
+table.bd th:first-child{text-align:left}
+table.bd td{padding:8px 0;border-bottom:1px solid var(--line)}
+table.bd td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums;width:110px}
+table.bd tr.total td{border-bottom:0;border-top:1px solid var(--line-strong);padding-top:12px;font-weight:700;font-size:17px}
+table.bd tr.subtotal td{font-weight:600;color:var(--ink-soft);font-size:12.5px;padding-top:2px}
+table.bd tr.subtotal td:not(:first-child){font-size:12.5px}
+table.bd .neg{color:var(--ink-soft)}
+
+.qrow{display:flex;gap:12px;align-items:center;padding:13px 0;border-top:1px solid var(--line);cursor:pointer}
+.qrow:last-child{border-bottom:1px solid var(--line)}
+.qrow:hover{background:rgba(0,0,0,.015)}
+.qtype{width:8px;height:8px;border-radius:50%;flex:none}
+.qtype.fdm{background:var(--brand-blue)}
+.qtype.resina{background:var(--brand-orange)}
+.qmain{flex:1;min-width:0}
+.qmain .name{font-weight:600}
+.qmain .sub{margin-top:1px}
+.qprice{font-weight:700;flex:none;text-align:right}
+.qprice small{display:block;font-weight:400;color:var(--ink-soft);font-size:11.5px}
+
+.empty-state{border:1px dashed var(--line-strong);padding:26px;text-align:center;color:var(--ink-soft);max-width:520px}
+.empty-state b{display:block;color:var(--ink);margin-bottom:6px;font-size:16px}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.42);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.overlay[hidden]{display:none}
+.sheet{background:var(--surface);border:1px solid var(--line-strong);width:min(560px,100%);max-height:92vh;overflow:auto;padding:22px;border-radius:var(--r) var(--r) 0 0}
+@media(min-width:700px){.overlay{align-items:center}.sheet{border-radius:var(--r)}}
+.sheet h3{margin:0 0 4px;font-size:19px;font-weight:600;letter-spacing:-.02em;overflow-wrap:break-word}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:16px}
+@media(max-width:560px){.actions .spacer{flex:1 0 100%;height:0}}
+
+.chk{flex-direction:row!important;align-items:center;gap:8px!important;color:var(--ink)!important;font-size:14px!important}
+.chk input{width:auto!important}
+.lbl-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.seg.mini{transform:scale(.82);transform-origin:right center}
+.seg.mini button{padding:3px 9px;font-size:12px}
+table.bd tr.muted td{color:var(--ink-soft)}
+.presetrow{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 10px}
+.presetrow button{font-size:12px;padding:5px 10px}
+.presetrow button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.xrow{display:grid;grid-template-columns:1fr 94px 84px 36px;gap:8px;align-items:center;margin-bottom:8px}
+.xrow.xhead{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);font-weight:600;margin-bottom:5px}
+.xdel{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r);height:34px;cursor:pointer;font-size:17px;line-height:1;color:var(--ink-soft);padding:0}
+.xdel:hover{border-color:var(--alert);color:var(--alert)}
+@media(max-width:520px){.xrow{grid-template-columns:1fr 72px 62px 32px;gap:6px}.xrow input{padding:7px 6px;font-size:14px}}
+.editbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:13.5px;padding:11px 13px;margin:18px 0 0;
+  border:1px solid var(--brand-blue);border-left:3px solid var(--brand-blue);border-radius:var(--r);background:rgba(62,150,194,.08)}
+.editbar[hidden]{display:none}
+
+.gate{position:fixed;inset:0;background:var(--paper);z-index:60;display:flex;align-items:center;justify-content:center;padding:24px}
+.gate[hidden]{display:none}
+.gate-card{max-width:360px;width:100%;text-align:center}
+.gate-card img{width:64px;height:64px;border-radius:15px;margin-bottom:18px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.gate-card h2{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0 0 8px}
+.gate-card p{color:var(--ink-soft);font-size:14px;line-height:1.5;margin:0 0 20px}
+.gate-card input{margin-bottom:10px}
+.gate-card .btn{width:100%;padding:11px;font-size:14.5px}
+.gate-link{margin-top:16px;font-size:12.5px;color:var(--ink-soft);text-decoration:underline;background:none;border:0;cursor:pointer;padding:4px}
+.gate-status{margin-top:12px;font-size:12.5px;color:var(--ink-soft)}
+.acctbar{display:flex;align-items:center;gap:8px;margin-top:12px}
+/* el correu empenyia el botó de tancar sessió fora de la pantalla al mòbil. Que
+   s'escurci ell, que és el prescindible: els botons es queden on són. */
+.acctbar .note{min-width:0;flex:0 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acctbar img{width:22px;height:22px;border-radius:50%;flex:none}
+.acctbar .btn{padding:4px 10px;font-size:12px;flex:none;white-space:nowrap}
+.backlink{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:5px;
+  text-decoration:none;color:var(--ink-soft);border:1px solid var(--line-strong);
+  border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;white-space:nowrap}
+.backlink:hover{color:var(--ink);border-color:var(--ink)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:40;background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:var(--r);font-size:13.5px}
+.toast[hidden]{display:none}
+.note{font-size:13px;color:var(--ink-soft)}
+.err{color:var(--alert)}
+textarea.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ───── correccions d'interfície ───── */
+/* Una classe amb display: propi es menjava l'atribut «hidden» i deixava
+   coses a la vista que havien d'estar amagades. */
+[hidden]{display:none!important}
+
+/* Les pestanyes, al mòbil, que es vegi que n'hi ha més a la dreta */
+nav{-webkit-overflow-scrolling:touch;scrollbar-width:none;position:relative}
+nav::-webkit-scrollbar{display:none}
+
+/* Als dits els cal una mica més de superfície */
+@media(max-width:720px){
+  nav button{padding:11px 13px 10px}
+  .btn{padding:10px 14px}
+  .q{min-width:32px;height:32px}
+}
+
+/* A l'ordinador, un camp de 800 px per escriure «48» no té sentit */
+@media(min-width:760px){
+  .grid2,.grid3{max-width:760px}
+  label.f.full input[type=text]{max-width:520px}
+  label.f.full textarea{max-width:620px}
+  .xrow{max-width:620px}
+}
+/* els components externs, llegibles al mòbil */
+@media(max-width:430px){
+  .xrow{grid-template-columns:1fr 66px 54px 30px;gap:5px}
+  .xrow.xhead{font-size:10px}
+  .xdel{height:32px;font-size:15px}
+}
+/* el selector de marge no s'encavalqui amb l'etiqueta */
+.lbl-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:22px}
+.seg.mini{transform:none;margin-left:auto}
+.seg.mini button{padding:4px 9px;font-size:11.5px}
+
+@media(max-width:560px){ .toolbar .spacer{display:none} }
+
+.navwrap{position:relative}
+.navwrap::after{content:"";position:absolute;right:0;top:0;bottom:1px;width:34px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,var(--paper));opacity:0;transition:opacity .15s}
+.navwrap.hi-ha-mes::after{opacity:1}
+
+@media(max-width:560px){
+  .grid2 > label.f:has(#q-marge){grid-column:1/-1}
+  .lbl-row{justify-content:space-between}
+}
+
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <img src="icona.png" alt="Zenkai3D Studio">
+    <div id="gate-setup">
+      <h2>Un pas, un cop</h2>
+      <p>Enganxa el Client ID que t'ha donat Google Cloud. Només cal fer-ho una vegada i val per a les tres apps.</p>
+      <input type="text" id="gate-cid" placeholder="xxxxx.apps.googleusercontent.com">
+      <button class="btn primary" id="gate-cid-save">Desa i continua</button>
+      <button type="button" class="gate-link" id="gate-skip">Fes-la servir només en aquest dispositiu, sense Google</button>
+    </div>
+    <div id="gate-login" hidden>
+      <h2>Pressupost d'impressió 3D</h2>
+      <p>Inicia sessió amb Google per veure i desar les teves dades — es guarden al teu Drive, sincronitzades entre dispositius.</p>
+      <button class="btn primary" id="gate-signin">Continua amb Google</button>
+      <button type="button" class="gate-link" id="gate-skip2">Fes-la servir només en aquest dispositiu</button>
+      <button type="button" class="gate-link" id="gate-reconfig">Canvia el Client ID</button>
+      <p class="gate-status" id="gate-status"></p>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<header>
+  <div class="brandbar">
+    <img class="brandmark" src="icona.png" alt="Zenkai3D Studio">
+    <span class="brandname"><b>ZENKAI</b><i>3D STUDIO</i></span>
+    <a class="backlink" href="index.html" title="Torna al menú">&lsaquo; Menú</a>
+  </div>
+  <div class="acctbar" id="acctbar" hidden>
+    <img id="acct-pic" alt="">
+    <span class="note" id="acct-email"></span>
+    <span class="spacer"></span>
+    <button class="btn" id="acct-signout">Tanca sessió</button>
+  </div>
+  <h1>Pressupost d'impressió 3D</h1>
+  <p class="sub">Filament i resina, cada un amb els seus costos — i el pintat de després quan toca. <span class="ver">v6 · interfície revisada</span></p>
+</header>
+
+<div class="navwrap"><nav role="tablist">
+  <button role="tab" data-view="calc" aria-selected="true">Pressupost</button>
+  <button role="tab" data-view="hist" aria-selected="false">Historial</button>
+  <button role="tab" data-view="settings" aria-selected="false">Ajustos</button>
+</nav></div>
+
+<main>
+<section id="view-calc">
+
+  <div class="editbar" id="prefillbar" hidden>
+    <span id="prefillbar-txt"></span>
+    <span class="spacer"></span>
+    <button class="btn" type="button" id="prefillbar-close">D'acord</button>
+  </div>
+
+  <div class="editbar" id="editbar" hidden>
+    <span id="editbar-txt"></span>
+    <span class="spacer"></span>
+    <button class="btn" type="button" id="editbar-new">Desa'l com a nou</button>
+  </div>
+
+  <div class="toolbar">
+    <div class="seg" id="tipus-seg">
+      <button data-v="fdm" aria-pressed="true">Filament (FDM)</button>
+      <button data-v="resina" aria-pressed="false">Resina</button>
+    </div>
+    <span class="spacer"></span>
+    <button class="btn" id="nou">Nou pressupost</button>
+  </div>
+
+  <div class="card">
+    <h3>La peça</h3>
+    <div class="grid2">
+      <label class="f full">Client o projecte <input type="text" id="q-client" placeholder="p. ex. Marc — figura pintada"></label>
+    </div>
+    <div class="grid3" style="margin-top:12px">
+      <label class="f">Nombre de peces <input type="number" id="q-peces" min="1" step="1" value="1"></label>
+      <label class="f">Temps d'impressió total
+        <span style="display:flex;gap:6px">
+          <input type="number" id="q-temps" min="0" step="1" placeholder="h" style="flex:1">
+          <input type="number" id="q-temps-min" min="0" max="59" step="1" placeholder="min" style="flex:1">
+        </span>
+      </label>
+      <label class="f">Preparació de l'arxiu (min) <input type="number" id="q-prep" min="0" step="1" placeholder="tallar, suports"></label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 id="mat-title">Material</h3>
+    <div class="grid2">
+      <label class="f" id="mat-qty-label">Material total (g) <input type="number" id="q-material" min="0" step="1"></label>
+      <label class="f" id="mat-price-label">Preu (€/kg) <input type="number" id="q-preu-material" min="0" step="0.5"></label>
+    </div>
+    <div id="resina-extra" hidden>
+      <p class="hint" style="margin-top:12px">Els consumibles propis de la resina (FEP, pantalla LCD, IPA, guants) surten sols dels Ajustos — no cal tornar-los a escriure cada vegada.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Components externs</h3>
+    <p class="hint">Peces que compres fetes i van amb l'impressió: la cadeneta d'un clauer, els LEDs i el cable d'una làmpada, imants, cargols, una bosseta.</p>
+    <div class="xrow xhead" aria-hidden="true"><span>Component</span><span>€ / unitat</span><span>Unitats</span><span></span></div>
+    <div id="extres-list"></div>
+    <div class="toolbar" style="margin:10px 0 0">
+      <button class="btn" type="button" id="extra-add">Afegeix un component</button>
+      <span class="spacer"></span>
+      <span class="note" id="extres-tot"></span>
+    </div>
+    <label class="f chk" style="margin-top:12px"><input type="checkbox" id="q-extres-marge" checked> Aplica-hi el marge de benefici (cobres per buscar-ho i muntar-ho)</label>
+  </div>
+
+  <div class="card">
+    <h3>Postprocés i acabat</h3>
+    <div class="grid2">
+      <label class="f">Postprocés per peça (min) <input type="number" id="q-postproces" min="0" step="1" placeholder="treure suports, netejar"></label>
+      <label class="f">
+        <span class="lbl-row"><span id="marge-label">Marge sobre el material (%)</span>
+          <span class="seg mini" id="marge-mode"><button type="button" data-v="pctmat" aria-pressed="true">% mat</button><button type="button" data-v="pct" aria-pressed="false">% tot</button><button type="button" data-v="flat" aria-pressed="false">€</button></span>
+        </span>
+        <input type="number" id="q-marge" min="0" step="1">
+      </label>
+    </div>
+    <label class="f chk" style="margin-top:14px"><input type="checkbox" id="q-amic"> És per a un amic (aplica el descompte dels Ajustos al preu final)</label>
+    <label class="f chk" style="margin-top:10px"><input type="checkbox" id="q-disseny"> Disseny personalitzat (no és un model ja fet)</label>
+    <div id="disseny-box" hidden style="margin-top:10px">
+      <div class="grid2">
+        <label class="f">Hores de disseny <input type="number" id="q-disseny-hores" min="0" step="0.25"></label>
+        <label class="f">Preu/hora de disseny (€) <input type="number" id="q-disseny-preu" min="0" step="1"></label>
+      </div>
+    </div>
+    <label class="f chk" id="pintar-wrap" style="margin-top:10px"><input type="checkbox" id="q-pintar"> Aquesta peça es pinta (resina)</label>
+    <div id="pintat-box" hidden style="margin-top:10px">
+      <div class="presetrow" id="pintat-presets">
+        <button type="button" data-h="0.5" data-txt="bàsic: base i ombres ràpides">Bàsic</button>
+        <button type="button" data-h="1.5" data-txt="estàndard: base, ombres, llums i detalls">Estàndard</button>
+        <button type="button" data-h="3" data-txt="avançat: nivell vitrina/concurs">Avançat</button>
+      </div>
+      <p class="hint" id="pintat-desc" style="margin:-4px 0 10px"></p>
+      <div class="grid3">
+        <label class="f">Hores de pintat / peça <input type="number" id="q-pintat-hores" min="0" step="0.25"></label>
+        <label class="f">Materials de pintat / peça (€) <input type="number" id="q-pintat-mat" min="0" step="0.5"></label>
+        <label class="f">Preu/hora de pintat (€) <input type="number" id="q-pintat-preu" min="0" step="1"></label>
+      </div>
+    </div>
+    <label class="f full" style="margin-top:14px">Notes <textarea id="q-notes" placeholder="Detalls per al pressupost o per a tu mateix"></textarea></label>
+  </div>
+
+  <h2>Desglossament</h2>
+  <table class="bd">
+    <thead><tr><th>Concepte</th><th>Per peça</th><th>Total</th></tr></thead>
+    <tbody id="bd-body"></tbody>
+  </table>
+
+  <div class="toolbar">
+    <button class="btn primary" id="save-quote">Desa al historial</button>
+    <button class="btn" id="copy-summary">Copia el resum</button>
+    <button class="btn" id="pdf-client">PDF per al client</button>
+    <button class="btn" id="pdf-intern">PDF complet</button>
+  </div>
+
+</section>
+
+<section id="view-hist" hidden>
+  <h2>Pressupostos desats</h2>
+  <p class="hint">Toca'n un per veure'l sencer, duplicar-lo com a punt de partida o eliminar-lo.</p>
+  <div id="hist-list"></div>
+  <div class="empty-state" id="hist-empty" hidden>
+    <b>Encara no has desat cap pressupost</b>
+    Omple'n un a la pestanya Pressupost i toca «Desa al historial».
+  </div>
+</section>
+
+<section id="view-settings" hidden>
+  <h2>Impressora de filament (FDM)</h2>
+  <div class="card">
+    <div class="grid3">
+      <label class="f">Preu de la impressora (€) <input type="number" id="s-fdm-preu" min="0" step="10"></label>
+      <label class="f">Vida útil (hores) <input type="number" id="s-fdm-vida" min="1" step="100"></label>
+      <label class="f">Consum (W) <input type="number" id="s-fdm-watts" min="0" step="10"></label>
+    </div>
+    <label class="f" style="margin-top:12px;max-width:280px">Manteniment i desgast — boquilla, base, corretges (€/h) <input type="number" id="s-fdm-manteniment" min="0" step="0.05"></label>
+  </div>
+
+  <h2>Impressora de resina i consumibles</h2>
+  <div class="card">
+    <div class="grid3">
+      <label class="f">Preu de la impressora (€) <input type="number" id="s-res-preu" min="0" step="10"></label>
+      <label class="f">Vida útil (hores) <input type="number" id="s-res-vida" min="1" step="100"></label>
+      <label class="f">Consum (W) <input type="number" id="s-res-watts" min="0" step="10"></label>
+    </div>
+    <div class="grid3" style="margin-top:12px">
+      <label class="f">Pel·lícula FEP (€) <input type="number" id="s-res-fep-preu" min="0" step="1"></label>
+      <label class="f">Impressions per FEP <input type="number" id="s-res-fep-vida" min="1" step="1"></label>
+      <label class="f">Pantalla LCD (€) <input type="number" id="s-res-lcd-preu" min="0" step="5"></label>
+    </div>
+    <div class="grid3" style="margin-top:12px">
+      <label class="f">Vida de l'LCD (hores) <input type="number" id="s-res-lcd-vida" min="1" step="50"></label>
+      <label class="f">IPA (€/L) <input type="number" id="s-res-ipa-preu" min="0" step="1"></label>
+      <label class="f">IPA gastat per rentat (ml) <input type="number" id="s-res-ipa-ml" min="0" step="10"></label>
+    </div>
+    <div class="grid3" style="margin-top:12px">
+      <label class="f">Guants i varis / tanda (€) <input type="number" id="s-res-guants" min="0" step="0.1"></label>
+      <label class="f">Estació de curat (W) <input type="number" id="s-res-cura-w" min="0" step="5"></label>
+      <label class="f">Curat per tanda (min) <input type="number" id="s-res-cura-min" min="0" step="1"></label>
+    </div>
+    <div class="grid2" style="margin-top:12px">
+      <label class="f">Resina perduda (supports, neteja) (%) <input type="number" id="s-res-perdua" min="0" step="1"></label>
+      <label class="f">Manteniment i desgast — cubeta, plataforma (€/h) <input type="number" id="s-res-manteniment" min="0" step="0.05"></label>
+    </div>
+  </div>
+
+  <h2>General</h2>
+  <div class="card">
+    <div class="grid3">
+      <label class="f">Preu electricitat (€/kWh) <input type="number" id="s-kwh" min="0" step="0.01"></label>
+      <label class="f">Mà d'obra (€/h) <input type="number" id="s-maobra" min="0" step="1"></label>
+      <label class="f">Pintat, preu/hora per defecte (€) <input type="number" id="s-pintat-hora" min="0" step="1"></label>
+    </div>
+    <div class="grid3" style="margin-top:12px">
+      <label class="f">Disseny, preu/hora per defecte (€) <input type="number" id="s-disseny-hora" min="0" step="1"></label>
+      <label class="f">Marge per defecte (%) <input type="number" id="s-marge" min="0" step="1"></label>
+      <label class="f">Marge per fallades — FDM (%) <input type="number" id="s-fallada-fdm" min="0" step="1"></label>
+    </div>
+    <div class="grid3" style="margin-top:12px">
+      <label class="f">Marge per fallades — Resina (%) <input type="number" id="s-fallada-res" min="0" step="1"></label>
+      <label class="f">Descompte preu d'amic (%) <input type="number" id="s-amic" min="0" step="1"></label>
+    </div>
+  </div>
+
+  <h2>Còpia de seguretat</h2>
+  <div class="card">
+    <p class="hint">Els ajustos i el historial es desen sols en aquest navegador. Exporta de tant en tant per no perdre'ls.</p>
+    <div class="toolbar" style="margin:0 0 12px">
+      <button class="btn" id="export-json">Exporta còpia (JSON)</button>
+      <button class="btn danger" id="wipe-all">Buida-ho tot</button>
+    </div>
+    <label class="f full">Enganxa aquí una còpia per restaurar-la <textarea class="mono" id="import-box" placeholder='{"ajustos":{...},"historial":[...]}'></textarea></label>
+    <div class="toolbar" style="margin-top:10px">
+      <button class="btn primary" id="import-btn">Restaura des del text</button>
+    </div>
+    <p class="note" id="import-msg"></p>
+  </div>
+</section>
+</main>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Pressupost desat">
+    <h3 id="d-title"></h3>
+    <p class="note" id="d-sub"></p>
+    <table class="bd" style="margin-top:14px">
+      <thead><tr><th>Concepte</th><th>Per peça</th><th>Total</th></tr></thead>
+      <tbody id="d-body"></tbody>
+    </table>
+    <p class="note" id="d-notes" style="margin-top:10px"></p>
+    <div class="actions">
+      <button class="btn primary" id="d-edit">Edita</button>
+      <button class="btn" id="d-pdf">PDF</button>
+      <button class="btn" id="d-dup">Duplica</button>
+      <button class="btn" id="d-close">Tanca</button>
+      <span class="spacer"></span>
+      <button class="btn danger" id="d-del">Elimina</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+"use strict";
+
+/* ---------------- estat ---------------- */
+var settings = {
+  fdm:{ preu:280, vida:3000, watts:150, manteniment:0.15 },
+  resina:{
+    preu:260, vida:2000, watts:65,
+    fepPreu:12, fepVida:30,
+    lcdPreu:40, lcdVida:1500,
+    ipaPreu:9, ipaMl:150,
+    guants:0.15,
+    curaW:20, curaMin:10,
+    perdua:10, manteniment:0.10
+  },
+  general:{
+    kwh:0.131, maObra:15, pintatHora:15, dissenyHora:20,
+    marge:30, falladaFdm:8, falladaRes:12,
+    materialKgFdm:22, materialLResina:22,
+    amicDte:15
+  }
+};
+var historial = [];
+var LS_S="pressupost3d-settings-v1", LS_H="pressupost3d-historial-v1";
+var dbAj=null, dbHi=null, remoteAjSeen=false, remoteHiSeen=false;
+var writeAjT=null, writeHiT=null, lastAjSer="", lastHiSer="";
+var tipus="fdm", pintatOn=false, margeMode="pctmat";
+var extres=[], editUid=null;
+var view="calc";
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+function num(v){ var n=parseFloat(v); return isFinite(n)?n:0; }
+function fmtHM(h){
+  h=h||0;
+  var tot=Math.round(h*60), hh=Math.floor(tot/60), mm=tot%60;
+  if(!tot) return "0 min";
+  return (hh?hh+" h":"")+(hh&&mm?" ":"")+(mm?mm+" min":"");
+}
+function fmtE(n){ if(!isFinite(n)) return "—"; return (Math.round(n*100)/100).toFixed(2).replace(".",",")+" €"; }
+function toast(msg){ var t=$("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(function(){t.hidden=true;},2600); }
+
+/* ---------------- persistència ---------------- */
+function saveLocal(){
+  try{
+    localStorage.setItem(LS_S, JSON.stringify(settings));
+    localStorage.setItem(LS_H, JSON.stringify(historial));
+  }catch(e){}
+}
+function loadLocal(){
+  try{
+    var a=localStorage.getItem(LS_S); if(a){ var o=JSON.parse(a); if(o) deepMerge(settings,o); }
+    var b=localStorage.getItem(LS_H); if(b){ var h=JSON.parse(b); if(Array.isArray(h)) historial=h; }
+  }catch(e){}
+}
+function deepMerge(base,extra){
+  for(var k in extra){
+    if(extra[k]&&typeof extra[k]==="object"&&!Array.isArray(extra[k])&&base[k]) deepMerge(base[k],extra[k]);
+    else base[k]=extra[k];
+  }
+}
+function persistSettings(){
+  saveLocal(); fillSettingsForm(); recalc();
+  if(typeof scheduleDriveSave==="function") scheduleDriveSave();
+  if(!dbAj) return;
+  clearTimeout(writeAjT);
+  writeAjT=setTimeout(function(){
+    lastAjSer=JSON.stringify(settings);
+    dbAj.set({settings:settings, updatedAt:new Date().toISOString()}).catch(function(){});
+  },450);
+}
+function persistHistory(){
+  saveLocal(); renderHist();
+  if(typeof scheduleDriveSave==="function") scheduleDriveSave();
+  if(!dbHi) return;
+  clearTimeout(writeHiT);
+  writeHiT=setTimeout(function(){
+    lastHiSer=JSON.stringify(historial);
+    dbHi.set({historial:historial, updatedAt:new Date().toISOString()}).catch(function(e){
+      if(e&&e.code==="quota_exceeded") toast("L'historial és molt gran per al servidor; queda desat només en aquest navegador.");
+    });
+  },450);
+}
+function connectDb(){
+  if(typeof window.claude==="undefined"||!window.claude||!window.claude.use) return;
+  window.claude.use("db").then(function(db){
+    if(!db) return;
+    dbAj=db.doc("pressupost/ajustos");
+    dbAj.onSnapshot(function(snap){
+      if(!snap.exists){ remoteAjSeen=true; if(true) persistSettings(); return; }
+      var d=snap.data()||{}, remote=d.settings||{};
+      var ser=JSON.stringify(remote);
+      if(!remoteAjSeen){ remoteAjSeen=true; deepMerge(settings,JSON.parse(JSON.stringify(remote))); lastAjSer=ser; saveLocal(); fillSettingsForm(); recalc(); return; }
+      if(ser!==lastAjSer && !snap.metadata.hasPendingWrites){ deepMerge(settings,JSON.parse(JSON.stringify(remote))); lastAjSer=ser; saveLocal(); fillSettingsForm(); recalc(); }
+    },function(){ dbAj=null; });
+
+    dbHi=db.doc("pressupost/historial");
+    dbHi.onSnapshot(function(snap){
+      if(!snap.exists){ remoteHiSeen=true; if(historial.length) persistHistory(); return; }
+      var d=snap.data()||{}, remote=Array.isArray(d.historial)?d.historial:[];
+      var ser=JSON.stringify(remote);
+      if(!remoteHiSeen){
+        remoteHiSeen=true;
+        if(remote.length||!historial.length){ historial=JSON.parse(JSON.stringify(remote)); lastHiSer=ser; saveLocal(); renderHist(); }
+        else persistHistory();
+        return;
+      }
+      if(ser!==lastHiSer && !snap.metadata.hasPendingWrites){ historial=JSON.parse(JSON.stringify(remote)); lastHiSer=ser; saveLocal(); renderHist(); }
+    },function(){ dbHi=null; });
+  }).catch(function(){});
+}
+
+/* ---------------- càlcul ---------------- */
+function currentInput(){
+  return {
+    tipus: tipus,
+    client: $("q-client").value.trim(),
+    peces: Math.max(1, Math.round(num($("q-peces").value))||1),
+    tempsH: num($("q-temps").value) + num($("q-temps-min").value)/60,
+    prepMin: num($("q-prep").value),
+    materialQty: num($("q-material").value),
+    materialPreu: num($("q-preu-material").value),
+    postprocesMin: num($("q-postproces").value),
+    margePct: num($("q-marge").value),
+    margeMode: margeMode,
+    amic: $("q-amic").checked,
+    disseny: $("q-disseny").checked ? {
+      actiu:true,
+      hores:num($("q-disseny-hores").value),
+      preuHora:num($("q-disseny-preu").value)
+    } : null,
+    notes: $("q-notes").value.trim(),
+    extres: readExtres().filter(function(x){ return x.desc!=="" || x.preu>0; }),
+    extresMarge: $("q-extres-marge").checked,
+    pintat: $("q-pintar").checked ? {
+      actiu:true,
+      horesPeca:num($("q-pintat-hores").value),
+      materialsPeca:num($("q-pintat-mat").value),
+      preuHora:num($("q-pintat-preu").value)
+    } : null
+  };
+}
+function calc(inp){
+  var isR = inp.tipus==="resina";
+  var cfg = isR ? settings.resina : settings.fdm;
+  var gen = settings.general;
+  var peces = Math.max(1, inp.peces);
+
+  var materialCost;
+  if(isR){
+    var mlEfectius = inp.materialQty * (1 + (cfg.perdua||0)/100);
+    materialCost = mlEfectius/1000 * inp.materialPreu;
+  } else {
+    materialCost = inp.materialQty/1000 * inp.materialPreu;
+  }
+
+  var machineCost = (cfg.preu||0) / Math.max(1,cfg.vida||1) * inp.tempsH;
+  var manteniCost = (cfg.manteniment||0) * inp.tempsH;
+
+  var elecCost = (cfg.watts||0)/1000 * inp.tempsH * (gen.kwh||0);
+  if(isR && cfg.curaMin>0){
+    elecCost += (cfg.curaW||0)/1000 * (cfg.curaMin/60) * (gen.kwh||0);
+  }
+
+  var consumCost = 0;
+  if(isR){
+    consumCost += (cfg.fepPreu||0) / Math.max(1,cfg.fepVida||1);
+    consumCost += (cfg.lcdPreu||0) / Math.max(1,cfg.lcdVida||1) * inp.tempsH;
+    consumCost += (cfg.ipaPreu||0)/1000 * (cfg.ipaMl||0);
+    consumCost += (cfg.guants||0);
+  }
+
+  /* costos que es paguen a cada intent, fins i tot als fallits */
+  var subtotalTanda = materialCost+machineCost+manteniCost+elecCost+consumCost;
+  var falladaPct = isR ? (gen.falladaRes||0) : (gen.falladaFdm||0);
+  var denom = Math.max(0.01, 1-falladaPct/100);
+  var tandaAmbFallada = subtotalTanda/denom;
+  var falladaExtra = tandaAmbFallada - subtotalTanda;
+
+  /* preparació i disseny: es fan un cop i no es repeteixen si una impressió falla */
+  var prepCost = (inp.prepMin||0)/60 * (gen.maObra||0);
+  var dissenyCost = 0;
+  if(inp.disseny && inp.disseny.actiu){
+    var dh = inp.disseny.preuHora>0 ? inp.disseny.preuHora : (gen.dissenyHora||0);
+    dissenyCost = (inp.disseny.hores||0) * dh;
+  }
+  var tandaTotal = tandaAmbFallada + prepCost + dissenyCost;
+  var produccioPerPeca = tandaTotal/peces;
+
+  var maObraPerPeca = (inp.postprocesMin/60) * (gen.maObra||0);
+
+  var pintatPerPeca = 0;
+  if(inp.pintat && inp.pintat.actiu){
+    var ph = inp.pintat.preuHora>0 ? inp.pintat.preuHora : (gen.pintatHora||0);
+    pintatPerPeca = (inp.pintat.materialsPeca||0) + (inp.pintat.horesPeca||0)*ph;
+  }
+
+  /* components que es compren fets: no es tornen a pagar si una impressio falla */
+  var extresPerPeca = 0, extresLlista = [];
+  if(Array.isArray(inp.extres)){
+    for(var ei=0; ei<inp.extres.length; ei++){
+      var ex = inp.extres[ei] || {};
+      var eq = (ex.qty==null) ? 1 : Math.max(0, ex.qty||0);
+      var ec = (ex.preu||0) * eq;
+      extresPerPeca += ec;
+      extresLlista.push({ desc:(ex.desc||""), preu:(ex.preu||0), qty:eq, cost:ec });
+    }
+  }
+  var extresMarge = inp.extresMarge !== false;
+
+  var costTotalPerPeca = produccioPerPeca + maObraPerPeca + pintatPerPeca + extresPerPeca;
+
+  var guanyPerPeca;
+  if(inp.margeMode==="flat"){
+    guanyPerPeca = inp.margePct||0;
+  } else if(inp.margeMode==="pct"){
+    guanyPerPeca = (costTotalPerPeca - (extresMarge?0:extresPerPeca)) * ((inp.margePct||0)/100);
+  } else { /* "pctmat" per defecte, com fa Prusa: marge nomes sobre el material */
+    guanyPerPeca = (materialCost/peces + (extresMarge?extresPerPeca:0)) * ((inp.margePct||0)/100);
+  }
+  var preuNormalPerPeca = costTotalPerPeca + guanyPerPeca;
+
+  var amicDte = Math.max(0,Math.min(95,(gen.amicDte||0)))/100;
+  var preuAmicPerPeca = preuNormalPerPeca * (1-amicDte);
+  var preuVendaPerPeca = inp.amic ? preuAmicPerPeca : preuNormalPerPeca;
+
+  return {
+    peces: peces,
+    materialCost:materialCost, machineCost:machineCost, manteniCost:manteniCost, elecCost:elecCost, consumCost:consumCost,
+    falladaExtra:falladaExtra, subtotalTanda:subtotalTanda, tandaAmbFallada:tandaAmbFallada,
+    prepCost:prepCost, dissenyCost:dissenyCost, tandaTotal:tandaTotal,
+    maObraPerPeca:maObraPerPeca, pintatPerPeca:pintatPerPeca,
+    extresPerPeca:extresPerPeca, extresMarge:extresMarge, extresLlista:extresLlista,
+    costTotalPerPeca:costTotalPerPeca,
+    guanyPerPeca:guanyPerPeca, preuNormalPerPeca:preuNormalPerPeca,
+    amic:!!inp.amic, preuAmicPerPeca:preuAmicPerPeca,
+    preuVendaPerPeca:preuVendaPerPeca, preuVendaTotal:preuVendaPerPeca*peces
+  };
+}
+
+function bdRows(r, isR){
+  function row(label,perpeca,total,cls){
+    return '<tr'+(cls?' class="'+cls+'"':'')+'><td>'+esc(label)+'</td><td>'+fmtE(perpeca)+'</td><td>'+fmtE(total)+'</td></tr>';
+  }
+  var rows = "";
+  rows += row("Material", r.materialCost/r.peces, r.materialCost);
+  rows += row("Màquina (amortització)", r.machineCost/r.peces, r.machineCost);
+  rows += row("Manteniment i desgast", r.manteniCost/r.peces, r.manteniCost);
+  rows += row("Electricitat", r.elecCost/r.peces, r.elecCost);
+  if(isR) rows += row("Consumibles (FEP, LCD, IPA, guants)", r.consumCost/r.peces, r.consumCost);
+  rows += row("Marge per fallades", r.falladaExtra/r.peces, r.falladaExtra);
+  if(r.prepCost>0) rows += row("Preparació de l'arxiu", r.prepCost/r.peces, r.prepCost);
+  if(r.dissenyCost>0) rows += row("Disseny personalitzat", r.dissenyCost/r.peces, r.dissenyCost);
+  rows += row("Cost de producció", r.tandaTotal/r.peces, r.tandaTotal, "subtotal");
+  rows += row("Mà d'obra (postprocés)", r.maObraPerPeca, r.maObraPerPeca*r.peces);
+  if(r.pintatPerPeca>0) rows += row("Pintat", r.pintatPerPeca, r.pintatPerPeca*r.peces);
+  if(r.extresPerPeca>0){
+    var exl = r.extresLlista||[];
+    if(exl.length>1){
+      for(var xi=0; xi<exl.length; xi++){
+        if(!(exl[xi].cost>0)) continue;
+        rows += row("· "+(exl[xi].desc||"component")+(exl[xi].qty!==1?" ×"+exl[xi].qty:""), exl[xi].cost, exl[xi].cost*r.peces, "muted");
+      }
+    }
+    rows += row("Components externs", r.extresPerPeca, r.extresPerPeca*r.peces);
+  }
+  rows += row("Cost total", r.costTotalPerPeca, r.costTotalPerPeca*r.peces, "subtotal");
+  rows += row("Marge / guany", r.guanyPerPeca, r.guanyPerPeca*r.peces);
+  if(r.amic){
+    rows += row("Preu normal", r.preuNormalPerPeca, r.preuNormalPerPeca*r.peces, "muted");
+    rows += row("PREU D'AMIC", r.preuVendaPerPeca, r.preuVendaTotal, "total");
+  } else {
+    rows += row("PREU DE VENDA", r.preuVendaPerPeca, r.preuVendaTotal, "total");
+  }
+  return rows;
+}
+
+function recalc(){
+  var inp = currentInput();
+  var r = calc(inp);
+  $("bd-body").innerHTML = bdRows(r, tipus==="resina");
+  var et=$("extres-tot");
+  if(et) et.textContent = r.extresPerPeca>0 ? (fmtE(r.extresPerPeca)+" per peça · "+fmtE(r.extresPerPeca*r.peces)+" en total") : "";
+  return {inp:inp, r:r};
+}
+
+/* ---------------- resum de text ---------------- */
+function summaryText(inp, r){
+  var l = [];
+  l.push((inp.client||"Pressupost")+" — "+(tipus==="resina"?"Resina":"Filament (FDM)"));
+  l.push(inp.peces+" peç"+(inp.peces===1?"a":"es")+" · "+fmtHM(inp.tempsH)+" d'impressió");
+  l.push("");
+  l.push("Material: "+fmtE(r.materialCost));
+  l.push("Màquina, manteniment i electricitat: "+fmtE(r.machineCost+r.manteniCost+r.elecCost));
+  if(tipus==="resina") l.push("Consumibles: "+fmtE(r.consumCost));
+  l.push("Marge per fallades: "+fmtE(r.falladaExtra));
+  if(r.prepCost>0) l.push("Preparació: "+fmtE(r.prepCost));
+  if(r.dissenyCost>0) l.push("Disseny personalitzat: "+fmtE(r.dissenyCost));
+  if(r.maObraPerPeca>0) l.push("Mà d'obra: "+fmtE(r.maObraPerPeca*r.peces));
+  if(r.pintatPerPeca>0) l.push("Pintat: "+fmtE(r.pintatPerPeca*r.peces));
+  if(r.extresPerPeca>0){
+    var exl=(r.extresLlista||[]).filter(function(x){return x.cost>0;});
+    var det = exl.map(function(x){ return (x.desc||"component")+(x.qty!==1?" ×"+x.qty:""); }).join(", ");
+    l.push("Components externs"+(det?" ("+det+")":"")+": "+fmtE(r.extresPerPeca*r.peces));
+  }
+  l.push("");
+  if(r.amic){
+    l.push("Preu normal per peça: "+fmtE(r.preuNormalPerPeca));
+    l.push("Preu d'amic per peça: "+fmtE(r.preuVendaPerPeca));
+  } else {
+    l.push("Preu per peça: "+fmtE(r.preuVendaPerPeca));
+  }
+  l.push("PREU TOTAL ("+inp.peces+"): "+fmtE(r.preuVendaTotal));
+  if(inp.notes) { l.push(""); l.push(inp.notes); }
+  return l.join("\n");
+}
+
+/* ---------------- components externs ---------------- */
+function readExtres(){
+  var out=[];
+  Array.prototype.forEach.call($("extres-list").querySelectorAll(".xrow"),function(row){
+    var q=row.querySelector(".x-qty").value;
+    out.push({
+      desc: row.querySelector(".x-desc").value.trim(),
+      preu: num(row.querySelector(".x-preu").value),
+      qty: q===""?1:Math.max(0,num(q))
+    });
+  });
+  return out;
+}
+function renderExtres(){
+  $("extres-list").innerHTML = extres.map(function(x,i){
+    return '<div class="xrow" data-i="'+i+'">'+
+      '<input type="text" class="x-desc" autocomplete="off" placeholder="p. ex. cadeneta de clauer" value="'+esc(x.desc||"")+'">'+
+      '<input type="number" class="x-preu" min="0" step="0.05" placeholder="0,00" value="'+(x.preu>0?x.preu:"")+'">'+
+      '<input type="number" class="x-qty" min="0" step="1" value="'+(x.qty==null?1:x.qty)+'">'+
+      '<button type="button" class="xdel" title="Treu aquest component" aria-label="Treu aquest component">×</button>'+
+      '</div>';
+  }).join("");
+  Array.prototype.forEach.call($("extres-list").querySelectorAll(".xrow"),function(row){
+    var idx = +row.dataset.i;
+    Array.prototype.forEach.call(row.querySelectorAll("input"),function(el){
+      el.addEventListener("input",function(){ extres=readExtres(); recalc(); });
+    });
+    row.querySelector(".xdel").onclick=function(){
+      extres=readExtres(); extres.splice(idx,1); renderExtres(); recalc();
+    };
+  });
+}
+$("extra-add").onclick=function(){
+  extres=readExtres();
+  extres.push({desc:"",preu:0,qty:1});
+  renderExtres();
+  var rows=$("extres-list").querySelectorAll(".xrow");
+  if(rows.length) rows[rows.length-1].querySelector(".x-desc").focus();
+  recalc();
+};
+$("q-extres-marge").onchange=recalc;
+
+/* ---------------- edicio d'un pressupost desat ---------------- */
+function setEditing(rec){
+  editUid = rec ? rec.uid : null;
+  var bar=$("editbar");
+  if(!editUid){
+    bar.hidden=true;
+    $("save-quote").textContent="Desa al historial";
+    return;
+  }
+  bar.hidden=false;
+  $("editbar-txt").textContent = "Estàs editant «"+((rec.input&&rec.input.client)||"Sense nom")+"», desat el "+fmtDate(rec.data)+".";
+  $("save-quote").textContent="Desa els canvis";
+}
+$("editbar-new").onclick=function(){
+  setEditing(null);
+  toast("D'acord: quan el desis en sortirà un pressupost nou");
+};
+
+/* ---------------- dades vingudes del registre d'impressions ---------------- */
+var PREFILL_KEY="zenkai_pressupost_prefill";
+function aplicaPrefill(){
+  var cru=null;
+  try{ cru=localStorage.getItem(PREFILL_KEY); }catch(e){ return; }
+  if(!cru) return;
+  try{ localStorage.removeItem(PREFILL_KEY); }catch(e){}
+  var d=null;
+  try{ d=JSON.parse(cru); }catch(e){ return; }
+  if(!d || typeof d!=="object") return;
+  if(d.quan && (Date.now()-d.quan) > 20*60*1000) return;   /* caduca als 20 min */
+
+  setTipus("fdm");
+  if(d.titol) $("q-client").value=String(d.titol).slice(0,120);
+  /* amb segons sencers no hi ha error de decimals; accepto hores per compatibilitat */
+  var seg = (d.segons!=null) ? Math.max(0, Math.round(d.segons)) : Math.round(Math.max(0, d.hores||0)*3600);
+  var h=Math.floor(seg/3600), m=Math.round((seg%3600)/60);
+  if(m===60){ h+=1; m=0; }
+  $("q-temps").value = h||"";
+  $("q-temps-min").value = m||"";
+  if(d.grams>0) $("q-material").value = Math.round(d.grams*10)/10;
+  if(d.peces>0) $("q-peces").value = Math.max(1,Math.round(d.peces));
+  if(d.notes){
+    var n=$("q-notes").value;
+    $("q-notes").value = (n? n+"\n" : "") + String(d.notes).slice(0,600);
+  }
+  setEditing(null);
+  recalc();
+  $("prefillbar-txt").textContent = d.resum || "Dades carregades des del registre d'impressions.";
+  $("prefillbar").hidden=false;
+  go("calc");
+  try{ window.scrollTo(0,0); }catch(e){}
+  toast("Omplert des del registre d'impressions");
+}
+$("prefillbar-close").onclick=function(){ $("prefillbar").hidden=true; };
+
+/* ---------------- desar / historial ---------------- */
+function saveQuote(){
+  var inp=currentInput(), r=calc(inp);
+  if(!inp.tempsH && !inp.materialQty){ toast("Omple almenys el temps o el material abans de desar"); return; }
+  if(editUid){
+    var trobat=false;
+    var nou=historial.map(function(x){
+      if(x.uid!==editUid) return x;
+      trobat=true;
+      return { uid:x.uid, data:x.data, modificat:new Date().toISOString(), input:inp, resultat:r };
+    });
+    if(trobat){
+      historial=nou;
+      setEditing(null);
+      persistHistory();
+      toast("Pressupost actualitzat");
+      return;
+    }
+    setEditing(null);
+    toast("Aquell pressupost ja no hi era; el deso com a nou");
+  }
+  var rec = {
+    uid: "Q"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    data: new Date().toISOString(),
+    input: inp,
+    resultat: r
+  };
+  historial.unshift(rec);
+  persistHistory();
+  toast("Pressupost desat");
+}
+function fmtDate(iso){
+  try{
+    var d=new Date(iso);
+    return d.toLocaleDateString("ca-ES",{day:"numeric",month:"short",year:"numeric"});
+  }catch(e){ return ""; }
+}
+function renderHist(){
+  var list=$("hist-list");
+  $("hist-empty").hidden = historial.length>0;
+  list.innerHTML = historial.map(function(rec){
+    var inp=rec.input, r=rec.resultat;
+    return '<div class="qrow" data-uid="'+esc(rec.uid)+'">'+
+      '<span class="qtype '+(inp.tipus==="resina"?"resina":"fdm")+'"></span>'+
+      '<div class="qmain"><div class="name">'+esc(inp.client||"Sense nom")+'</div>'+
+      '<div class="sub note">'+fmtDate(rec.data)+' · '+(inp.tipus==="resina"?"Resina":"FDM")+' · '+inp.peces+' peç'+(inp.peces===1?"a":"es")+(rec.modificat?' · editat el '+fmtDate(rec.modificat):'')+'</div></div>'+
+      '<div class="qprice">'+fmtE(r.preuVendaTotal)+'<small>'+fmtE(r.preuVendaPerPeca)+'/peça</small></div></div>';
+  }).join("");
+  Array.prototype.forEach.call(list.querySelectorAll(".qrow"),function(row){
+    row.onclick=function(){ openDetail(row.dataset.uid); };
+  });
+}
+function byUidH(uid){ return historial.filter(function(r){return r.uid===uid;})[0]; }
+var detailUid=null;
+function openDetail(uid){
+  var rec=byUidH(uid); if(!rec) return;
+  detailUid=uid;
+  var inp=rec.input, r=rec.resultat;
+  $("d-title").textContent = inp.client || "Pressupost";
+  $("d-sub").textContent = fmtDate(rec.data)+" · "+(inp.tipus==="resina"?"Resina":"Filament (FDM)")+" · "+inp.peces+" peç"+(inp.peces===1?"a":"es")+" · "+fmtHM(inp.tempsH)+(rec.modificat?" · modificat el "+fmtDate(rec.modificat):"");
+  $("d-body").innerHTML = bdRows(r, inp.tipus==="resina");
+  $("d-notes").textContent = inp.notes||"";
+  $("overlay").hidden=false;
+}
+function closeDetail(){ $("overlay").hidden=true; detailUid=null; }
+$("d-close").onclick=closeDetail;
+$("overlay").onclick=function(e){ if(e.target===this) closeDetail(); };
+document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&!$("overlay").hidden) closeDetail(); });
+$("d-del").onclick=function(){
+  if(editUid===detailUid) setEditing(null);
+  historial=historial.filter(function(r){return r.uid!==detailUid;});
+  closeDetail(); persistHistory(); toast("Pressupost eliminat");
+};
+$("d-pdf").onclick=function(){
+  var rec=byUidH(detailUid); if(!rec) return;
+  makePDF(rec.input, rec.resultat, false, rec.data);
+};
+$("d-edit").onclick=function(){
+  var rec=byUidH(detailUid); if(!rec) return;
+  loadIntoForm(rec.input);
+  setEditing(rec);
+  closeDetail(); go("calc");
+  try{ window.scrollTo(0,0); }catch(e){}
+  toast("Canvia el que calgui i toca «Desa els canvis»");
+};
+$("d-dup").onclick=function(){
+  var rec=byUidH(detailUid); if(!rec) return;
+  setEditing(null);
+  loadIntoForm(rec.input);
+  closeDetail(); go("calc");
+  toast("Carregat com a còpia nova — ajusta'l i desa'l");
+};
+
+function loadIntoForm(inp){
+  setTipus(inp.tipus||"fdm");
+  $("q-client").value = inp.client||"";
+  $("q-peces").value = inp.peces||1;
+  var _th=inp.tempsH||0;
+  $("q-temps").value = _th?Math.floor(_th):"";
+  $("q-temps-min").value = _th?Math.round((_th-Math.floor(_th))*60):"";
+  $("q-prep").value = inp.prepMin||"";
+  $("q-material").value = inp.materialQty||"";
+  $("q-preu-material").value = inp.materialPreu||"";
+  $("q-postproces").value = inp.postprocesMin||"";
+  setMargeMode(inp.margeMode||"pctmat");
+  $("q-marge").value = inp.margePct!=null?inp.margePct:settings.general.marge;
+  $("q-amic").checked = !!inp.amic;
+  var d=inp.disseny;
+  $("q-disseny").checked = !!(d&&d.actiu);
+  $("disseny-box").hidden = !($("q-disseny").checked);
+  $("q-disseny-hores").value = d?d.hores||"":"";
+  $("q-disseny-preu").value = d?(d.preuHora||settings.general.dissenyHora):settings.general.dissenyHora;
+  $("q-notes").value = inp.notes||"";
+  extres = (Array.isArray(inp.extres)?inp.extres:[]).map(function(x){
+    x = x||{};
+    return { desc:x.desc||"", preu:x.preu||0, qty:(x.qty==null?1:x.qty) };
+  });
+  renderExtres();
+  $("q-extres-marge").checked = inp.extresMarge!==false;
+  var p=inp.pintat;
+  $("q-pintar").checked = !!(p&&p.actiu);
+  $("pintat-box").hidden = !($("q-pintar").checked);
+  $("q-pintat-hores").value = p?p.horesPeca||"":"";
+  $("q-pintat-mat").value = p?p.materialsPeca||"":"";
+  $("q-pintat-preu").value = p?(p.preuHora||settings.general.pintatHora):settings.general.pintatHora;
+  recalc();
+}
+
+/* ---------------- formulari: tipus i camps dinàmics ---------------- */
+function setTipus(v){
+  tipus=v;
+  Array.prototype.forEach.call($("tipus-seg").querySelectorAll("button"),function(b){
+    b.setAttribute("aria-pressed", String(b.dataset.v===v));
+  });
+  var isR = v==="resina";
+  $("mat-title").textContent = isR?"Resina":"Material";
+  $("mat-qty-label").firstChild.textContent = isR?"Resina total (ml) ":"Material total (g) ";
+  $("mat-price-label").firstChild.textContent = isR?"Preu (€/L) ":"Preu (€/kg) ";
+  $("resina-extra").hidden = !isR;
+  $("pintar-wrap").hidden = !isR;
+  if(!isR){
+    $("q-pintar").checked = false;
+    $("pintat-box").hidden = true;
+  }
+  if(!$("q-preu-material").value || $("q-preu-material")._auto){
+    /* per a l'FDM, el que diu l'inventari; la resina encara no hi és */
+    $("q-preu-material").value = isR ? settings.general.materialLResina
+      : (invPreuKg!=null ? invPreuKg : settings.general.materialKgFdm);
+    $("q-preu-material")._auto = true;
+  }
+  posaNotaPreu(isR ? "" : invPreuNota);
+  recalc();
+}
+$("q-preu-material").addEventListener("input", function(){ this._auto=false; });
+Array.prototype.forEach.call($("tipus-seg").querySelectorAll("button"),function(b){
+  b.onclick=function(){ setTipus(b.dataset.v); };
+});
+
+function setMargeMode(mode){
+  margeMode = (mode==="flat"||mode==="pct") ? mode : "pctmat";
+  Array.prototype.forEach.call($("marge-mode").querySelectorAll("button"),function(b){
+    b.setAttribute("aria-pressed", String(b.dataset.v===margeMode));
+  });
+  $("marge-label").textContent =
+    margeMode==="flat" ? "Guany fix per peça (€)" :
+    margeMode==="pct" ? "Marge sobre el cost total (%)" :
+    "Marge sobre el material (%)";
+}
+Array.prototype.forEach.call($("marge-mode").querySelectorAll("button"),function(b){
+  b.onclick=function(){ setMargeMode(b.dataset.v); recalc(); };
+});
+$("q-amic").addEventListener("change", recalc);
+$("q-disseny").onchange=function(){ $("disseny-box").hidden=!this.checked; recalc(); };
+
+$("q-pintar").onchange=function(){ $("pintat-box").hidden=!this.checked; recalc(); };
+Array.prototype.forEach.call($("pintat-presets").querySelectorAll("button"),function(b){
+  b.onclick=function(){
+    Array.prototype.forEach.call($("pintat-presets").querySelectorAll("button"),function(x){x.setAttribute("aria-pressed","false");});
+    b.setAttribute("aria-pressed","true");
+    $("q-pintat-hores").value = b.dataset.h;
+    $("pintat-desc").textContent = b.dataset.txt;
+    recalc();
+  };
+});
+["q-peces","q-temps","q-temps-min","q-prep","q-material","q-preu-material","q-postproces","q-marge","q-disseny-hores","q-disseny-preu","q-pintat-hores","q-pintat-mat","q-pintat-preu"].forEach(function(id){
+  $(id).addEventListener("input", recalc);
+});
+
+$("nou").onclick=function(){
+  $("q-client").value=""; $("q-peces").value=1; $("q-temps").value=""; $("q-temps-min").value=""; $("q-prep").value=""; $("q-material").value="";
+  $("q-preu-material")._auto=true; $("q-preu-material").value = tipus==="resina"?settings.general.materialLResina:settings.general.materialKgFdm;
+  $("q-postproces").value=""; setMargeMode("pctmat"); $("q-marge").value=settings.general.marge; $("q-amic").checked=false; $("q-notes").value="";
+  $("q-disseny").checked=false; $("disseny-box").hidden=true; $("q-disseny-hores").value=""; $("q-disseny-preu").value=settings.general.dissenyHora;
+  $("q-pintar").checked=false; $("pintat-box").hidden=true;
+  $("q-pintat-hores").value=""; $("q-pintat-mat").value=""; $("q-pintat-preu").value=settings.general.pintatHora;
+  Array.prototype.forEach.call($("pintat-presets").querySelectorAll("button"),function(x){x.setAttribute("aria-pressed","false");});
+  extres=[]; renderExtres(); $("q-extres-marge").checked=true;
+  setEditing(null);
+  $("prefillbar").hidden=true;
+  recalc();
+};
+$("save-quote").onclick=saveQuote;
+/* ---------------- PDF ---------------- */
+var BRAND_BLUE=[62,150,194], BRAND_ORANGE=[230,115,36], INK=[25,26,28], SOFT=[120,123,128];
+
+function pdfLines(inp,r,intern){
+  var rows=[];
+  if(intern){
+    rows.push(["Material", r.materialCost]);
+    rows.push(["Màquina (amortització)", r.machineCost]);
+    rows.push(["Manteniment i desgast", r.manteniCost]);
+    rows.push(["Electricitat", r.elecCost]);
+    if(inp.tipus==="resina") rows.push(["Consumibles (FEP, LCD, IPA)", r.consumCost]);
+    rows.push(["Marge per fallades", r.falladaExtra]);
+    if(r.prepCost>0) rows.push(["Preparació de l'arxiu", r.prepCost]);
+    if(r.dissenyCost>0) rows.push(["Disseny personalitzat", r.dissenyCost]);
+    if(r.maObraPerPeca>0) rows.push(["Mà d'obra (postprocés)", r.maObraPerPeca*r.peces]);
+    if(r.pintatPerPeca>0) rows.push(["Pintat", r.pintatPerPeca*r.peces]);
+    if(r.extresPerPeca>0){
+      var exl=(r.extresLlista||[]).filter(function(x){return x.cost>0;});
+      if(exl.length && exl.length<=6){
+        exl.forEach(function(x){
+          rows.push([(x.desc||"Component extern")+(x.qty!==1?" x"+x.qty:""), x.cost*r.peces]);
+        });
+      } else {
+        rows.push(["Components externs", r.extresPerPeca*r.peces]);
+      }
+    }
+    rows.push(["__SUB__Cost total", r.costTotalPerPeca*r.peces]);
+    rows.push(["Marge / guany", r.guanyPerPeca*r.peces]);
+    if(r.amic) rows.push(["__SUB__Preu normal", r.preuNormalPerPeca*r.peces]);
+    return rows;
+  }
+  /* versió per al client: per servei, amb el marge repartit, sense costos interns */
+  var base=[];
+  base.push(["Material", r.materialCost + (inp.tipus==="resina"?r.consumCost:0)]);
+  base.push(["Impressió i ús de màquina", r.machineCost + r.manteniCost + r.elecCost + r.falladaExtra]);
+  if(r.prepCost+r.dissenyCost>0) base.push([r.dissenyCost>0?"Disseny i preparació":"Preparació de l'arxiu", r.prepCost+r.dissenyCost]);
+  if(r.maObraPerPeca>0) base.push(["Postprocés i acabat", r.maObraPerPeca*r.peces]);
+  if(r.pintatPerPeca>0) base.push(["Pintat a mà", r.pintatPerPeca*r.peces]);
+  if(r.extresPerPeca>0){
+    var exc=(r.extresLlista||[]).filter(function(x){return x.cost>0;});
+    var noms=exc.map(function(x){ return (x.desc||"").trim(); }).filter(function(t){ return t!==""; });
+    var et="Components i material extern";
+    if(noms.length && noms.join(", ").length<=52) et += " ("+noms.join(", ")+")";
+    base.push([et, r.extresPerPeca*r.peces]);
+  }
+  var sum=base.reduce(function(a,x){ return a+x[1]; },0);
+  var k = sum>0 ? (r.preuVendaTotal/sum) : 1;
+  return base.map(function(x){ return [x[0], x[1]*k]; });
+}
+
+function makePDF(inp,r,intern,dateISO){
+  if(!window.jspdf||!window.jspdf.jsPDF){ toast("No he pogut carregar el generador de PDF (revisa la connexió)."); return; }
+  var doc=new window.jspdf.jsPDF({unit:"mm",format:"a4"});
+  var M=18, W=210, right=W-M, y=0;
+
+  try{
+    var logo=document.querySelector(".brandmark");
+    if(logo&&logo.src) doc.addImage(logo.src,"PNG",M,14,17,17);
+  }catch(e){}
+
+  doc.setFont("helvetica","bold"); doc.setFontSize(12);
+  doc.setTextColor(BRAND_BLUE[0],BRAND_BLUE[1],BRAND_BLUE[2]);
+  doc.text("ZENKAI",M+21,22);
+  var wz=doc.getTextWidth("ZENKAI");
+  doc.setTextColor(BRAND_ORANGE[0],BRAND_ORANGE[1],BRAND_ORANGE[2]);
+  doc.text("3D STUDIO",M+21+wz+1.2,22);
+  doc.setFont("helvetica","normal"); doc.setFontSize(8.5);
+  doc.setTextColor(SOFT[0],SOFT[1],SOFT[2]);
+  doc.text("Impressió 3D · disseny i acabat",M+21,27);
+
+  var d=dateISO?new Date(dateISO):new Date();
+  var ref="P-"+d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0")+
+          "-"+String(Math.abs((inp.client||"x").split("").reduce(function(a,c){return a+c.charCodeAt(0);},0))%97).padStart(2,"0");
+  doc.setFontSize(9); doc.setTextColor(SOFT[0],SOFT[1],SOFT[2]);
+  doc.text(d.toLocaleDateString("ca-ES",{day:"numeric",month:"long",year:"numeric"}),right,22,{align:"right"});
+  doc.text("Ref. "+ref,right,27,{align:"right"});
+
+  doc.setDrawColor(215,215,211); doc.setLineWidth(0.3);
+  doc.line(M,36,right,36);
+
+  doc.setFont("helvetica","bold"); doc.setFontSize(21);
+  doc.setTextColor(INK[0],INK[1],INK[2]);
+  doc.text(intern?"Full de costos":"Pressupost",M,49);
+
+  y=60;
+  doc.setFontSize(9.5); doc.setFont("helvetica","bold");
+  doc.setTextColor(SOFT[0],SOFT[1],SOFT[2]);
+  doc.text("PER A",M,y);
+  doc.text("TREBALL",M+62,y);
+  doc.setFont("helvetica","normal"); doc.setTextColor(INK[0],INK[1],INK[2]); doc.setFontSize(11);
+  doc.text(inp.client||"—",M,y+6);
+  var desc=inp.peces+" peç"+(inp.peces===1?"a":"es")+" · "+(inp.tipus==="resina"?"Resina":"Filament (FDM)");
+  doc.text(desc,M+62,y+6);
+  doc.setFontSize(9); doc.setTextColor(SOFT[0],SOFT[1],SOFT[2]);
+  doc.text(fmtHM(inp.tempsH)+" d'impressió",M+62,y+11);
+
+  y=88;
+  doc.setDrawColor(182,182,177); doc.setLineWidth(0.4);
+  doc.line(M,y,right,y);
+  y+=6;
+  doc.setFont("helvetica","bold"); doc.setFontSize(8.5);
+  doc.setTextColor(SOFT[0],SOFT[1],SOFT[2]);
+  doc.text("CONCEPTE",M,y);
+  doc.text("IMPORT",right,y,{align:"right"});
+  y+=3.5;
+  doc.setDrawColor(215,215,211); doc.setLineWidth(0.3);
+  doc.line(M,y,right,y);
+  y+=7;
+
+  var rows=pdfLines(inp,r,intern);
+  doc.setFontSize(10.5);
+  rows.forEach(function(row){
+    var label=row[0], sub=false;
+    if(label.indexOf("__SUB__")===0){ label=label.slice(7); sub=true; }
+    doc.setFont("helvetica",sub?"bold":"normal");
+    doc.setTextColor(INK[0],INK[1],INK[2]);
+    doc.text(label,M,y);
+    doc.text(fmtE(row[1]),right,y,{align:"right"});
+    y+=6.6;
+    if(sub){ doc.setDrawColor(230,230,227); doc.line(M,y-3.2,right,y-3.2); }
+  });
+
+  y+=2;
+  doc.setDrawColor(25,26,28); doc.setLineWidth(0.5);
+  doc.line(M,y,right,y);
+  y+=9;
+  doc.setFont("helvetica","bold"); doc.setFontSize(13);
+  doc.setTextColor(INK[0],INK[1],INK[2]);
+  doc.text(r.amic&&!intern?"TOTAL (preu d'amic)":"TOTAL",M,y);
+  doc.setFontSize(17);
+  doc.text(fmtE(r.preuVendaTotal),right,y+0.6,{align:"right"});
+  y+=7;
+  doc.setFont("helvetica","normal"); doc.setFontSize(9);
+  doc.setTextColor(SOFT[0],SOFT[1],SOFT[2]);
+  doc.text(fmtE(r.preuVendaPerPeca)+" per peça · "+inp.peces+" unitat"+(inp.peces===1?"":"s"),right,y,{align:"right"});
+
+  if(inp.notes){
+    y+=12;
+    doc.setFont("helvetica","bold"); doc.setFontSize(8.5);
+    doc.setTextColor(SOFT[0],SOFT[1],SOFT[2]);
+    doc.text("NOTES",M,y);
+    y+=5;
+    doc.setFont("helvetica","normal"); doc.setFontSize(10);
+    doc.setTextColor(INK[0],INK[1],INK[2]);
+    doc.splitTextToSize(inp.notes,right-M).forEach(function(ln){ doc.text(ln,M,y); y+=5; });
+  }
+
+  doc.setFontSize(8); doc.setTextColor(SOFT[0],SOFT[1],SOFT[2]);
+  doc.setDrawColor(215,215,211); doc.setLineWidth(0.3);
+  doc.line(M,273,right,273);
+  doc.text(intern
+    ? "Document intern — no destinat al client."
+    : "Pressupost vàlid 30 dies. Els terminis es confirmen en acceptar la comanda.", M,279);
+  doc.text("Zenkai3D Studio",right,279,{align:"right"});
+
+  var safe=(inp.client||"pressupost").replace(/[^A-Za-zÀ-ÿ0-9 _-]/g,"").trim()||"pressupost";
+  doc.save((intern?"Costos - ":"Pressupost - ")+safe+".pdf");
+}
+
+$("pdf-client").onclick=function(){ var i=currentInput(); makePDF(i,calc(i),false,null); };
+$("pdf-intern").onclick=function(){ var i=currentInput(); makePDF(i,calc(i),true,null); };
+
+$("copy-summary").onclick=function(){
+  var inp=currentInput(), r=calc(inp);
+  var text=summaryText(inp,r);
+  navigator.clipboard.writeText(text).then(function(){ toast("Resum copiat"); },function(){ toast("No he pogut copiar-ho"); });
+};
+
+/* ---------------- ajustos ---------------- */
+function fillSettingsForm(){
+  $("s-fdm-preu").value=settings.fdm.preu; $("s-fdm-vida").value=settings.fdm.vida; $("s-fdm-watts").value=settings.fdm.watts;
+  $("s-fdm-manteniment").value=settings.fdm.manteniment;
+  $("s-res-preu").value=settings.resina.preu; $("s-res-vida").value=settings.resina.vida; $("s-res-watts").value=settings.resina.watts;
+  $("s-res-fep-preu").value=settings.resina.fepPreu; $("s-res-fep-vida").value=settings.resina.fepVida;
+  $("s-res-lcd-preu").value=settings.resina.lcdPreu; $("s-res-lcd-vida").value=settings.resina.lcdVida;
+  $("s-res-ipa-preu").value=settings.resina.ipaPreu; $("s-res-ipa-ml").value=settings.resina.ipaMl;
+  $("s-res-guants").value=settings.resina.guants; $("s-res-cura-w").value=settings.resina.curaW; $("s-res-cura-min").value=settings.resina.curaMin;
+  $("s-res-perdua").value=settings.resina.perdua; $("s-res-manteniment").value=settings.resina.manteniment;
+  $("s-kwh").value=settings.general.kwh; $("s-maobra").value=settings.general.maObra; $("s-pintat-hora").value=settings.general.pintatHora;
+  $("s-disseny-hora").value=settings.general.dissenyHora;
+  $("s-marge").value=settings.general.marge; $("s-fallada-fdm").value=settings.general.falladaFdm; $("s-fallada-res").value=settings.general.falladaRes;
+  $("s-amic").value=settings.general.amicDte;
+}
+var SETTINGS_MAP = [
+  ["s-fdm-preu","fdm","preu"],["s-fdm-vida","fdm","vida"],["s-fdm-watts","fdm","watts"],["s-fdm-manteniment","fdm","manteniment"],
+  ["s-res-preu","resina","preu"],["s-res-vida","resina","vida"],["s-res-watts","resina","watts"],
+  ["s-res-fep-preu","resina","fepPreu"],["s-res-fep-vida","resina","fepVida"],
+  ["s-res-lcd-preu","resina","lcdPreu"],["s-res-lcd-vida","resina","lcdVida"],
+  ["s-res-ipa-preu","resina","ipaPreu"],["s-res-ipa-ml","resina","ipaMl"],
+  ["s-res-guants","resina","guants"],["s-res-cura-w","resina","curaW"],["s-res-cura-min","resina","curaMin"],
+  ["s-res-perdua","resina","perdua"],["s-res-manteniment","resina","manteniment"],
+  ["s-kwh","general","kwh"],["s-maobra","general","maObra"],["s-pintat-hora","general","pintatHora"],["s-disseny-hora","general","dissenyHora"],
+  ["s-marge","general","marge"],["s-fallada-fdm","general","falladaFdm"],["s-fallada-res","general","falladaRes"],
+  ["s-amic","general","amicDte"]
+];
+SETTINGS_MAP.forEach(function(m){
+  $(m[0]).addEventListener("change", function(){
+    settings[m[1]][m[2]] = num(this.value);
+    persistSettings();
+  });
+});
+
+/* ---------------- backup ---------------- */
+function browserDownload(filename,text,mime){
+  try{
+    var blob=new Blob([text],{type:(mime||"text/plain")+";charset=utf-8"});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement("a");
+    a.href=url; a.download=filename; a.style.display="none";
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); },1500);
+    toast("Descarregant "+filename);
+  }catch(e){ copyFallback(text); }
+}
+function copyFallback(text){
+  $("import-box").value=text;
+  try{ navigator.clipboard.writeText(text); toast("No he pogut descarregar-ho; ho he copiat al porta-retalls"); }
+  catch(e){ toast("No he pogut descarregar-ho; el tens al quadre de text"); }
+}
+function offer(filename,text,mime){
+  if(typeof window.claude!=="undefined"&&window.claude&&window.claude.use){
+    window.claude.use("downloads").then(function(d){
+      if(!d){ browserDownload(filename,text,mime); return; }
+      d.save({filename:filename,data:text}).catch(function(){ browserDownload(filename,text,mime); });
+    }).catch(function(){ browserDownload(filename,text,mime); });
+  } else browserDownload(filename,text,mime);
+}
+$("export-json").onclick=function(){
+  offer("pressupost-3d-backup.json", JSON.stringify({ajustos:settings,historial:historial},null,2), "application/json");
+};
+$("wipe-all").onclick=function(){
+  if(confirm("Vols eliminar tot l'historial i tornar els ajustos als valors de fàbrica? Això no es pot desfer.")){
+    historial=[];
+    settings = {
+      fdm:{ preu:280, vida:3000, watts:150, manteniment:0.15 },
+      resina:{ preu:260, vida:2000, watts:65, fepPreu:12, fepVida:30, lcdPreu:40, lcdVida:1500, ipaPreu:9, ipaMl:150, guants:0.15, curaW:20, curaMin:10, perdua:10, manteniment:0.10 },
+      general:{ kwh:0.131, maObra:15, pintatHora:15, dissenyHora:20, marge:30, falladaFdm:8, falladaRes:12, materialKgFdm:22, materialLResina:22, amicDte:15 }
+    };
+    persistSettings(); persistHistory();
+    toast("Restaurat als valors de fàbrica");
+  }
+};
+$("import-btn").onclick=function(){
+  var msg=$("import-msg"), raw=$("import-box").value.trim();
+  if(!raw){ msg.className="note err"; msg.textContent="Enganxa primer el contingut de la còpia."; return; }
+  try{
+    raw=raw.replace(/^```(?:json)?/i,"").replace(/```$/,"").trim();
+    var data=JSON.parse(raw);
+    if(data.ajustos) deepMerge(settings, data.ajustos);
+    if(Array.isArray(data.historial)) historial=data.historial;
+    persistSettings(); persistHistory();
+    msg.className="note ok"; msg.textContent="Restaurat correctament.";
+    $("import-box").value="";
+  }catch(e){
+    msg.className="note err"; msg.textContent="No he pogut llegir això: "+e.message;
+  }
+};
+
+/* ---------------- navegació ---------------- */
+function go(v){
+  view=v;
+  ["calc","hist","settings"].forEach(function(k){ $("view-"+k).hidden=(k!==v); });
+  document.querySelectorAll("nav button").forEach(function(b){ b.setAttribute("aria-selected", String(b.dataset.view===v)); });
+}
+document.querySelectorAll("nav button").forEach(function(b){ b.onclick=function(){ go(b.dataset.view); }; });
+
+/* ---------------- arrencada ---------------- */
+
+function buildCSV(){
+  var cols=["data","modificat","client","tipus","peces","hores","prep_min","material_qty","material_preu",
+            "postproces_min","marge_mode","marge","amic","disseny_hores","pintat_hores",
+            "extres_eur_peca","extres_detall",
+            "cost_per_peca","preu_per_peca","preu_total"];
+  var rows=historial.map(function(rec){
+    var i=rec.input, r=rec.resultat;
+    var exDet=(Array.isArray(i.extres)?i.extres:[]).map(function(x){
+      x=x||{}; var q=(x.qty==null?1:x.qty);
+      return (x.desc||"component")+(q!==1?" x"+q:"")+" @ "+(Math.round((x.preu||0)*100)/100)+" EUR";
+    }).join(" + ");
+    var vals=[rec.data, rec.modificat||"", i.client||"", i.tipus, i.peces, i.tempsH, i.prepMin||0,
+      i.materialQty, i.materialPreu, i.postprocesMin||0, i.margeMode||"", i.margePct||0,
+      i.amic?"si":"no", (i.disseny&&i.disseny.hores)||0, (i.pintat&&i.pintat.horesPeca)||0,
+      (Math.round((r.extresPerPeca||0)*100)/100), exDet,
+      (Math.round(r.costTotalPerPeca*100)/100), (Math.round(r.preuVendaPerPeca*100)/100),
+      (Math.round(r.preuVendaTotal*100)/100)];
+    return vals.map(function(v){ return '"'+String(v==null?"":v).replace(/"/g,'""')+'"'; }).join(",");
+  });
+  return cols.join(",")+"\n"+rows.join("\n");
+}
+
+/* ---------------- el preu del material, de l'inventari ---------------- */
+/* Era un número escrit a mà als Ajustos mentre l'inventari ja sabia què havia
+   costat cada bobina. Es pondera pels grams que queden: és el que costa de
+   debò el pròxim gram, no la mitjana de les etiquetes. */
+var invPreuKg = null, invPreuNota = "";
+function preuKgInventari(items){
+  var grams = 0, euros = 0, amb = 0, sense = 0, min = null, max = null;
+  (items || []).forEach(function (it) {
+    if (!it) return;
+    var q = Number(it.quantitat); if (!isFinite(q)) q = 1;
+    var nom = Number(it.pes_net_nominal_g || it.pes_nominal_g) || 1000;
+    var rest = Number(it.pes_restant_g); if (!isFinite(rest)) rest = 0;
+    var est = q > 0 ? rest + (q - 1) * nom : 0;
+    var p = Number(it.preu_bobina_eur);
+    if (!(p > 0)) { if (est > 0) sense++; return; }
+    var kg = p / (nom / 1000);
+    if (min == null || kg < min) min = kg;
+    if (max == null || kg > max) max = kg;
+    amb++;
+    if (est > 0) { grams += est; euros += est / 1000 * kg; }
+  });
+  if (!amb || !(grams > 0)) return null;
+  return { kg: Math.round(euros / (grams / 1000) * 100) / 100,
+           amb: amb, sense: sense, min: min, max: max };
+}
+function carregaPreuInventari(){
+  if(typeof driveLlegeixDe!=="function" || !gToken) return;
+  driveLlegeixDe("zenkai3d-inventari.json").then(function(d){
+    var r = d ? preuKgInventari(d.items) : null;
+    if(!r){ posaNotaPreu(""); return; }
+    invPreuKg = r.kg;
+    var n = "Mitjana de l'inventari: " + fmtE(r.kg) + "/kg";
+    if(r.min!=null && r.max!=null && Math.abs(r.max-r.min) > 0.01)
+      n += " (de " + fmtE(r.min) + " a " + fmtE(r.max) + ")";
+    if(r.sense) n += " · " + r.sense + (r.sense===1?" bobina":" bobines") + " sense preu posat";
+    invPreuNota = n;
+    posaNotaPreu(n);
+    /* si no l'ha tocat ell, el camp passa a dir el de debò */
+    var e=$("q-preu-material");
+    if(e._auto && tipus!=="resina") { e.value = r.kg; }
+    recalc();
+  }).catch(function(){ posaNotaPreu(""); });
+}
+function posaNotaPreu(txt){
+  var l=$("mat-price-label"); if(!l) return;
+  var n=l.querySelector(".preunota");
+  if(!txt){ if(n) n.remove(); return; }
+  if(!n){ n=document.createElement("small"); n.className="note preunota";
+          n.style.cssText="display:block;margin-top:3px"; l.appendChild(n); }
+  n.textContent=txt;
+}
+var ZCFG = {
+  nomFitxa: "pressupost",
+  nomFitxes: "pressupostos",
+  /* el que hi ha al Drive i aquí no: ve d'haver-ho apuntat en un altre
+     aparell, i si no s'afegeix abans de desar es perd */
+  mergeRemote: function(d){
+    var noves = zFonLlista(historial, d && d.historial, null);
+    if(!noves.length) return 0;
+    noves.forEach(function(x){ historial.push(x); });
+    saveLocal(); renderHist();
+    return noves.length;
+  },
+  refreshRemote: function(d){
+    var r = d && d.historial;
+    if(!Array.isArray(r) || !r.length) return false;
+    if(JSON.stringify(r)===JSON.stringify(historial)) return false;
+    historial = JSON.parse(JSON.stringify(r));
+    saveLocal(); renderHist();
+    return true;
+  },
+  jsonName: "zenkai3d-pressupostos.json",
+  csvName:  "zenkai3d-pressupostos.csv",
+  buildCSV: function(){ return buildCSV(); },
+  getPayload: function(){ return {historial:historial, settings:settings, updatedAt:new Date().toISOString()}; },
+  applyPayload: function(d){
+    loadLocal();
+    var had=false;
+    if(Array.isArray(d.historial) && d.historial.length){ historial=d.historial; had=true; }
+    if(d.settings) zdeepMerge(settings,d.settings);
+    saveLocal();
+    return had;
+  },
+  boot: function(){
+    loadLocal();
+    $("q-marge").value=settings.general.marge;
+    $("q-pintat-preu").value=settings.general.pintatHora;
+    $("q-preu-material")._auto=true;
+    carregaPreuInventari();
+    setMargeMode("pctmat");
+    setTipus("fdm");
+    renderExtres();
+    setEditing(null);
+    fillSettingsForm();
+    renderHist();
+    connectDb();
+    aplicaPrefill();
+  }
+};
+
+</script>
+<script src="zenkai.js"></script>
+<script>if(typeof gateInit!=="function"){var _g=document.getElementById("gate-status");
+  if(_g) _g.textContent="No s'ha pogut carregar zenkai.js. Recarrega la pàgina.";}</script>
+<script src="zenkai-nav.js"></script>
+</body>
+</html>
