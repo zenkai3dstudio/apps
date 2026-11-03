@@ -1,0 +1,1955 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Col·laboracions</title>
+<meta name="description" content="Marques, entregables i què tens pendent">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Col·laboracions">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F2F2F0">
+<link rel="apple-touch-icon" href="icona.png">
+<link rel="icon" href="icona.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<link rel="stylesheet" href="zenkai.css">
+<style>
+:root{
+  --paper:#F2F2F0; --surface:#FFFFFF; --ink:#191A1C; --ink-soft:#6B6D72;
+  --line:#D9D9D5; --line-strong:#B6B6B1; --alert:#C4362B; --good:#3F7D4C; --hub:#F2F2F0;
+  --r:3px; --brand-blue:#3E96C2; --brand-orange:#E67324;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#131416; --surface:#1B1C1F; --ink:#EDEDEA; --ink-soft:#95979C;
+    --line:#2E3033; --line-strong:#45484C; --alert:#F0796B; --good:#6FBF7F; --hub:#131416;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131416; --surface:#1B1C1F; --ink:#EDEDEA; --ink-soft:#95979C;
+  --line:#2E3033; --line-strong:#45484C; --alert:#F0796B; --good:#6FBF7F; --hub:#131416;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink); font-family:"Archivo","Helvetica Neue",Arial,sans-serif;
+  font-size:15px; line-height:1.45; font-variant-numeric:tabular-nums; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:900px;margin:0 auto;padding:0 20px 90px}
+button{font:inherit;color:inherit}
+a{color:inherit}
+
+header{padding:34px 0 18px}
+.brandbar{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.brandmark{width:30px;height:30px;border-radius:7px;display:block;object-fit:cover;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.brandname{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.brandname b{color:var(--brand-blue)}
+.brandname i{color:var(--brand-orange);font-style:normal}
+h1{font-size:clamp(26px,5.5vw,38px);font-weight:700;letter-spacing:-.026em;line-height:1.03;margin:0}
+.sub{color:var(--ink-soft);font-size:13.5px;margin:6px 0 0}
+.stats{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;color:var(--ink-soft);font-size:13.5px;margin-top:16px}
+.stats b{color:var(--ink);font-weight:600;font-size:16px}
+
+nav{display:flex;gap:0;border-bottom:1px solid var(--line-strong);margin:26px 0 0;overflow-x:auto}
+nav button{background:none;border:0;border-bottom:2px solid transparent;padding:9px 14px 8px;margin-bottom:-1px;cursor:pointer;white-space:nowrap;color:var(--ink-soft);font-weight:500}
+nav button:hover{color:var(--ink)}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+/* ---- les pestanyes al mòbil: totes a la vista, en files ---- */
+@media(max-width:560px){
+  nav{flex-wrap:wrap;overflow-x:visible;border-bottom:0;gap:6px;margin:20px 0 0;padding:0 0 2px}
+  nav button{border:1px solid var(--line-strong);border-radius:20px;border-bottom-width:1px;
+    margin-bottom:0;padding:6px 11px;font-size:12.5px;line-height:1.15}
+  nav button[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  nav button[aria-selected="true"] .ncount{color:var(--paper);opacity:.8}
+  .navwrap::after{display:none}
+}
+nav button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+section[hidden]{display:none}
+section{padding-top:24px}
+h2{font-size:18px;font-weight:600;letter-spacing:-.02em;margin:30px 0 4px}
+h2:first-child{margin-top:0}
+.hint{color:var(--ink-soft);font-size:13px;margin:0 0 14px;max-width:64ch}
+
+input[type=text],input[type=search],input[type=date],select,textarea{
+  background:var(--surface);border:1px solid var(--line-strong);color:var(--ink);
+  padding:7px 9px;border-radius:var(--r);font:inherit;width:100%;
+}
+textarea{min-height:70px;resize:vertical}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink-soft)}
+label.f.full{grid-column:1/-1}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:520px){.grid3{grid-template-columns:1fr 1fr}}
+
+.btn{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--r);padding:8px 13px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.primary:hover{opacity:.86}
+.btn.danger{color:var(--alert);border-color:var(--line-strong)}
+.btn.small{padding:5px 10px;font-size:12.5px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0}
+.spacer{flex:1}
+input[type=search]{flex:1 1 190px;min-width:0}
+
+.card{border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:16px;background:var(--surface)}
+.card h3{margin:0 0 12px;font-size:14px;font-weight:600;letter-spacing:-.01em}
+
+.badge{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.03em;padding:2px 8px;border-radius:20px;border:1px solid var(--line-strong);color:var(--ink-soft);white-space:nowrap}
+.badge.b-acceptada{color:var(--brand-blue);border-color:var(--brand-blue)}
+.badge.b-obert{color:var(--paper);background:var(--brand-blue);border-color:var(--brand-blue)}
+.badge.b-producte,.badge.b-rebut,.badge.b-produccio{color:var(--brand-orange);border-color:var(--brand-orange)}
+.badge.b-revisio{color:var(--brand-orange);border-color:var(--brand-orange)}
+.badge.b-publicat,.badge.b-cobrat{color:var(--good);border-color:var(--good)}
+.badge.b-descartada{text-decoration:line-through;opacity:.6}
+.badge.t-material{color:var(--brand-blue);border-color:var(--brand-blue);background:color-mix(in srgb,var(--brand-blue) 10%,transparent)}
+.badge.t-disseny{color:var(--brand-orange);border-color:var(--brand-orange);background:color-mix(in srgb,var(--brand-orange) 10%,transparent)}
+.badge.t-hardware{color:var(--ink);border-color:var(--ink-soft);background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.badge.t-concurs{color:var(--good);border-color:var(--good);background:color-mix(in srgb,var(--good) 10%,transparent)}
+.tipusline{margin-top:4px}
+/* els concursos: el que compta és quants dies queden, no l'estat */
+.cgrup{margin:28px 0 0}
+.cgrup:first-child{margin-top:4px}
+.cgrup>h3{margin:0 0 3px;font-size:15px}
+.cgrup>h3 .quants{font-weight:400;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.cgrup.apagat .collab-row{opacity:.6}
+.dies{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.03em;padding:2px 8px;border-radius:20px;border:1px solid var(--line-strong);color:var(--ink-soft);white-space:nowrap}
+.dies.aviat{color:var(--paper);background:var(--brand-orange);border-color:var(--brand-orange)}
+.dies.avui{color:var(--paper);background:var(--alert);border-color:var(--alert)}
+.thumbs{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 0}
+.thumb{position:relative;width:74px;height:110px;border:1px solid var(--line-strong);border-radius:var(--r);overflow:hidden;background:var(--paper)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb button{position:absolute;top:2px;right:2px;width:22px;height:22px;border:0;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:15px;line-height:1;cursor:pointer;padding:0}
+
+.collab-row{display:flex;gap:12px;align-items:center;padding:14px 0;border-top:1px solid var(--line);cursor:pointer}
+.collab-row:last-child{border-bottom:1px solid var(--line)}
+.collab-row:hover{background:rgba(0,0,0,.015)}
+.collab-row.done{opacity:.55}
+nav .ncount{font-weight:400;color:var(--ink-soft);margin-left:5px;font-variant-numeric:tabular-nums}
+.cmain{flex:1;min-width:0}
+.cmain .name{font-weight:600}
+.cmain .sub{margin-top:2px;color:var(--ink-soft);font-size:12.5px}
+.cright{text-align:right;flex:none;font-size:12.5px;color:var(--ink-soft)}
+.progress{width:70px;height:5px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:5px;margin-left:auto}
+.progress span{display:block;height:100%;background:var(--ink)}
+
+.checklist{display:flex;flex-direction:column;gap:2px}
+.citem{display:flex;align-items:center;gap:9px;padding:7px 0;border-top:1px solid var(--line)}
+.citem:last-child{border-bottom:1px solid var(--line)}
+.citem input[type=checkbox]{width:17px;height:17px;flex:none}
+.citem span{flex:1;min-width:0;overflow-wrap:anywhere;font-size:14px}
+.citem.fet span{color:var(--ink-soft);text-decoration:line-through}
+.citem .x{border:0;background:none;cursor:pointer;color:var(--ink-soft);font-size:18px;line-height:1;padding:2px 4px}
+.citem .x:hover{color:var(--alert)}
+.addrow{display:flex;gap:6px;margin-top:8px}
+.addrow input{flex:1}
+
+.frow{display:flex;align-items:center;gap:9px;padding:8px 0;border-top:1px solid var(--line);font-size:13.5px;flex-wrap:wrap}
+.frow:last-child{border-bottom:1px solid var(--line)}
+/* un enllaç enganxat sencer no té on partir-se: que s'encongeixi i parteixi
+   on calgui, si no estira la fila i el full se'n va de la pantalla */
+.frow a{font-weight:500;text-decoration:none;border-bottom:1px solid var(--line-strong);flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+.frow a:hover{border-color:var(--ink)}
+.frow .badge,.frow .x{flex:none}
+.frow .note{margin-left:auto;flex:none}
+
+.empty-state{border:1px dashed var(--line-strong);padding:26px;text-align:center;color:var(--ink-soft);max-width:520px}
+.empty-state b{display:block;color:var(--ink);margin-bottom:6px;font-size:16px}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.42);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.overlay[hidden]{display:none}
+.sheet{background:var(--surface);border:1px solid var(--line-strong);width:min(600px,100%);max-height:92vh;overflow:auto;padding:22px;border-radius:var(--r) var(--r) 0 0}
+@media(min-width:700px){.overlay{align-items:center}.sheet{border-radius:var(--r)}}
+.sheet h3{margin:0;font-size:19px;font-weight:600;letter-spacing:-.02em;overflow-wrap:break-word}
+.actions{display:flex;gap:8px;align-items:center;margin-top:16px}
+
+.gate{position:fixed;inset:0;background:var(--paper);z-index:60;display:flex;align-items:center;justify-content:center;padding:24px}
+.gate[hidden]{display:none}
+.gate-card{max-width:360px;width:100%;text-align:center}
+.gate-card img{width:64px;height:64px;border-radius:15px;margin-bottom:18px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.gate-card h2{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0 0 8px}
+.gate-card p{color:var(--ink-soft);font-size:14px;line-height:1.5;margin:0 0 20px}
+.gate-card input{margin-bottom:10px}
+.gate-card .btn{width:100%;padding:11px;font-size:14.5px}
+.gate-link{margin-top:16px;font-size:12.5px;color:var(--ink-soft);text-decoration:underline;background:none;border:0;cursor:pointer;padding:4px}
+.gate-status{margin-top:12px;font-size:12.5px;color:var(--ink-soft)}
+.acctbar{display:flex;align-items:center;gap:8px;margin-top:12px}
+/* el correu empenyia el botó de tancar sessió fora de la pantalla al mòbil. Que
+   s'escurci ell, que és el prescindible: els botons es queden on són. */
+.acctbar .note{min-width:0;flex:0 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acctbar img{width:22px;height:22px;border-radius:50%;flex:none}
+.acctbar .btn{padding:4px 10px;font-size:12px;flex:none;white-space:nowrap}
+.backlink{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:5px;
+  text-decoration:none;color:var(--ink-soft);border:1px solid var(--line-strong);
+  border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;white-space:nowrap}
+.backlink:hover{color:var(--ink);border-color:var(--ink)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:40;background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:var(--r);font-size:13.5px}
+.toast[hidden]{display:none}
+.note{font-size:13px;color:var(--ink-soft)}
+.err{color:var(--alert)}
+textarea.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+
+/* ---------- mòbil ---------- */
+@media(max-width:600px){
+  .wrap{padding:0 14px 80px}
+  header{padding:22px 0 12px}
+  .stats{gap:6px 16px;font-size:12.5px}
+  nav{margin-top:18px}
+  nav button{padding:9px 11px 8px;font-size:14px}
+  section{padding-top:18px}
+  h2{font-size:16.5px;margin:24px 0 4px}
+
+  /* els formularis passen a una sola columna: a 2 columnes els camps queden inservibles */
+  .grid2,.grid3{grid-template-columns:1fr}
+
+  /* la barra d'eines s'apila i els botons ocupen tota l'amplada */
+  .toolbar{gap:7px}
+  .toolbar .spacer{display:none}
+  .toolbar>.btn{flex:1 1 100%}
+  input[type=search]{flex:1 1 100%}
+  #f-estat,#f-tipus,#f2-estat,#f2-tipus{flex:1 1 calc(50% - 4px);min-width:0}
+
+  /* files de la llista: el nom mana, l'estat baixa a sota */
+  .collab-row{gap:10px;padding:13px 0;align-items:flex-start}
+  .cright{text-align:left;font-size:12px}
+  .progress{margin-left:0}
+
+  /* afegir entregables/enllaços: en columna perquè els camps siguin usables */
+  .addrow{flex-wrap:wrap}
+  .addrow input{flex:1 1 100%!important}
+  .addrow .btn{flex:1 1 100%}
+
+  .sheet{padding:18px 15px;max-height:94vh}
+  .sheet h3{font-size:17.5px}
+  .actions{flex-wrap:wrap}
+  .actions .btn{flex:1 1 calc(50% - 4px)}
+  .actions .spacer{display:none}
+  .empty-state{padding:20px 16px}
+  .frow{flex-wrap:wrap;gap:7px}
+  .frow .note{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ───── correccions d'interfície ───── */
+/* Una classe amb display: propi es menjava l'atribut «hidden» i deixava
+   coses a la vista que havien d'estar amagades. */
+[hidden]{display:none!important}
+
+/* Les pestanyes, al mòbil, que es vegi que n'hi ha més a la dreta */
+nav{-webkit-overflow-scrolling:touch;scrollbar-width:none;position:relative}
+nav::-webkit-scrollbar{display:none}
+
+/* Als dits els cal una mica més de superfície */
+@media(max-width:720px){
+  nav button{padding:11px 13px 10px}
+  .btn{padding:10px 14px}
+  .q{min-width:32px;height:32px}
+}
+
+/* Els filtres anaven un sota l'altre ocupant tota l'amplada */
+.toolbar input[type=search],.toolbar input[type=text]{flex:1 1 180px;min-width:0;width:auto}
+.toolbar select{flex:0 1 auto;width:auto;min-width:0}
+@media(max-width:560px){
+  .toolbar{gap:7px}
+  .toolbar input[type=search],.toolbar input[type=text]{flex:1 1 100%}
+  .toolbar select{flex:1 1 calc(50% - 4px);font-size:13px}
+}
+@media(min-width:760px){
+  .toolbar input[type=search],.toolbar input[type=text]{max-width:300px}
+  .toolbar select{max-width:190px}
+  /* les files no s'estirin d'una punta a l'altra deixant un forat al mig */
+  #llista,#pend-list{max-width:760px}
+  .grid2,.grid3{max-width:760px}
+  label.f.full input[type=text]{max-width:520px}
+  label.f.full textarea{max-width:620px}
+}
+
+@media(max-width:560px){ .toolbar .spacer{display:none} }
+
+.navwrap{position:relative}
+.navwrap::after{content:"";position:absolute;right:0;top:0;bottom:1px;width:34px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,var(--paper));opacity:0;transition:opacity .15s}
+.navwrap.hi-ha-mes::after{opacity:1}
+
+.ver{display:inline-block;margin-left:7px;padding:2px 9px;border-radius:999px;background:var(--brand-blue);
+  color:#fff;font-size:11px;font-weight:700;letter-spacing:.04em;white-space:nowrap;vertical-align:1px}
+/* ---- seguiment ---- */
+.segsec{margin:26px 0 0}
+.segsec h3{font-size:14px;font-weight:600;margin:0 0 3px;display:flex;align-items:center;gap:8px}
+.segsec .compte{background:var(--ink);color:var(--paper);border-radius:999px;font-size:11px;
+  font-weight:700;padding:1px 8px;min-width:20px;text-align:center}
+.segsec.buida .compte{background:var(--line-strong)}
+.segsec > p.hint{margin:0 0 12px}
+.segitem{border:1px solid var(--line);border-left:3px solid var(--brand-blue);border-radius:var(--r);
+  padding:13px 15px;margin-bottom:10px;background:var(--surface)}
+.segitem.urgent{border-left-color:var(--alert)}
+.segitem.feta{border-left-color:var(--good);opacity:.6}
+.segtop{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.segtop b{font-size:15px}
+.segtop .quan{color:var(--ink-soft);font-size:12px;margin-left:auto;white-space:nowrap}
+.segwhy{font-size:12.5px;color:var(--ink-soft);margin:4px 0 0;line-height:1.45}
+.segmail{margin-top:11px;border:1px solid var(--line);border-radius:6px;background:var(--hub);overflow:hidden}
+.segmail summary{cursor:pointer;padding:8px 11px;font-size:12.5px;font-weight:600}
+.segmail .cos{padding:0 11px 11px}
+.segmail label{display:block;font-size:11px;color:var(--ink-soft);margin:6px 0 3px}
+.segmail input,.segmail textarea{width:100%;font:inherit;font-size:13px;padding:7px 9px;
+  border:1px solid var(--line-strong);border-radius:5px;background:var(--surface);color:var(--ink)}
+.segmail textarea{min-height:170px;resize:vertical;line-height:1.5}
+.segacc{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.segacc .btn{font-size:12.5px;padding:7px 11px}
+.sensemail{font-size:12px;color:var(--alert);margin-top:8px}
+.plantilles{margin-top:30px;border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;background:var(--surface)}
+.plantilles summary{cursor:pointer;font-size:13px;font-weight:600}
+.plantilles label{display:block;font-size:12px;color:var(--ink-soft);margin:13px 0 4px}
+.plantilles input,.plantilles textarea{width:100%;font:inherit;font-size:13px;padding:7px 9px;
+  border:1px solid var(--line-strong);border-radius:5px;background:var(--hub);color:var(--ink)}
+.plantilles textarea{min-height:140px;resize:vertical;line-height:1.5}
+.claus{font-size:11.5px;color:var(--ink-soft);line-height:1.6;margin:10px 0 0}
+.claus code{background:var(--hub);border:1px solid var(--line);border-radius:3px;padding:1px 5px;font-size:11px}
+
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <img src="icona.png" alt="Zenkai3D Studio">
+    <div id="gate-setup">
+      <h2>Un pas, un cop</h2>
+      <p>Enganxa el Client ID que t'ha donat Google Cloud. Només cal fer-ho una vegada i val per a les tres apps.</p>
+      <input type="text" id="gate-cid" placeholder="xxxxx.apps.googleusercontent.com">
+      <button class="btn primary" id="gate-cid-save">Desa i continua</button>
+      <button type="button" class="gate-link" id="gate-skip">Fes-la servir només en aquest dispositiu, sense Google</button>
+    </div>
+    <div id="gate-login" hidden>
+      <h2>Col·laboracions</h2>
+      <p>Inicia sessió amb Google per veure i desar les teves dades — es guarden al teu Drive, sincronitzades entre dispositius.</p>
+      <button class="btn primary" id="gate-signin">Continua amb Google</button>
+      <button type="button" class="gate-link" id="gate-skip2">Fes-la servir només en aquest dispositiu</button>
+      <button type="button" class="gate-link" id="gate-reconfig">Canvia el Client ID</button>
+      <p class="gate-status" id="gate-status"></p>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<header>
+  <div class="brandbar">
+    <img class="brandmark" src="icona.png" alt="Zenkai3D Studio">
+    <span class="brandname"><b>ZENKAI</b><i>3D STUDIO</i></span>
+    <a class="backlink" href="index.html" title="Torna al menú">&lsaquo; Menú</a>
+  </div>
+  <div class="acctbar" id="acctbar" hidden>
+    <img id="acct-pic" alt="">
+    <span class="note" id="acct-email"></span>
+    <span class="spacer"></span>
+    <button class="btn" id="acct-signout">Tanca sessió</button>
+  </div>
+  <h1>Col·laboracions</h1>
+  <p class="sub">Cada marca amb el seu propi projecte: què t'han enviat, què els deus i què falta. <span class="ver">v4 · concursos a part</span></p>
+  <div class="stats">
+    <span><b id="t-actives">0</b> actives</span>
+    <span><b id="t-pendents">0</b> accions pendents</span>
+    <span><b id="t-cobrar">0</b> per cobrar</span>
+    <span><b id="t-concursos">0</b> concursos oberts</span>
+    <span><b id="t-seguiment">0</b> esperen correu</span>
+    <span class="spacer"></span>
+    <button class="btn small" id="sync-btn" title="Torna a sincronitzar amb el que hi hagi desat">⟳ Actualitza</button>
+  </div>
+</header>
+
+<div class="navwrap"><nav role="tablist">
+  <button role="tab" data-view="llista" aria-selected="true">Col·laboracions</button>
+  <button role="tab" data-view="concursos" aria-selected="false">Concursos<span class="ncount" id="n-concursos"></span></button>
+  <button role="tab" data-view="pendent" aria-selected="false">Pendent</button>
+  <button role="tab" data-view="seguiment" aria-selected="false">Seguiment</button>
+  <button role="tab" data-view="tancades" aria-selected="false">Tancades<span class="ncount" id="n-tancades"></span></button>
+  <button role="tab" data-view="correu" aria-selected="false">Correu</button>
+  <button role="tab" data-view="instagram" aria-selected="false">Instagram</button>
+  <button role="tab" data-view="importa" aria-selected="false">Importa</button>
+</nav></div>
+
+<main>
+<section id="view-llista">
+  <div class="toolbar">
+    <input type="search" id="q" placeholder="Cerca una marca…">
+    <select id="f-estat"><option value="">Tots els estats</option></select>
+    <select id="f-tipus">
+      <option value="">Tots els tipus</option>
+      <option value="material">Filament</option>
+      <option value="hardware">Hardware</option>
+      <option value="disseny">Disseny</option>
+      <option value="altre">Altre</option>
+    </select>
+    <span class="spacer"></span>
+    <button class="btn primary" id="add">Nova col·laboració</button>
+  </div>
+  <div id="llista"></div>
+  <div class="empty-state" id="llista-empty" hidden>
+    <b>Encara no tens cap col·laboració desada</b>
+    Quan una marca t'accepti una proposta — per correu, Instagram o TikTok — crea-la aquí i tindràs en un sol lloc què t'han enviat, què els deus i la data de lliurament.
+    <div style="margin-top:14px"><button class="btn primary" data-goto-add>Nova col·laboració</button></div>
+  </div>
+</section>
+
+<section id="view-tancades" hidden>
+  <p class="hint">Les cobrades i les descartades, de la més recent a la més antiga. Si n'obres una i li canvies l'estat, torna a Col·laboracions.</p>
+  <div class="toolbar">
+    <input type="search" id="q2" placeholder="Cerca una marca…">
+    <select id="f2-estat">
+      <option value="">Tots els estats</option>
+      <option value="cobrat">Cobrat</option>
+      <option value="descartada">Descartada</option>
+    </select>
+    <select id="f2-tipus">
+      <option value="">Tots els tipus</option>
+      <option value="material">Filament</option>
+      <option value="hardware">Hardware</option>
+      <option value="disseny">Disseny</option>
+      <option value="altre">Altre</option>
+    </select>
+  </div>
+  <div id="tancades"></div>
+  <div class="empty-state" id="tancades-empty" hidden>
+    <b>Encara no n'hi ha cap de tancada</b>
+    Quan marquis una col·laboració com a cobrada o descartada, passarà aquí.
+  </div>
+</section>
+
+<section id="view-concursos" hidden>
+  <p class="hint">Els concursos i els sortejos van a part de les col·laboracions amb marques: aquí el que compta és la data límit. Cada dilluns te'n busco de nous.</p>
+  <div class="toolbar">
+    <input type="search" id="q3" placeholder="Cerca un concurs…">
+    <span class="spacer"></span>
+    <button class="btn primary" id="add-concurs">Nou concurs</button>
+  </div>
+  <div id="concursos"></div>
+  <div class="empty-state" id="concursos-empty" hidden>
+    <b>Encara no tens cap concurs</b>
+    Cada dilluns miro quins concursos i sortejos d'impressió 3D hi ha oberts i te'ls deixo aquí amb la data límit. També hi entren els premis que guanyes.
+  </div>
+</section>
+
+<section id="view-pendent" hidden>
+  <h2>El que tens pendent, de totes les col·laboracions actives</h2>
+  <p class="hint">Marca-ho aquí mateix quan ho facis; s'actualitza a la fitxa de cada marca.</p>
+  <div id="pendent-list"></div>
+  <div class="empty-state" id="pendent-empty" hidden>
+    <b>No tens res pendent ara mateix</b>
+    O no has desat cap entregable/recepció encara, o ja els tens tots marcats.
+  </div>
+</section>
+
+<section id="view-seguiment" hidden>
+  <h2>Qui espera un correu teu</h2>
+  <p class="hint">Es calcula sol amb les dates i l'estat de cada fitxa. Els correus te'ls deixo escrits; enviar-los el fas tu.</p>
+
+  <div class="segsec" id="seg-tancar">
+    <h3>Per tancar <span class="compte">0</span></h3>
+    <p class="hint">Has publicat i has entregat tot. Un correu de tancament és el que fa que repeteixin.</p>
+    <div class="llistat"></div>
+  </div>
+
+  <div class="segsec" id="seg-recordar">
+    <h3>Sense resposta <span class="compte">0</span></h3>
+    <p class="hint">Propostes que no t'han contestat. Un recordatori educat passades unes setmanes funciona.</p>
+    <div class="llistat"></div>
+  </div>
+
+  <div class="segsec" id="seg-revisitar">
+    <h3>Per tornar-hi <span class="compte">0</span></h3>
+    <p class="hint">Marques on vas posar una data per tornar-hi amb una proposta nova.</p>
+    <div class="llistat"></div>
+  </div>
+
+  <div class="segsec" id="seg-tard">
+    <h3>Vas tard <span class="compte">0</span></h3>
+    <p class="hint">Entregues amb la data passada i coses per fer. Aquí no hi ha correu: és per a tu.</p>
+    <div class="llistat"></div>
+  </div>
+
+  <details class="plantilles">
+    <summary>Els textos dels correus</summary>
+    <p class="claus">Pots canviar-los com vulguis. On posis aquestes paraules, s'hi posarà el que toqui:
+      <code>{marca}</code> <code>{hola}</code> <code>{compensacio}</code>
+      <code>{entregables}</code> <code>{data}</code> <code>{dies}</code> <code>{motiu}</code></p>
+
+    <label>Tancament — assumpte</label>
+    <input type="text" id="pl-tancar-as">
+    <label>Tancament — cos</label>
+    <textarea id="pl-tancar-cos"></textarea>
+
+    <label>Recordatori — assumpte</label>
+    <input type="text" id="pl-recordar-as">
+    <label>Recordatori — cos</label>
+    <textarea id="pl-recordar-cos"></textarea>
+
+    <label>Tornar-hi — assumpte</label>
+    <input type="text" id="pl-revisitar-as">
+    <label>Tornar-hi — cos</label>
+    <textarea id="pl-revisitar-cos"></textarea>
+
+    <label>A partir de quants dies sense resposta avisar-te</label>
+    <input type="number" id="pl-dies" min="1" max="120" step="1" style="max-width:120px">
+
+    <div class="toolbar" style="margin:14px 0 0">
+      <button class="btn" type="button" id="pl-reset">Torna als textos de fàbrica</button>
+    </div>
+  </details>
+</section>
+
+<section id="view-correu" hidden>
+  <h2>Busca col·laboracions al correu</h2>
+  <p class="hint">Mira el teu Gmail i et llista els correus que semblen col·laboracions. Els que ja tens fitxats els marca; dels altres et pot crear la fitxa amb el text ja posat.</p>
+
+  <label class="f">Què buscar
+    <input type="text" id="mail-q" value="newer_than:120d (collaboration OR partnership OR sponsor OR ambassador OR affiliate OR &quot;creator program&quot; OR gifted)">
+  </label>
+  <div class="toolbar">
+    <button class="btn primary" id="mail-buscar">Busca al correu</button>
+    <button class="btn" id="mail-reconsent">Torna a demanar el permís</button>
+  </div>
+  <p class="note" id="mail-msg"></p>
+  <div id="mail-list"></div>
+</section>
+
+<section id="view-instagram" hidden>
+  <h2>Captures de la conversa</h2>
+  <p class="hint" id="ig-cap-hint" hidden>El text es llegeix al mateix mòbil. Amb lletra petita o fosca pot fallar — el que llegeixi et queda a les notes perquè ho revisis.</p>
+  <p class="hint">Fes captures de pantalla del DM (les que calguin), tria-les aquí i les llegeixo jo. Instagram no deixa copiar una conversa sencera, però una captura sí.</p>
+
+  <div class="toolbar" style="margin-top:0">
+    <button class="btn primary" id="ig-shot-btn">Afegeix captures</button>
+    <input type="file" id="ig-shot-input" hidden multiple accept="image/*">
+  </div>
+  <div id="ig-thumbs" class="thumbs"></div>
+  <div class="toolbar" id="ig-read-row" hidden>
+    <button class="btn primary" id="ig-llegir">Llegeix les captures</button>
+  </div>
+
+  <h2>Dades de la col·laboració</h2>
+  <label class="f" style="margin-bottom:12px">Marca <input type="text" id="ig-marca" placeholder="p. ex. Sunlu"></label>
+  <div class="grid2" style="margin-bottom:12px">
+    <label class="f">Tipus
+      <select id="ig-tipus">
+        <option value="material">Filament — m'envien filament o resina</option>
+        <option value="hardware">Hardware — impressora, eines o accessoris</option>
+        <option value="disseny">Disseny — imprimeixo un model seu</option>
+        <option value="concurs">Concurs — premi guanyat</option>
+        <option value="altre">Altre</option>
+      </select>
+    </label>
+    <label class="f">Estat
+      <select id="ig-estat">
+        <option value="enviada">Proposta enviada — espero resposta</option>
+        <option value="proposta">Proposta rebuda</option>
+        <option value="acceptada">Acceptada</option>
+        <option value="producte">Esperant el producte</option>
+        <option value="rebut">Material rebut</option>
+      </select>
+    </label>
+  </div>
+  <label class="f">Notes / conversa
+    <textarea id="ig-text" style="min-height:120px" placeholder="S'omple sol en llegir les captures. També pots enganxar-hi missatges solts."></textarea>
+  </label>
+  <div class="toolbar">
+    <button class="btn primary" id="ig-crear">Crea la col·laboració</button>
+    <button class="btn" id="ig-netejar">Neteja</button>
+  </div>
+  <p class="note" id="ig-msg"></p>
+</section>
+
+<section id="view-importa" hidden>
+  <h2>Carrega un fitxer</h2>
+  <p class="hint">La manera més segura des del mòbil: no depèn del teclat ni del porta-retalls.</p>
+  <div class="toolbar" style="margin-top:0">
+    <button class="btn primary" id="import-file-btn">Afegeix des d'un fitxer .json</button>
+    <button class="btn danger" id="import-replace-btn">Substitueix-ho tot amb un fitxer</button>
+    <input type="file" id="import-file-input" hidden>
+  </div>
+
+  <h2>O enganxa-ho directament</h2>
+  <p class="hint">Accepta un array JSON de col·laboracions. S'afegeixen a les que ja tens — no esborra res.</p>
+  <textarea class="mono" id="import-box" style="min-height:180px" autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder='[{"marca":"...", "estat":"acceptada", ...}]'></textarea>
+  <div class="toolbar">
+    <button class="btn primary" id="import-btn">Afegeix-les</button>
+    <span class="spacer"></span>
+    <button class="btn" id="export-btn">Exporta còpia (JSON)</button>
+  </div>
+  <p class="note" id="import-msg"></p>
+</section>
+</main>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Col·laboració">
+    <h3 id="sheet-title">Nova col·laboració</h3>
+    <div class="grid2" style="margin-top:16px">
+      <label class="f full">Marca / empresa <input type="text" id="e-marca" placeholder="p. ex. Sunlu"></label>
+      <label class="f full">Tipus de col·laboració
+        <select id="e-tipus">
+          <option value="material">Filament — m'envien filament o resina</option>
+          <option value="hardware">Hardware — m'envien impressora, eines o accessoris</option>
+          <option value="disseny">Disseny — imprimeixo el model d'un dissenyador</option>
+          <option value="concurs">Concurs — premi guanyat en un sorteig</option>
+          <option value="altre">Altre</option>
+        </select>
+      </label>
+      <label class="f">Persona de contacte <input type="text" id="e-contacte" placeholder="opcional"></label>
+      <label class="f">Correu <input type="email" id="e-email" placeholder="per als correus de seguiment" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+      <label class="f">Torna-hi el <input type="date" id="e-tornar-el"></label>
+      <label class="f full">Motiu per tornar-hi <input type="text" id="e-tornar-motiu" placeholder="p. ex. quan hagi passat el llançament, o amb números nous"></label>
+      <label class="f">Canal <select id="e-canal"><option value="email">Correu</option><option value="instagram">Instagram</option><option value="tiktok">TikTok</option><option value="altre">Altre</option></select></label>
+      <label class="f">Estat
+        <select id="e-estat">
+          <option value="obert">Concurs obert</option>
+          <option value="enviada">Proposta enviada — espero resposta</option>
+          <option value="proposta">Proposta rebuda</option>
+          <option value="acceptada">Acceptada</option>
+          <option value="producte">Esperant el producte</option>
+          <option value="rebut">Material rebut</option>
+          <option value="produccio">En producció</option>
+          <option value="revisio">Enviat a revisió</option>
+          <option value="publicat">Publicat</option>
+          <option value="cobrat">Cobrat</option>
+          <option value="descartada">Descartada</option>
+        </select>
+      </label>
+      <label class="f">Compensació <input type="text" id="e-compensacio" placeholder="p. ex. producte + 120 €"></label>
+      <label class="f">Data d'acceptació <input type="date" id="e-data-acc"></label>
+      <label class="f">Data de lliurament <input type="date" id="e-data-lliurament"></label>
+    </div>
+
+    <h2>Què els deus (entregables)</h2>
+    <div class="checklist" id="e-entregables"></div>
+    <div class="addrow"><input type="text" id="e-entregable-nou" placeholder="p. ex. 1 Reel a Instagram"><button class="btn small" id="e-entregable-add">Afegeix</button></div>
+
+    <h2>Què esperes rebre</h2>
+    <div class="checklist" id="e-rebuts"></div>
+    <div class="addrow"><input type="text" id="e-rebut-nou" placeholder="p. ex. Enviament del producte"><button class="btn small" id="e-rebut-add">Afegeix</button></div>
+
+    <h2>Fitxers i enllaços</h2>
+    <p class="hint" id="assets-hint">Puja un PDF, imatge o vídeo, o enganxa un enllaç (a un Drive, a la conversa d'Instagram, etc.).</p>
+    <div class="checklist" id="e-fitxers"></div>
+    <div class="toolbar" style="margin:8px 0">
+      <button class="btn small" id="e-file-btn">Adjunta un fitxer</button>
+      <input type="file" id="e-file-input" hidden accept="image/*,video/mp4,video/webm,.pdf,.csv,.md,.txt,.json">
+      <span class="spacer"></span>
+    </div>
+    <div class="addrow"><input type="text" id="e-link-nom" placeholder="Nom de l'enllaç" style="flex:1"><input type="text" id="e-link-url" placeholder="https://…" style="flex:2"><button class="btn small" id="e-link-add">Afegeix</button></div>
+
+    <label class="f full" style="margin-top:16px">Notes <textarea id="e-notes" placeholder="Qualsevol detall que necessitis recordar"></textarea></label>
+
+    <div class="actions">
+      <button class="btn primary" id="e-save">Desa</button>
+      <button class="btn" id="e-cancel">Cancel·la</button>
+      <span class="spacer"></span>
+      <button class="btn danger" id="e-del" hidden>Elimina</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+"use strict";
+
+/* ---------------- estat ---------------- */
+var collabs = [];
+var deletedUids = {};   /* esborrades en aquesta sessió: no les recupero del Drive en desar */
+var LS_KEY = "collabs-v1";
+var dbDoc=null, remoteSeen=false, writeTimer=null, lastSerialized="";
+var assetsNs=null, sampleFn=null, imgCaps=null, igPend=null;
+var editingId=null;
+var edEntregables=[], edRebuts=[], edFitxers=[];
+
+var ESTATS = {
+  obert:"Concurs obert", enviada:"Proposta enviada", proposta:"Proposta rebuda",
+  acceptada:"Acceptada", producte:"Esperant el producte", rebut:"Material rebut",
+  produccio:"En producció", revisio:"Enviat a revisió", publicat:"Publicat",
+  cobrat:"Cobrat", descartada:"Descartada"
+};
+var ACTIUS = ["acceptada","producte","rebut","produccio","revisio","publicat"];
+var TANCATS = ["cobrat","descartada"];
+var TIPUS = { material:"Filament", hardware:"Hardware", disseny:"Disseny", concurs:"Concurs", altre:"Altre" };
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+function toast(msg){ var t=$("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(function(){t.hidden=true;},2600); }
+function uid(pfx){ return pfx+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function fmtDate(iso){
+  if(!iso) return "";
+  try{ var d=new Date(iso+"T00:00:00"); return d.toLocaleDateString("ca-ES",{day:"numeric",month:"short"}); }catch(e){ return iso; }
+}
+function fmtSize(b){
+  if(b==null) return "";
+  if(b<1024) return b+" B";
+  if(b<1024*1024) return Math.round(b/1024)+" KB";
+  return (b/1024/1024).toFixed(1)+" MB";
+}
+
+/* ---------------- persistència ---------------- */
+function saveLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(collabs)); }catch(e){} }
+function loadLocal(){
+  try{ var s=localStorage.getItem(LS_KEY); if(s){ var a=JSON.parse(s); if(Array.isArray(a)) collabs=a; } }catch(e){}
+}
+var dbWaitTimer=null, dbWaitTries=0;
+function persist(){
+  saveLocal(); renderAll();
+  if(typeof scheduleDriveSave==="function") scheduleDriveSave();
+  scheduleRemoteWrite();
+}
+function scheduleRemoteWrite(){
+  clearTimeout(dbWaitTimer);
+  if(!dbDoc){
+    if(dbWaitTries>=20) return; /* ~10s of trying; db capability genuinely unavailable */
+    dbWaitTries++;
+    dbWaitTimer=setTimeout(scheduleRemoteWrite,500);
+    return;
+  }
+  dbWaitTries=0;
+  clearTimeout(writeTimer);
+  writeTimer=setTimeout(function(){
+    lastSerialized=JSON.stringify(collabs);
+    dbDoc.set({collabs:collabs, updatedAt:new Date().toISOString()}).catch(function(e){
+      if(e&&e.code==="quota_exceeded") toast("Massa dades per al servidor; queda desat només en aquest navegador.");
+    });
+  },450);
+}
+function manualSync(){
+  var btn=$("sync-btn"), old=btn.textContent;
+  if(typeof gToken==="undefined" || !gToken || !gFileId){
+    toast("Per sincronitzar cal entrar-hi amb el compte de Google.");
+    return;
+  }
+  btn.disabled=true; btn.textContent="Actualitzant…";
+  driveLoad(gFileId).then(function(d){
+    btn.disabled=false; btn.textContent=old;
+    var remote = Array.isArray(d && d.collabs) ? d.collabs : [];
+    if(JSON.stringify(remote)===JSON.stringify(collabs)){
+      toast("Ja tenies l'última versió");
+    }else{
+      collabs=JSON.parse(JSON.stringify(remote));
+      saveLocal(); renderAll();
+      toast("Actualitzat amb els últims canvis del Drive");
+    }
+  }).catch(function(e){
+    btn.disabled=false; btn.textContent=old;
+    if(e&&e.code==="g_401"){
+      toast("La sessió de Google ha caducat; torna a entrar-hi.");
+      gToken=null; showLogin("Torna a entrar-hi per continuar.");
+    } else {
+      toast("No he pogut llegir el Drive ara mateix.");
+    }
+  });
+}
+function connectCaps(){
+  $("sync-btn").onclick=manualSync;
+  if(typeof window.claude==="undefined"||!window.claude||!window.claude.use){
+    $("ig-cap-hint").hidden=false;
+    return;
+  }
+  connectDb(0);
+  window.claude.use("sample").then(function(fn){
+    if(!fn){ $("ig-cap-hint").hidden=false; return; }
+    sampleFn=fn;
+    if(fn.limits) fn.limits().then(function(l){
+      imgCaps=(l&&l.images)?l.images:null;
+      $("ig-cap-hint").hidden = !!imgCaps;
+      if(imgCaps&&imgCaps.mediaTypes&&imgCaps.mediaTypes.length){
+        $("ig-shot-input").accept=imgCaps.mediaTypes.join(",");
+      }
+      igRenderThumbs();
+    },function(){ $("ig-cap-hint").hidden=false; });
+  },function(){ $("ig-cap-hint").hidden=false; });
+  window.claude.use("assets").then(function(a){
+    assetsNs=a||null;
+    $("assets-hint").textContent = assetsNs
+      ? "Puja un PDF, imatge o vídeo, o enganxa un enllaç (a un Drive, a la conversa d'Instagram, etc.)."
+      : "Aquí no puc guardar fitxers pujats — enganxa un enllaç (Drive, WeTransfer, la conversa d'Instagram…) en lloc de pujar-lo.";
+    $("e-file-btn").hidden = !assetsNs;
+  },function(){ $("e-file-btn").hidden=true; });
+}
+function connectDb(attempt){
+  window.claude.use("db").then(function(db){
+    if(!db) return;
+    dbDoc=db.doc("collabs/llista");
+    scheduleRemoteWrite();
+    dbDoc.onSnapshot(function(snap){
+      if(!snap.exists){ remoteSeen=true; if(collabs.length) persist(); return; }
+      var d=snap.data()||{}, remote=Array.isArray(d.collabs)?d.collabs:[];
+      var ser=JSON.stringify(remote);
+      if(!remoteSeen){
+        remoteSeen=true;
+        if(remote.length||!collabs.length){ collabs=JSON.parse(JSON.stringify(remote)); lastSerialized=ser; saveLocal(); renderAll(); }
+        else persist();
+        return;
+      }
+      if(ser!==lastSerialized && !snap.metadata.hasPendingWrites){ collabs=JSON.parse(JSON.stringify(remote)); lastSerialized=ser; saveLocal(); renderAll(); }
+    },function(){ dbDoc=null; if(attempt<2) setTimeout(function(){ connectDb(attempt+1); },1500); });
+  }).catch(function(){
+    if(attempt<2) setTimeout(function(){ connectDb(attempt+1); },1500);
+  });
+}
+
+/* ---------------- càlculs ---------------- */
+function byUid(u){ return collabs.filter(function(c){return c.uid===u;})[0]; }
+function progress(c){
+  var list=c.entregables||[];
+  var fet=list.filter(function(x){return x.fet;}).length;
+  return {fet:fet, total:list.length};
+}
+function isActiu(c){ return ACTIUS.indexOf(c.estat)>=0; }
+function esConcurs(c){ return (c.tipus||"material")==="concurs"; }
+function avuiISO(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+/* un concurs obert amb la data límit passada ja no es pot fer: va a Tancades sense haver de tocar res */
+function caducat(c){ return c.estat==="obert" && !!c.dataLliurament && c.dataLliurament < avuiISO(); }
+function isTancat(c){ return TANCATS.indexOf(c.estat)>=0 || caducat(c); }
+function pendentsCount(c){
+  var a=(c.entregables||[]).filter(function(x){return !x.fet;}).length;
+  var b=(c.rebuts||[]).filter(function(x){return !x.fet;}).length;
+  return a+b;
+}
+
+/* ---------------- render: capçalera ---------------- */
+function renderHeader(){
+  var actius=collabs.filter(isActiu);
+  $("t-actives").textContent=actius.length;
+  $("t-pendents").textContent=actius.reduce(function(s,c){return s+pendentsCount(c);},0);
+  $("t-cobrar").textContent=collabs.filter(function(c){return c.estat==="publicat";}).length;
+  try{
+    var sg=calculaSeguiment();
+    $("t-seguiment").textContent = sg.tancar.length+sg.recordar.length+sg.revisitar.length;
+  }catch(e){ $("t-seguiment").textContent="0"; }
+}
+
+/* ---------------- render: llista ---------------- */
+function passaFiltre(c, q, f, ft){
+  if(f && c.estat!==f) return false;
+  if(ft && (c.tipus||"material")!==ft) return false;
+  if(!q) return true;
+  return (c.marca+" "+(c.contacte||"")+" "+(c.notes||"")+" "+(c.compensacio||"")).toLowerCase().indexOf(q)>=0;
+}
+function visible(){
+  var q=$("q").value.trim().toLowerCase(), f=$("f-estat").value, ft=$("f-tipus").value;
+  var list=collabs.filter(function(c){ return !esConcurs(c) && !isTancat(c) && passaFiltre(c, q, f, ft); });
+  var order = ["obert","produccio","rebut","revisio","producte","acceptada","proposta","publicat","enviada"];
+  list.sort(function(a,b){
+    var da=order.indexOf(a.estat), db=order.indexOf(b.estat);
+    if(da!==db) return da-db;
+    if(a.estat==="obert") return (a.dataLliurament||"9999").localeCompare(b.dataLliurament||"9999");
+    return (b.dataLliurament||"").localeCompare(a.dataLliurament||"");
+  });
+  return list;
+}
+function fmtDateAny(iso){
+  if(!iso) return "";
+  try{ var d=new Date(iso+"T00:00:00"); return d.toLocaleDateString("ca-ES",{day:"numeric",month:"short",year:"numeric"}); }catch(e){ return iso; }
+}
+function rowHtml(c, tancada){
+  var p=progress(c);
+  var pct = p.total ? Math.round(p.fet/p.total*100) : 0;
+  var quan = c.dataLliurament ? (c.estat==="obert" ? (caducat(c) ? ' · va tancar el ' : ' · tanca el ') : ' · lliurament ')+(tancada?fmtDateAny(c.dataLliurament):fmtDate(c.dataLliurament))
+           : (tancada && c.dataAcceptacio ? ' · '+fmtDateAny(c.dataAcceptacio) : '');
+  return '<div class="collab-row" data-uid="'+esc(c.uid)+'">'+
+    '<div class="cmain"><div class="name">'+esc(c.marca||"Sense nom")+'</div>'+
+    '<div class="sub">'+(c.contacte?esc(c.contacte)+' · ':'')+esc({email:"Correu",instagram:"Instagram",tiktok:"TikTok",altre:"Altre"}[c.canal]||"")+
+    quan+'</div></div>'+
+    '<div class="cright"><span class="badge b-'+esc(caducat(c)?"descartada":c.estat)+'">'+esc(caducat(c)?"Concurs tancat":(ESTATS[c.estat]||c.estat))+'</span>'+
+    '<div class="tipusline"><span class="badge t-'+esc(c.tipus||"material")+'">'+esc(TIPUS[c.tipus||"material"]||"Material")+'</span></div>'+
+    (p.total?'<div class="progress" title="'+p.fet+'/'+p.total+' entregables"><span style="width:'+pct+'%"></span></div>':'')+
+    '</div></div>';
+}
+function bindRows(box){
+  Array.prototype.forEach.call(box.querySelectorAll(".collab-row"),function(row){
+    row.onclick=function(){ openEditor(row.dataset.uid); };
+  });
+}
+function renderLlista(){
+  var box=$("llista"), list=visible();
+  var oberts=collabs.filter(function(c){ return !esConcurs(c) && !isTancat(c); }).length;
+  $("llista-empty").hidden = collabs.filter(function(c){ return !esConcurs(c); }).length>0;
+  box.innerHTML = list.map(function(c){ return rowHtml(c, false); }).join("") ||
+    (collabs.length && !oberts ? '<p class="hint">Totes les col·laboracions estan tancades. Les tens a la pestanya Tancades.</p>' : '');
+  bindRows(box);
+  var sel=$("f-estat"), cur=sel.value;
+  sel.innerHTML='<option value="">Tots els estats</option>'+Object.keys(ESTATS).filter(function(k){ return TANCATS.indexOf(k)<0; }).map(function(k){
+    return '<option value="'+k+'"'+(k===cur?' selected':'')+'>'+esc(ESTATS[k])+'</option>'; }).join("");
+}
+
+/* ---------------- render: tancades ---------------- */
+function renderTancades(){
+  var box=$("tancades");
+  var q=$("q2").value.trim().toLowerCase(), f=$("f2-estat").value, ft=$("f2-tipus").value;
+  var tots=collabs.filter(function(c){ return !esConcurs(c) && isTancat(c); });
+  var list=tots.filter(function(c){ return passaFiltre(c, q, f, ft); });
+  list.sort(function(a,b){
+    var da=a.dataLliurament||a.dataAcceptacio||"", db=b.dataLliurament||b.dataAcceptacio||"";
+    return db.localeCompare(da);
+  });
+  box.innerHTML = list.map(function(c){ return rowHtml(c, true); }).join("");
+  bindRows(box);
+  $("tancades-empty").hidden = tots.length>0;
+  $("n-tancades").textContent = tots.length ? String(tots.length) : "";
+}
+
+/* ---------------- render: concursos ---------------- */
+function diesFins(iso){
+  if(!iso) return null;
+  var d=new Date(iso+"T00:00:00");
+  if(isNaN(d)) return null;
+  var a=new Date(); a.setHours(0,0,0,0);
+  return Math.round((d-a)/86400000);
+}
+function quanTanca(c){
+  var n=diesFins(c.dataLliurament);
+  if(n==null) return {txt:"sense data límit", cls:""};
+  if(n<0) return {txt:"va tancar el "+fmtDateAny(c.dataLliurament), cls:""};
+  if(n===0) return {txt:"tanca avui", cls:"avui"};
+  if(n===1) return {txt:"tanca demà", cls:"avui"};
+  return {txt:"queden "+n+" dies", cls:(n<=3?"aviat":"")};
+}
+/* El vocabulari de les col·laboracions no li va bé a un concurs: "Esperant el
+   producte" és el premi que t'han de fer arribar, i "Cobrat" és que ja el tens. */
+var ESTATS_CONCURS = { obert:"Concurs obert", producte:"Esperant el premi", cobrat:"Premi rebut",
+                       descartada:"Descartat" };
+function estatConcurs(c){
+  if(caducat(c)) return "No t'hi has presentat";
+  return ESTATS_CONCURS[c.estat] || ESTATS[c.estat] || c.estat;
+}
+/* L'any només si no és el d'enguany: un concurs que tanca aquesta setmana no
+   necessita que li diguin "del 2026". */
+function fmtDataCurta(iso){
+  if(!iso) return "";
+  return iso.slice(0,4)===String(new Date().getFullYear()) ? fmtDate(iso) : fmtDateAny(iso);
+}
+function rowConcurs(c){
+  var obert = c.estat==="obert" && !caducat(c);
+  var q = quanTanca(c);
+  var p = progress(c);
+  var sub=[];
+  if(c.contacte) sub.push(esc(c.contacte));
+  if(c.compensacio) sub.push(esc(c.compensacio));
+  if(c.dataLliurament) sub.push(esc((obert?"fins al ":"tancava el ")+fmtDataCurta(c.dataLliurament)));
+  /* Res de barra de progrés: en un concurs o t'hi has presentat o no. */
+  if(p.total && p.fet===p.total) sub.push("ja t'hi has presentat");
+  return '<div class="collab-row" data-uid="'+esc(c.uid)+'">'+
+    '<div class="cmain"><div class="name">'+esc(c.marca||"Sense nom")+'</div>'+
+    '<div class="sub">'+sub.join(" · ")+'</div></div>'+
+    '<div class="cright">'+
+    (obert ? '<span class="dies '+q.cls+'">'+esc(q.txt)+'</span>'
+           : '<span class="badge b-'+esc(caducat(c)?"descartada":c.estat)+'">'+esc(estatConcurs(c))+'</span>')+
+    '</div></div>';
+}
+function renderConcursos(){
+  var box=$("concursos");
+  var q=$("q3").value.trim().toLowerCase();
+  var tots=collabs.filter(esConcurs);
+  var mira=tots.filter(function(c){
+    if(!q) return true;
+    return ((c.marca||"")+" "+(c.contacte||"")+" "+(c.notes||"")+" "+(c.compensacio||"")).toLowerCase().indexOf(q)>=0;
+  });
+  /* La línia que compta no és oberta/tancada, sinó si l'has guanyat: un premi
+     rebut no té res a veure amb un concurs que has deixat passar. */
+  var oberts=[], premis=[], tancats=[];
+  mira.forEach(function(c){
+    if(c.estat==="obert") (caducat(c)?tancats:oberts).push(c);
+    else if(c.estat==="descartada") tancats.push(c);
+    else premis.push(c);
+  });
+  oberts.sort(function(a,b){ return (a.dataLliurament||"9999").localeCompare(b.dataLliurament||"9999"); });
+  function recent(c){ return c.dataLliurament || c.dataAcceptacio || (c.creat||"").slice(0,10); }
+  premis.sort(function(a,b){ return recent(b).localeCompare(recent(a)); });
+  tancats.sort(function(a,b){ return recent(b).localeCompare(recent(a)); });
+  var h="";
+  function grup(titol, hint, llista, apagat){
+    if(!llista.length) return;
+    h += '<div class="cgrup'+(apagat?" apagat":"")+'"><h3>'+titol+' <span class="quants">'+llista.length+'</span></h3>'+
+         (hint?'<p class="hint">'+hint+'</p>':'')+
+         llista.map(rowConcurs).join("")+'</div>';
+  }
+  grup("Oberts", "El que tanca abans, a dalt. Obre'n un i hi trobaràs l'enllaç i com s'hi participa.", oberts, false);
+  grup("Premis guanyats", "", premis, false);
+  grup("Ja han tancat", "Els que van passar sense que t'hi presentessis, i els que vas descartar.", tancats, true);
+  box.innerHTML = h || (tots.length?'<p class="hint">Cap concurs amb aquesta cerca.</p>':'');
+  bindRows(box);
+  $("concursos-empty").hidden = tots.length>0;
+  var n = tots.filter(function(c){ return c.estat==="obert" && !caducat(c); }).length;
+  $("n-concursos").textContent = n ? String(n) : "";
+  $("t-concursos").textContent = n;
+}
+
+/* ---------------- render: pendent ---------------- */
+function renderPendent(){
+  var box=$("pendent-list");
+  var actius=collabs.filter(function(c){ return !esConcurs(c) && isActiu(c); }).sort(function(a,b){ return (a.dataLliurament||"9999").localeCompare(b.dataLliurament||"9999"); });
+  var html="";
+  actius.forEach(function(c){
+    var items=[];
+    (c.entregables||[]).forEach(function(it){ if(!it.fet) items.push({kind:"entregable", it:it}); });
+    (c.rebuts||[]).forEach(function(it){ if(!it.fet) items.push({kind:"rebut", it:it}); });
+    if(!items.length) return;
+    html += '<h2 style="margin-top:22px">'+esc(c.marca||"Sense nom")+
+      (c.dataLliurament?' <span class="note" style="font-weight:400">— '+(c.estat==="obert"?'tanca el ':'lliurament ')+fmtDate(c.dataLliurament)+'</span>':'')+'</h2>';
+    html += '<div class="checklist" data-cuid="'+esc(c.uid)+'">'+items.map(function(x){
+      return '<div class="citem" data-id="'+esc(x.it.id)+'" data-kind="'+x.kind+'">'+
+        '<input type="checkbox">'+
+        '<span>'+esc(x.it.text)+(x.kind==="rebut"?' <span class="note">(a rebre)</span>':'')+'</span>'+
+      '</div>';
+    }).join("")+'</div>';
+  });
+  box.innerHTML = html;
+  $("pendent-empty").hidden = html.length>0;
+  Array.prototype.forEach.call(box.querySelectorAll(".checklist"),function(list){
+    var cuid=list.dataset.cuid, c=byUid(cuid);
+    Array.prototype.forEach.call(list.querySelectorAll(".citem"),function(row){
+      row.querySelector('input[type=checkbox]').onchange=function(){
+        var arr = row.dataset.kind==="rebut" ? c.rebuts : c.entregables;
+        var item = arr.filter(function(x){return x.id===row.dataset.id;})[0];
+        if(item){ item.fet=true; persist(); toast("Fet"); }
+      };
+    });
+  });
+}
+
+function renderAll(){ renderHeader(); renderLlista(); renderConcursos(); renderTancades(); renderPendent(); }
+
+/* ---------------- editor: checklist genèric ---------------- */
+function renderChecklistEditor(containerId, arr){
+  var box=$(containerId);
+  box.innerHTML = arr.map(function(it){
+    return '<div class="citem'+(it.fet?' fet':'')+'" data-id="'+esc(it.id)+'">'+
+      '<input type="checkbox"'+(it.fet?' checked':'')+'>'+
+      '<span>'+esc(it.text)+'</span>'+
+      '<button type="button" class="x" title="Elimina">&times;</button></div>';
+  }).join("");
+  Array.prototype.forEach.call(box.querySelectorAll(".citem"),function(row){
+    var it=arr.filter(function(x){return x.id===row.dataset.id;})[0];
+    row.querySelector('input[type=checkbox]').onchange=function(){ it.fet=this.checked; row.classList.toggle("fet",it.fet); };
+    row.querySelector(".x").onclick=function(){
+      var i=arr.indexOf(it); if(i>=0) arr.splice(i,1);
+      renderChecklistEditor(containerId, arr);
+    };
+  });
+}
+function addChecklistItem(arr, inputId, containerId){
+  var input=$(inputId), text=input.value.trim();
+  if(!text) return;
+  arr.push({id:uid("i"), text:text, fet:false});
+  input.value="";
+  renderChecklistEditor(containerId, arr);
+}
+$("e-entregable-add").onclick=function(){ addChecklistItem(edEntregables,"e-entregable-nou","e-entregables"); };
+$("e-rebut-add").onclick=function(){ addChecklistItem(edRebuts,"e-rebut-nou","e-rebuts"); };
+["e-entregable-nou","e-rebut-nou"].forEach(function(id){
+  $(id).addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); this.nextElementSibling.click(); } });
+});
+
+/* ---------------- editor: fitxers i enllaços ---------------- */
+function renderFitxersEditor(){
+  var box=$("e-fitxers");
+  box.innerHTML = edFitxers.map(function(f){
+    var href = f.assetId ? "/_blob/"+f.assetId : f.url;
+    return '<div class="frow" data-id="'+esc(f.id)+'">'+
+      '<span class="badge">'+(f.assetId?'fitxer':'enllaç')+'</span>'+
+      '<a href="'+esc(href)+'" target="_blank" rel="noopener">'+esc(f.nom)+'</a>'+
+      (f.mida?'<span class="note">'+fmtSize(f.mida)+'</span>':'')+
+      '<button type="button" class="x" title="Elimina" style="margin-left:6px">&times;</button></div>';
+  }).join("");
+  Array.prototype.forEach.call(box.querySelectorAll(".frow"),function(row){
+    row.querySelector(".x").onclick=function(){
+      edFitxers = edFitxers.filter(function(f){return f.id!==row.dataset.id;});
+      renderFitxersEditor();
+    };
+  });
+}
+$("e-link-add").onclick=function(){
+  var nom=$("e-link-nom").value.trim(), url=$("e-link-url").value.trim();
+  if(!url){ toast("Enganxa primer l'enllaç"); return; }
+  if(!/^https?:\/\//i.test(url)) url="https://"+url;
+  edFitxers.push({id:uid("f"), nom:nom||url, url:url});
+  $("e-link-nom").value=""; $("e-link-url").value="";
+  renderFitxersEditor();
+};
+$("e-file-btn").onclick=function(){ $("e-file-input").click(); };
+$("e-file-input").onchange=function(e){
+  var file=e.target.files&&e.target.files[0];
+  e.target.value="";
+  if(!file||!assetsNs) return;
+  toast("Pujant "+file.name+"…");
+  var opts={};
+  if(!file.type) toast("Aquest fitxer no té un tipus reconegut i pot fallar");
+  assetsNs.upload(file, file.type?{type:file.type}:{}).then(function(r){
+    edFitxers.push({id:uid("f"), nom:file.name, assetId:r.id, mida:r.sizeBytes});
+    renderFitxersEditor();
+    toast("Fitxer adjuntat");
+  }).catch(function(err){
+    var code=err&&err.code;
+    var msg = code==="too_large" ? "Aquest fitxer és massa gran."
+      : code==="unsupported_type" ? "Aquest tipus de fitxer no es pot pujar aquí — prova amb un enllaç."
+      : "No he pogut pujar el fitxer.";
+    toast(msg);
+  });
+};
+
+/* ---------------- editor: obrir / desar ---------------- */
+function openEditor(u, pre){
+  pre = pre || {};
+  editingId=u;
+  var c = u ? byUid(u) : null;
+  $("sheet-title").textContent = c ? (esConcurs(c)?"Edita el concurs":"Edita la col·laboració")
+                                 : (pre.tipus==="concurs"?"Nou concurs":"Nova col·laboració");
+  $("e-marca").value = c?c.marca||"":"";
+  $("e-contacte").value = c?c.contacte||"":"";
+  $("e-email").value = c?c.email||emailDe(c)||"":"";
+  $("e-tornar-el").value = c?c.tornarEl||"":"";
+  $("e-tornar-motiu").value = c?c.tornarMotiu||"":"";
+  $("e-canal").value = c?c.canal||"email":"email";
+  $("e-tipus").value = c?c.tipus||"material":(pre.tipus||"material");
+  $("e-estat").value = c?c.estat||"acceptada":(pre.estat||"acceptada");
+  $("e-compensacio").value = c?c.compensacio||"":"";
+  $("e-data-acc").value = c?c.dataAcceptacio||"":"";
+  $("e-data-lliurament").value = c?c.dataLliurament||"":"";
+  $("e-notes").value = c?c.notes||"":"";
+  edEntregables = c ? JSON.parse(JSON.stringify(c.entregables||[])) : [];
+  edRebuts = c ? JSON.parse(JSON.stringify(c.rebuts||[])) : [];
+  edFitxers = c ? JSON.parse(JSON.stringify(c.fitxers||[])) : [];
+  renderChecklistEditor("e-entregables", edEntregables);
+  renderChecklistEditor("e-rebuts", edRebuts);
+  renderFitxersEditor();
+  $("e-del").hidden = !c;
+  $("overlay").hidden=false;
+  $("e-marca").focus();
+}
+function closeEditor(){ $("overlay").hidden=true; editingId=null; }
+$("e-cancel").onclick=closeEditor;
+$("overlay").onclick=function(e){ if(e.target===this) closeEditor(); };
+document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&!$("overlay").hidden) closeEditor(); });
+$("e-save").onclick=function(){
+  var marca=$("e-marca").value.trim();
+  if(!marca){ toast("Posa-hi almenys el nom de la marca"); $("e-marca").focus(); return; }
+  var data={
+    marca:marca,
+    contacte:$("e-contacte").value.trim()||null,
+    email:$("e-email").value.trim()||null,
+    tornarEl:$("e-tornar-el").value||null,
+    tornarMotiu:$("e-tornar-motiu").value.trim()||null,
+    canal:$("e-canal").value,
+    tipus:$("e-tipus").value,
+    estat:$("e-estat").value,
+    compensacio:$("e-compensacio").value.trim()||null,
+    dataAcceptacio:$("e-data-acc").value||null,
+    dataLliurament:$("e-data-lliurament").value||null,
+    entregables:edEntregables,
+    rebuts:edRebuts,
+    fitxers:edFitxers,
+    notes:$("e-notes").value.trim()||null
+  };
+  var abans=editingId ? byUid(editingId) : null;
+  var eraTancada=!!(abans && isTancat(abans)), araTancada=isTancat(data);
+  if(editingId){
+    collabs=collabs.map(function(c){ return c.uid===editingId ? Object.assign({},c,data) : c; });
+  }else{
+    data.uid=uid("C");
+    data.creat=new Date().toISOString();
+    collabs.push(data);
+  }
+  closeEditor(); persist();
+  toast(araTancada && !eraTancada ? "Desat · ara és a Tancades" : (!araTancada && eraTancada ? "Desat · torna a Col·laboracions" : "Desat"));
+};
+$("e-del").onclick=function(){
+  if(!confirm("Vols eliminar aquesta col·laboració? No es pot desfer.")) return;
+  deletedUids[editingId]=1;
+  collabs=collabs.filter(function(c){return c.uid!==editingId;});
+  closeEditor(); persist(); toast("Eliminada");
+};
+$("add").onclick=function(){ openEditor(null); };
+$("add-concurs").onclick=function(){ openEditor(null, {tipus:"concurs", estat:"obert"}); };
+document.addEventListener("click",function(e){
+  if(e.target.closest("[data-goto-add]")) openEditor(null);
+});
+
+/* ---------------- Correu: buscar col·laboracions al Gmail ---------------- */
+var mailHits=[];
+
+function mailMsg(cls,txt){ var m=$("mail-msg"); m.className="note"+(cls?" "+cls:""); m.textContent=txt; }
+
+function headerOf(msg,name){
+  var h=(msg.payload&&msg.payload.headers)||[];
+  for(var i=0;i<h.length;i++){ if((h[i].name||"").toLowerCase()===name) return h[i].value||""; }
+  return "";
+}
+function senderName(from){
+  var m=from.match(/^\s*"?([^"<]*?)"?\s*</);
+  var nom=(m&&m[1]||"").trim();
+  var em=(from.match(/<([^>]+)>/)||[null,from])[1]||"";
+  return {nom:nom, email:em.trim()};
+}
+function domainOf(email){
+  var d=(email.split("@")[1]||"").toLowerCase();
+  return d.replace(/^(mail|mkt|info|team|partnerships|marketing|creator|cloud|directmail)\./,"");
+}
+/* marca provisional a partir del domini: creator@meshy.ai -> Meshy */
+function brandFromEmail(email){
+  var d=domainOf(email).split(".")[0]||"";
+  if(!d) return "";
+  return d.charAt(0).toUpperCase()+d.slice(1);
+}
+function alreadyKnown(email,subject){
+  var dom=domainOf(email);
+  var low=(subject||"").toLowerCase();
+  for(var i=0;i<collabs.length;i++){
+    var c=collabs[i];
+    var hay=((c.marca||"")+" "+(c.contacte||"")).toLowerCase();
+    if(dom && hay.indexOf(dom.split(".")[0])>=0) return c;
+    if((c.marca||"") && low.indexOf((c.marca||"").toLowerCase().split(" ")[0])>=0) return c;
+  }
+  return null;
+}
+
+$("mail-reconsent").onclick=function(){
+  if(!gTokenClient){ mailMsg("err","Encara carregant Google; prova d'aquí un moment."); return; }
+  mailMsg("","Demanant el permís de Gmail…");
+  gTokenClient.requestAccessToken({prompt:"consent"});
+};
+$("mail-buscar").onclick=function(){
+  if(!gToken){ mailMsg("err","Per llegir el correu cal entrar-hi amb el compte de Google."); return; }
+  if(gScopes && gScopes.indexOf("gmail.readonly")<0){
+    mailMsg("err","La sessió actual no inclou el permís de Gmail. Toca «Torna a demanar el permís» aquí sota.");
+    return;
+  }
+  var q=$("mail-q").value.trim();
+  if(!q){ mailMsg("err","Escriu què vols buscar."); return; }
+  var btn=$("mail-buscar"), old=btn.textContent;
+  btn.disabled=true; btn.textContent="Buscant…";
+  mailMsg("","Buscant al correu…");
+  $("mail-list").innerHTML="";
+  mailHits=[];
+
+  driveFetch("https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=25&q="+encodeURIComponent(q))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var ids=(d.messages||[]).map(function(m){ return m.id; });
+      if(!ids.length){ btn.disabled=false; btn.textContent=old; mailMsg("","Cap correu trobat amb aquesta cerca."); return; }
+      mailMsg("","Llegint "+ids.length+" correus…");
+      return Promise.all(ids.map(function(id){
+        return driveFetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/"+id+
+                          "?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date")
+          .then(function(r){ return r.json(); })
+          .catch(function(){ return null; });
+      })).then(function(msgs){
+        btn.disabled=false; btn.textContent=old;
+        renderMailHits(msgs.filter(Boolean));
+      });
+    })
+    .catch(function(e){
+      btn.disabled=false; btn.textContent=old;
+      var det=(e&&e.detail)||"";
+      if(e&&e.code==="g_401"){
+        gToken=null;
+        mailMsg("err","La sessió ha caducat. Tanca sessió i torna a entrar-hi.");
+      } else if(e&&e.status===403 && /has not been used|is disabled|SERVICE_DISABLED/i.test(det)){
+        mailMsg("err","Falta activar la Gmail API al teu projecte de Google Cloud. Ves a console.cloud.google.com → API i serveis → Biblioteca → «Gmail API» → Habilita. Espera un minut i torna-ho a provar.");
+      } else if(e&&e.status===403 && /insufficient|scope|permission/i.test(det)){
+        mailMsg("err","El permís de Gmail no s'ha concedit. Toca «Torna a demanar el permís» aquí sota.");
+      } else if(e&&(e.status===403||e.status===400)){
+        mailMsg("err","Google ho ha rebutjat: "+det);
+      } else {
+        mailMsg("err","No he pogut llegir el correu ara mateix."+(det?" ("+det+")":""));
+      }
+    });
+};
+
+function renderMailHits(msgs){
+  /* un per fil: el més recent de cada conversa */
+  var perThread={};
+  msgs.forEach(function(m){
+    var t=m.threadId||m.id;
+    if(!perThread[t] || Number(m.internalDate||0)>Number(perThread[t].internalDate||0)) perThread[t]=m;
+  });
+  mailHits=Object.keys(perThread).map(function(k){ return perThread[k]; })
+    .sort(function(a,b){ return Number(b.internalDate||0)-Number(a.internalDate||0); });
+
+  var nous=0;
+  $("mail-list").innerHTML = mailHits.map(function(m,i){
+    var from=headerOf(m,"from"), subj=headerOf(m,"subject");
+    var sn=senderName(from);
+    var known=alreadyKnown(sn.email,subj);
+    if(!known) nous++;
+    var d=new Date(Number(m.internalDate||0));
+    var data=isNaN(d)?"":d.toLocaleDateString("ca-ES",{day:"numeric",month:"short",year:"numeric"});
+    return '<div class="row" data-i="'+i+'">'+
+      '<div class="rowmain">'+
+        '<div class="name">'+esc(sn.nom||sn.email)+'</div>'+
+        '<div class="sub">'+esc(subj)+'</div>'+
+        '<div class="sub note">'+esc(data)+' · '+esc(sn.email)+'</div>'+
+        '<div class="sub">'+esc((m.snippet||"").slice(0,180))+'…</div>'+
+      '</div>'+
+      (known
+        ? '<span class="badge">ja fitxada</span>'
+        : '<button class="btn small mail-add" type="button">Crea fitxa</button>')+
+      '</div>';
+  }).join("");
+
+  Array.prototype.forEach.call($("mail-list").querySelectorAll(".mail-add"),function(b){
+    b.onclick=function(){
+      var row=b.closest(".row");
+      var m=mailHits[parseInt(row.dataset.i,10)];
+      var from=headerOf(m,"from"), subj=headerOf(m,"subject");
+      var sn=senderName(from);
+      var rec=buildRecord({
+        marca: brandFromEmail(sn.email) || sn.nom || "Sense nom",
+        contacte: (sn.nom? sn.nom+" (" : "")+sn.email+(sn.nom?")":""),
+        canal: "email",
+        tipus: "material",
+        estat: "proposta",
+        notes: subj+"\n\n"+(m.snippet||"")
+      });
+      collabs.push(rec);
+      persist();
+      toast("Fitxa creada — revisa-la i completa-la");
+      openEditor(rec.uid);
+    };
+  });
+
+  mailMsg("ok", mailHits.length+" fil"+(mailHits.length===1?"":"s")+" trobat"+(mailHits.length===1?"":"s")+
+    (nous? " · "+nous+" sense fitxar" : " · tots ja fitxats"));
+}
+
+/* ---------------- Instagram: llegir captures de pantalla ---------------- */
+var igShots = [];
+
+function igMsg(cls,txt){ var m=$("ig-msg"); m.className="note"+(cls?" "+cls:""); m.textContent=txt; }
+function igReset(){
+  igShots.forEach(function(sh){ try{ URL.revokeObjectURL(sh.url); }catch(e){} });
+  igShots=[]; igPend=null;
+  $("ig-marca").value=""; $("ig-text").value="";
+  $("ig-tipus").value="material"; $("ig-estat").value="proposta";
+  igRenderThumbs(); igMsg("","");
+}
+function igRenderThumbs(){
+  var box=$("ig-thumbs");
+  box.innerHTML = igShots.map(function(sh){
+    return '<div class="thumb" data-id="'+esc(sh.id)+'"><img src="'+esc(sh.url)+'" alt="captura">'+
+           '<button type="button" title="Treu-la">&times;</button></div>';
+  }).join("");
+  Array.prototype.forEach.call(box.querySelectorAll(".thumb"),function(el){
+    el.querySelector("button").onclick=function(){
+      var id=el.dataset.id;
+      igShots = igShots.filter(function(sh){
+        if(sh.id===id){ try{ URL.revokeObjectURL(sh.url); }catch(e){} return false; }
+        return true;
+      });
+      igRenderThumbs();
+    };
+  });
+  var can = igShots.length>0 && typeof Tesseract!=="undefined";
+  $("ig-read-row").hidden = !can;
+}
+
+/* redueix la captura abans d'enviar-la: les captures de mòbil són enormes */
+function shrinkImage(file,maxSide,quality){
+  return new Promise(function(res,rej){
+    var url=URL.createObjectURL(file), img=new Image();
+    img.onload=function(){
+      var sc=Math.min(1,maxSide/Math.max(img.naturalWidth,img.naturalHeight));
+      var c=document.createElement("canvas");
+      c.width=Math.max(1,Math.round(img.naturalWidth*sc));
+      c.height=Math.max(1,Math.round(img.naturalHeight*sc));
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(function(b){ b?res(b):rej(new Error("no s'ha pogut convertir")); },"image/jpeg",quality);
+    };
+    img.onerror=function(){ URL.revokeObjectURL(url); rej(new Error("no s'ha pogut obrir la imatge")); };
+    img.src=url;
+  });
+}
+
+$("ig-shot-btn").onclick=function(){ $("ig-shot-input").click(); };
+$("ig-shot-input").onchange=function(e){
+  var files=Array.prototype.slice.call(e.target.files||[]);
+  e.target.value="";
+  if(!files.length) return;
+  var cap = (imgCaps && imgCaps.maxCount) ? imgCaps.maxCount : 8;
+  if(igShots.length+files.length > cap){
+    files = files.slice(0, Math.max(0, cap-igShots.length));
+    igMsg("err","Només puc llegir "+cap+" captures alhora; he agafat les primeres.");
+  }
+  if(!files.length) return;
+  igMsg("","Preparant les captures…");
+  Promise.all(files.map(function(f){
+    return shrinkImage(f,1400,0.85).then(function(b){
+      return {id:uid("s"), blob:b, url:URL.createObjectURL(b)};
+    });
+  })).then(function(list){
+    list.forEach(function(sh){ igShots.push(sh); });
+    igRenderThumbs();
+    igMsg("", igShots.length+" captur"+(igShots.length===1?"a":"es")+" a punt. Toca «Llegeix les captures».");
+  }).catch(function(){
+    igMsg("err","No he pogut obrir alguna de les imatges.");
+  });
+};
+
+$("ig-llegir").onclick=function(){
+  if(!igShots.length){ igMsg("err","Afegeix primer alguna captura."); return; }
+  if(typeof Tesseract==="undefined"){ igMsg("err","No he pogut carregar el lector de text (revisa la connexió)."); return; }
+  var btn=$("ig-llegir"), old=btn.textContent;
+  btn.disabled=true; btn.textContent="Llegint…";
+  igMsg("","Llegint les captures… (la primera vegada triga una mica més)");
+
+  var texts=[];
+  var seq=igShots.reduce(function(chain,sh,i){
+    return chain.then(function(){
+      igMsg("","Llegint captura "+(i+1)+" de "+igShots.length+"…");
+      return Tesseract.recognize(sh.blob,"eng").then(function(r){
+        texts.push((r&&r.data&&r.data.text)||"");
+      });
+    });
+  }, Promise.resolve());
+
+  seq.then(function(){
+    btn.disabled=false; btn.textContent=old;
+    var all=texts.join("\n").replace(/[ \t]+/g," ");
+    var lines=all.split(/\r?\n+/).map(function(x){ return x.trim(); })
+                 .filter(function(x){ return x.length>1 && x.length<160; });
+    if(!lines.length){ igMsg("err","No hi he trobat text llegible. Prova amb captures més grans o més nítides."); return; }
+
+    /* la conversa sencera va a les notes: sempre útil, encara que no endevini els camps */
+    if(!$("ig-text").value.trim()) $("ig-text").value=lines.join("\n");
+
+    var joined=lines.join(" ");
+    var low=joined.toLowerCase();
+
+    /* tipus: material si parlen d'enviar producte; disseny si parlen d'imprimir un model seu */
+    var tipus=null;
+    if(/\b(stl|3mf|model|design|dissenyador|designer|print our|imprimir el|archivo|fitxer)\b/i.test(joined)) tipus="disseny";
+    if(/\b(send you|enviar|sample|filament|resin|resina|spool|bobina|product|producte|gift)\b/i.test(joined)) tipus="material";
+    if(tipus) $("ig-tipus").value=tipus;
+
+    /* compensació: import o paraula clau */
+    var payM=joined.match(/(?:[$€]\s?\d[\d.,]*|\d[\d.,]*\s?(?:usd|eur|euros|dollars))/i);
+    var comp = payM ? payM[0] : (/\b(gifted|free|gratis|sense cost|no cost)\b/i.test(joined) ? "producte gratuït" : null);
+
+    igPend = { contacte:null, compensacio:comp, entregables:[], rebuts:[] };
+
+    var bits=[];
+    if(tipus) bits.push("tipus "+tipus);
+    if(comp) bits.push("compensació "+comp);
+    igMsg("ok","Text llegit i posat a les notes"+(bits.length?" ("+bits.join(", ")+")":"")+
+      ". Revisa la marca i el tipus, i toca «Crea la col·laboració».");
+  }).catch(function(){
+    btn.disabled=false; btn.textContent=old;
+    igMsg("err","No he pogut llegir les captures; omple-ho a mà.");
+  });
+};
+
+$("ig-netejar").onclick=igReset;
+
+$("ig-crear").onclick=function(){
+  var marca=$("ig-marca").value.trim();
+  var text=$("ig-text").value.trim();
+  if(!marca){ igMsg("err","Falta el nom de la marca."); $("ig-marca").focus(); return; }
+  var btn=$("ig-crear"), old=btn.textContent;
+  btn.disabled=true; btn.textContent="Desant…";
+  var seed = {
+    marca: marca,
+    canal: "instagram",
+    tipus: $("ig-tipus").value,
+    estat: $("ig-estat").value,
+    notes: text || null
+  };
+  if(igPend){
+    seed.contacte = igPend.contacte;
+    seed.compensacio = igPend.compensacio;
+    seed.entregables = igPend.entregables;
+    seed.rebuts = igPend.rebuts;
+  }
+  /* les captures queden adjuntades a la fitxa com a prova de l'acord */
+  igUploadShots().then(function(fitxers){
+    seed.fitxers = fitxers;
+    var rec;
+    try{ rec = buildRecord(seed); }
+    catch(err){ btn.disabled=false; btn.textContent=old; igMsg("err","No he pogut crear-la: "+err.message); return; }
+    collabs.push(rec);
+    btn.disabled=false; btn.textContent=old;
+    igReset();
+    persist(); go("llista");
+    toast("Col·laboració creada");
+  });
+};
+function igUploadShots(){
+  if(!assetsNs||!igShots.length) return Promise.resolve([]);
+  return Promise.all(igShots.map(function(sh,i){
+    return assetsNs.upload(sh.blob,{type:"image/jpeg"}).then(function(r){
+      return r&&r.id ? {id:uid("f"), nom:"Captura "+(i+1), assetId:r.id} : null;
+    },function(){ return null; });
+  })).then(function(list){ return list.filter(Boolean); }).catch(function(){ return []; });
+}
+
+/* ---------------- navegació ---------------- */
+function browserDownload(filename,text,mime){
+  try{
+    var blob=new Blob([text],{type:(mime||"text/plain")+";charset=utf-8"});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement("a");
+    a.href=url; a.download=filename; a.style.display="none";
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); },1500);
+    toast("Descarregant "+filename);
+  }catch(e){
+    $("import-box").value=text;
+    toast("No he pogut descarregar-ho; ho tens al quadre de text");
+  }
+}
+function offerFile(filename,text,mime){
+  if(typeof window.claude!=="undefined"&&window.claude&&window.claude.use){
+    window.claude.use("downloads").then(function(d){
+      if(!d){ browserDownload(filename,text,mime); return; }
+      d.save({filename:filename,data:text}).catch(function(){ browserDownload(filename,text,mime); });
+    }).catch(function(){ browserDownload(filename,text,mime); });
+  } else browserDownload(filename,text,mime);
+}
+$("export-btn").onclick=function(){
+  offerFile("collaboracions-backup.json", JSON.stringify(collabs,null,2), "application/json");
+};
+function buildRecord(c){
+  if(!c || typeof c!=="object" || Array.isArray(c)) throw new Error("no és una fitxa vàlida");
+  var ent = Array.isArray(c.entregables) ? c.entregables : [];
+  var reb = Array.isArray(c.rebuts) ? c.rebuts : [];
+  var fit = Array.isArray(c.fitxers) ? c.fitxers : [];
+  return {
+    uid: uid("C"),
+    creat: new Date().toISOString(),
+    key: (c.key!=null?String(c.key).trim().toLowerCase():null),
+    marca: (c.marca!=null?String(c.marca):""),
+    contacte: (c.contacte!=null?String(c.contacte):null),
+    canal: (c.canal!=null?String(c.canal):"email"),
+    tipus: (c.tipus!=null?String(c.tipus):"material"),
+    estat: (c.estat!=null?String(c.estat):"acceptada"),
+    compensacio: (c.compensacio!=null?String(c.compensacio):null),
+    dataAcceptacio: (c.dataAcceptacio!=null?String(c.dataAcceptacio):null),
+    dataLliurament: (c.dataLliurament!=null?String(c.dataLliurament):null),
+    notes: (c.notes!=null?String(c.notes):null),
+    entregables: ent.map(function(it){ return {id:uid("i"), text:(it&&it.text!=null?String(it.text):""), fet:!!(it&&it.fet)}; }),
+    rebuts: reb.map(function(it){ return {id:uid("i"), text:(it&&it.text!=null?String(it.text):""), fet:!!(it&&it.fet)}; }),
+    fitxers: fit.map(function(f){ return Object.assign({},f); })
+  };
+}
+function processImportText(raw,replace){
+  var msg=$("import-msg");
+  raw=(raw||"").trim();
+  if(!raw){ msg.className="note err"; msg.textContent="No hi ha cap contingut per llegir."; return; }
+
+  var list;
+  try{
+    raw=raw.replace(/^```(?:json)?/i,"").replace(/```$/,"").trim();
+    raw=raw.replace(/[\u201C\u201D\u201E\u201F]/g,'"').replace(/[\u2018\u2019\u201A\u201B]/g,"'");
+    var start=raw.search(/[[{]/);
+    if(start>0) raw=raw.slice(start);
+    var end=Math.max(raw.lastIndexOf("}"),raw.lastIndexOf("]"));
+    if(end>0 && end<raw.length-1) raw=raw.slice(0,end+1);
+    var data=JSON.parse(raw);
+    list=Array.isArray(data)?data:(Array.isArray(data.collabs)?data.collabs:null);
+    if(!list) throw new Error("no hi he trobat cap llista de col·laboracions");
+  }catch(e){
+    msg.className="note err"; msg.textContent="No he pogut interpretar el JSON: "+e.message;
+    return;
+  }
+
+  var toAdd;
+  try{
+    toAdd = list.map(function(c,idx){
+      try{ return buildRecord(c); }
+      catch(err){ throw new Error("l'element "+(idx+1)+": "+err.message); }
+    });
+  }catch(e){
+    msg.className="note err"; msg.textContent="No he pogut preparar les dades: "+e.message;
+    return;
+  }
+
+  /* amb "substitueix", l'arxiu mana i s'esborra el que hi havia */
+  if(replace){ collabs.forEach(function(c){ deletedUids[c.uid]=1; }); collabs.length=0; }
+
+  /* si ja hi és, actualitzo la fitxa en lloc de duplicar-la.
+     Es compara primer per "key" (que no canvia mai) i, si no n'hi ha, pel nom. */
+  var afegides=0, actualitzades=0;
+  toAdd.forEach(function(c){
+    var k=(c.key||"").trim().toLowerCase();
+    var nom=(c.marca||"").trim().toLowerCase();
+    var idx=-1;
+    for(var i=0;i<collabs.length;i++){
+      var ek=(collabs[i].key||"").trim().toLowerCase();
+      var en=(collabs[i].marca||"").trim().toLowerCase();
+      if(k && ek){ if(ek===k){ idx=i; break; } }
+      else if(en===nom){ idx=i; break; }
+    }
+    if(idx<0){ collabs.push(c); afegides++; return; }
+    /* conserva l'uid i les fitxes que ja tenies marcades com a fetes */
+    var vell=collabs[idx];
+    var fets={};
+    (vell.entregables||[]).forEach(function(x){ if(x.fet) fets[(x.text||"").trim().toLowerCase()]=1; });
+    (vell.rebuts||[]).forEach(function(x){ if(x.fet) fets[(x.text||"").trim().toLowerCase()]=1; });
+    c.entregables.forEach(function(x){ if(fets[(x.text||"").trim().toLowerCase()]) x.fet=true; });
+    c.rebuts.forEach(function(x){ if(fets[(x.text||"").trim().toLowerCase()]) x.fet=true; });
+    c.uid=vell.uid;
+    c.creat=vell.creat||c.creat;
+    if((vell.fitxers||[]).length) c.fitxers=vell.fitxers;
+    collabs[idx]=c;
+    actualitzades++;
+  });
+
+  $("import-box").value="";
+  var parts=[];
+  if(afegides) parts.push(afegides+" afegid"+(afegides===1?"a":"es"));
+  if(actualitzades) parts.push(actualitzades+" actualitzad"+(actualitzades===1?"a":"es"));
+  msg.className="note ok";
+  msg.textContent = replace
+    ? ("Substituït: ara hi ha "+collabs.length+" col·laboracions.")
+    : (parts.length ? parts.join(" i ")+"." : "No hi havia res de nou.");
+  try{ persist(); }catch(e){ msg.textContent+=" (però hi ha hagut un problema en desar-ho: "+e.message+")"; }
+  go("llista");
+  toast(msg.textContent);
+}
+var importReplace=false;
+$("import-btn").onclick=function(){ processImportText($("import-box").value,false); };
+$("import-replace-btn").onclick=function(){
+  if(collabs.length && !confirm("Això esborrarà les "+collabs.length+" col·laboracions actuals i les substituirà per les del fitxer. Continuem?")) return;
+  importReplace=true;
+  $("import-file-input").click();
+};
+$("import-file-btn").onclick=function(){
+  try{ $("import-file-input").click(); }
+  catch(e){ $("import-msg").className="note err"; $("import-msg").textContent="No he pogut obrir el selector de fitxers: "+e.message; }
+};
+$("import-file-input").onchange=function(e){
+  var msg=$("import-msg");
+  try{
+    var file=e.target.files&&e.target.files[0];
+    if(!file){ msg.className="note err"; msg.textContent="No s'ha triat cap fitxer."; return; }
+    msg.className="note"; msg.textContent="Llegint "+file.name+"…";
+    var reader=new FileReader();
+    reader.onload=function(){
+      e.target.value="";
+      var rep=importReplace; importReplace=false;
+      processImportText(String(reader.result),rep);
+    };
+    reader.onerror=function(){
+      e.target.value=""; importReplace=false;
+      msg.className="note err"; msg.textContent="No he pogut llegir el fitxer.";
+    };
+    reader.readAsText(file);
+  }catch(err){
+    msg.className="note err"; msg.textContent="Error triant el fitxer: "+err.message;
+  }
+};
+
+function go(v){
+  ["llista","concursos","pendent","seguiment","tancades","correu","instagram","importa"].forEach(function(k){ $("view-"+k).hidden=(k!==v); });
+  if(v==="seguiment") renderSeguiment();
+  document.querySelectorAll("nav button").forEach(function(b){ b.setAttribute("aria-selected", String(b.dataset.view===v)); });
+}
+document.querySelectorAll("nav button").forEach(function(b){ b.onclick=function(){ go(b.dataset.view); }; });
+$("q").addEventListener("input", renderLlista);
+$("f-estat").addEventListener("change", renderLlista);
+$("f-tipus").addEventListener("change", renderLlista);
+$("q3").addEventListener("input", renderConcursos);
+$("q2").addEventListener("input", renderTancades);
+$("f2-estat").addEventListener("change", renderTancades);
+$("f2-tipus").addEventListener("change", renderTancades);
+
+/* ---------------- arrencada ---------------- */
+
+function buildCSV(){
+  var cols=["marca","tipus","estat","canal","contacte","compensacio","data_acceptacio",
+            "data_lliurament","entregables_fets","entregables_total","pendents","notes"];
+  var rows=collabs.map(function(c){
+    var ent=c.entregables||[], reb=c.rebuts||[];
+    var fets=ent.filter(function(x){return x.fet;}).length;
+    var pend=ent.filter(function(x){return !x.fet;}).concat(reb.filter(function(x){return !x.fet;}))
+                .map(function(x){return x.text;}).join(" | ");
+    var vals=[c.marca||"", c.tipus||"material", c.estat||"", c.canal||"", c.contacte||"",
+              c.compensacio||"", c.dataAcceptacio||"", c.dataLliurament||"",
+              fets, ent.length, pend, (c.notes||"").replace(/\s+/g," ")];
+    return vals.map(function(v){ return '"'+String(v==null?"":v).replace(/"/g,'""')+'"'; }).join(",");
+  });
+  return cols.join(",")+"\n"+rows.join("\n");
+}
+
+
+/* ════════════ seguiment: qui espera un correu ════════════ */
+var PLANTILLES_FAB = {
+  dies: 14,
+  tancarAs: "{marca} × Zenkai3D Studio — resum de la col·laboració",
+  tancarCos: "{hola}\n\nJa està publicat tot el que havíem acordat. T'ho deixo reunit aquí:\n\n{entregables}\n\nSi us va bé que us passi els números d'abast quan hagin reposat uns dies, me'ls demaneu i us els envio.\n\nHa estat un gust treballar amb vosaltres. Si teniu res al cap per més endavant, aquí em teniu.\n\nSanti\nZenkai3D Studio",
+  recordarAs: "Re: proposta de col·laboració — Zenkai3D Studio",
+  recordarCos: "{hola}\n\nUs torno a escriure per si el meu correu de fa {dies} dies va quedar enterrat.\n\nSegueixo interessat a tirar endavant la col·laboració. Si ara no és el moment, cap problema: digueu-m'ho i ho deixo aquí.\n\nSanti\nZenkai3D Studio",
+  revisitarAs: "Zenkai3D Studio — tornem-hi?",
+  revisitarCos: "{hola}\n\nFa un temps vam parlar de col·laborar i llavors no va quadrar. Us escric perquè {motiu}.\n\nSi us sembla bé, us passo una proposta concreta i la mireu amb calma.\n\nSanti\nZenkai3D Studio"
+};
+var plantilles = JSON.parse(JSON.stringify(PLANTILLES_FAB));
+
+function emailDe(c){
+  if(!c) return null;
+  if(c.email) return c.email;
+  var on = [c.contacte, c.notes].join(" ");
+  var m = on.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/);
+  return m ? m[0] : null;
+}
+function nomDe(c){
+  var t = (c && c.contacte) ? String(c.contacte).trim() : "";
+  if(!t) return null;
+  t = t.split(/[<(,]/)[0].trim();          /* "Gwen Zhou <gwen@…>" -> "Gwen Zhou" */
+  if(t.indexOf("@")>=0) return null;
+  var parts = t.split(/\s+/);
+  return parts.length ? parts[0] : null;
+}
+function diesDes(iso){
+  if(!iso) return null;
+  var t = Date.parse(iso);
+  if(isNaN(t)) return null;
+  return Math.floor((Date.now()-t)/86400000);
+}
+function seg(c){ return (c && c.seguiment) ? c.seguiment : {}; }
+
+function omple(txt, c, extra){
+  extra = extra || {};
+  var nom = nomDe(c);
+  var ents = (c.entregables||[]).filter(function(x){ return x.fet; })
+    .map(function(x){ return "· "+x.text; }).join("\n");
+  var map = {
+    "{marca}": c.marca || "",
+    "{hola}": nom ? ("Hola "+nom+",") : "Hola,",
+    "{compensacio}": c.compensacio || "",
+    "{entregables}": ents || "· (posa-hi aquí els enllaços)",
+    "{data}": c.dataAcceptacio || (c.creat ? String(c.creat).slice(0,10) : ""),
+    "{dies}": extra.dies != null ? String(extra.dies) : "",
+    "{motiu}": c.tornarMotiu || "ara tinc coses noves per ensenyar-vos"
+  };
+  var out = String(txt||"");
+  for(var k in map) out = out.split(k).join(map[k]);
+  return out;
+}
+
+function calculaSeguiment(){
+  var r = { tancar:[], recordar:[], revisitar:[], tard:[] };
+  var avui = new Date(); avui.setHours(0,0,0,0);
+  collabs.forEach(function(c){
+    if(esConcurs(c)) return;
+    var S = seg(c);
+    var ents = c.entregables || [];
+    var totFet = ents.length>0 && ents.every(function(x){ return x.fet; });
+
+    if((c.estat==="publicat"||c.estat==="cobrat") && totFet && !S.tancatEl){
+      r.tancar.push({c:c, tipus:"tancar"});
+    }
+    if(c.estat==="proposta" || c.estat==="enviada"){
+      var desde = S.recordatEl || c.creat;
+      var d = diesDes(desde);
+      if(d!=null && d >= (plantilles.dies||14)) r.recordar.push({c:c, tipus:"recordar", dies:d});
+    }
+    if(c.tornarEl){
+      var dt = new Date(c.tornarEl+"T00:00:00");
+      if(!isNaN(dt) && dt <= avui && (!S.revisitatEl || S.revisitatEl < c.tornarEl)){
+        r.revisitar.push({c:c, tipus:"revisitar"});
+      }
+    }
+    if(c.dataLliurament && ents.length && !totFet && ACTIUS.indexOf(c.estat)>=0){
+      var dl = new Date(c.dataLliurament+"T00:00:00");
+      if(!isNaN(dl) && dl < avui){
+        r.tard.push({c:c, tipus:"tard", dies:Math.floor((avui-dl)/86400000),
+                     falten:ents.filter(function(x){return !x.fet;}).length});
+      }
+    }
+  });
+  return r;
+}
+
+function fitxaSeg(it){
+  var c = it.c, t = it.tipus;
+  var adreca = emailDe(c);
+  var as, cos, perque;
+  if(t==="tancar"){
+    as = omple(plantilles.tancarAs, c); cos = omple(plantilles.tancarCos, c);
+    var ne=(c.entregables||[]).length;
+    perque = "Has entregat "+(ne===1?"l'únic compromís":"els "+ne+" compromisos")+" i la col·laboració consta com a "+(ESTATS[c.estat]||c.estat).toLowerCase()+".";
+  } else if(t==="recordar"){
+    as = omple(plantilles.recordarAs, c, {dies:it.dies}); cos = omple(plantilles.recordarCos, c, {dies:it.dies});
+    perque = "Proposta "+(c.estat==="enviada"?"enviada":"rebuda")+" i sense resposta des de fa "+
+             it.dies+(it.dies===1?" dia":" dies")+".";
+  } else if(t==="revisitar"){
+    as = omple(plantilles.revisitarAs, c); cos = omple(plantilles.revisitarCos, c);
+    perque = "Vas apuntar de tornar-hi el "+c.tornarEl+(c.tornarMotiu?" — "+c.tornarMotiu:"")+".";
+  } else {
+    perque = "L'entrega era el "+c.dataLliurament+", fa "+it.dies+(it.dies===1?" dia":" dies")+", i et falta"+(it.falten===1?" 1 cosa":"n "+it.falten+" coses")+" per fer.";
+  }
+
+  var h = '<div class="segitem'+(t==="tard"?" urgent":"")+'" data-uid="'+esc(c.uid)+'" data-t="'+t+'">'+
+    '<div class="segtop"><b>'+esc(c.marca||"Sense nom")+'</b>'+
+    '<span class="note">'+esc(TIPUS[c.tipus]||c.tipus||"")+'</span>'+
+    '<span class="quan">'+esc(ESTATS[c.estat]||c.estat||"")+'</span></div>'+
+    '<p class="segwhy">'+esc(perque)+'</p>';
+
+  if(t!=="tard"){
+    h += '<details class="segmail"><summary>El correu</summary><div class="cos">'+
+         '<label>Per a</label><input type="email" class="sg-to" value="'+esc(adreca||"")+'" placeholder="adreça de la marca">'+
+         '<label>Assumpte</label><input type="text" class="sg-as" value="'+esc(as)+'">'+
+         '<label>Missatge</label><textarea class="sg-cos">'+esc(cos)+'</textarea>'+
+         '</div></details>'+
+         (adreca?'':'<p class="sensemail">No li tens cap adreça. Escriu-la aquí sobre o posa-la a la fitxa.</p>')+
+         '<div class="segacc">'+
+           '<button class="btn primary sg-obre" type="button">Obre el correu</button>'+
+           '<button class="btn sg-copia" type="button">Copia el text</button>'+
+           '<button class="btn sg-gmail" type="button">Busca\'l a Gmail</button>'+
+           '<span class="spacer"></span>'+
+           '<button class="btn sg-fet" type="button">Ja l\'he enviat</button>'+
+         '</div>';
+  } else {
+    h += '<div class="segacc"><button class="btn sg-edita" type="button">Obre la fitxa</button></div>';
+  }
+  return h + '</div>';
+}
+
+function renderSeguiment(){
+  var r = calculaSeguiment();
+  [["seg-tancar",r.tancar],["seg-recordar",r.recordar],["seg-revisitar",r.revisitar],["seg-tard",r.tard]].forEach(function(p){
+    var box = $(p[0]), llista = p[1];
+    box.querySelector(".compte").textContent = llista.length;
+    box.classList.toggle("buida", llista.length===0);
+    box.querySelector(".llistat").innerHTML = llista.length
+      ? llista.map(fitxaSeg).join("")
+      : '<p class="note" style="padding:4px 2px">Res pendent.</p>';
+  });
+  omplePlantillesForm();
+  lligaSeguiment();
+}
+
+function lligaSeguiment(){
+  Array.prototype.forEach.call($("view-seguiment").querySelectorAll(".segitem"), function(box){
+    var uid = box.dataset.uid;
+    function dades(){
+      return {
+        to: (box.querySelector(".sg-to")||{}).value || "",
+        as: (box.querySelector(".sg-as")||{}).value || "",
+        cos: (box.querySelector(".sg-cos")||{}).value || ""
+      };
+    }
+    var b;
+    if((b=box.querySelector(".sg-obre"))) b.onclick=function(){
+      var d=dades();
+      if(!d.to){ toast("Posa-hi una adreça primer"); return; }
+      window.location.href = "mailto:"+encodeURIComponent(d.to)+
+        "?subject="+encodeURIComponent(d.as)+"&body="+encodeURIComponent(d.cos);
+    };
+    if((b=box.querySelector(".sg-copia"))) b.onclick=function(){
+      var d=dades(), txt=d.as+"\n\n"+d.cos;
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(function(){ toast("Copiat"); },function(){ toast("No he pogut copiar-ho"); });
+      } else toast("Aquest navegador no deixa copiar");
+    };
+    if((b=box.querySelector(".sg-gmail"))) b.onclick=function(){
+      var d=dades();
+      var c=byUid(uid);
+      var q = d.to ? ("from:"+d.to+" OR to:"+d.to) : ((c&&c.marca)||"");
+      window.open("https://mail.google.com/mail/u/0/#search/"+encodeURIComponent(q), "_blank", "noopener");
+    };
+    if((b=box.querySelector(".sg-fet"))) b.onclick=function(){
+      var t=box.dataset.t, camp = t==="tancar"?"tancatEl" : t==="recordar"?"recordatEl" : "revisitatEl";
+      var ara=new Date().toISOString().slice(0,10);
+      collabs = collabs.map(function(c){
+        if(c.uid!==uid) return c;
+        var S = Object.assign({}, c.seguiment||{});
+        S[camp]=ara;
+        return Object.assign({}, c, {seguiment:S});
+      });
+      persist(); renderSeguiment();
+      toast("Apuntat. No te'l tornaré a treure.");
+    };
+    if((b=box.querySelector(".sg-edita"))) b.onclick=function(){ openEditor(uid); };
+  });
+}
+
+function omplePlantillesForm(){
+  $("pl-tancar-as").value=plantilles.tancarAs;   $("pl-tancar-cos").value=plantilles.tancarCos;
+  $("pl-recordar-as").value=plantilles.recordarAs; $("pl-recordar-cos").value=plantilles.recordarCos;
+  $("pl-revisitar-as").value=plantilles.revisitarAs; $("pl-revisitar-cos").value=plantilles.revisitarCos;
+  $("pl-dies").value=plantilles.dies;
+}
+[["pl-tancar-as","tancarAs"],["pl-tancar-cos","tancarCos"],["pl-recordar-as","recordarAs"],
+ ["pl-recordar-cos","recordarCos"],["pl-revisitar-as","revisitarAs"],["pl-revisitar-cos","revisitarCos"]
+].forEach(function(p){
+  $(p[0]).addEventListener("input", function(){ plantilles[p[1]]=this.value; desaPlantilles(); });
+});
+$("pl-dies").addEventListener("input", function(){
+  var v=parseInt(this.value,10); if(isFinite(v)&&v>0){ plantilles.dies=v; desaPlantilles(); renderSeguiment(); }
+});
+$("pl-reset").onclick=function(){
+  plantilles=JSON.parse(JSON.stringify(PLANTILLES_FAB));
+  desaPlantilles(); renderSeguiment(); toast("Textos tornats com estaven");
+};
+function desaPlantilles(){
+  try{ localStorage.setItem("collabs-plantilles-v1", JSON.stringify(plantilles)); }catch(e){}
+  if(typeof scheduleDriveSave==="function") scheduleDriveSave();
+}
+function carregaPlantilles(){
+  try{
+    var raw=localStorage.getItem("collabs-plantilles-v1");
+    if(raw){ var o=JSON.parse(raw); if(o&&typeof o==="object") for(var k in PLANTILLES_FAB) if(o[k]!=null) plantilles[k]=o[k]; }
+  }catch(e){}
+}
+
+var ZCFG = {
+  scopes: ["https://www.googleapis.com/auth/gmail.readonly"],
+  nomFitxa: "col·laboració",
+  nomFitxes: "col·laboracions",
+  /* el que hi ha al Drive i aquí no: ve d'haver-ho apuntat en un altre
+     aparell, i si no s'afegeix abans de desar es perd */
+  mergeRemote: function(d){
+    var noves = zFonLlista(collabs, d && d.collabs, deletedUids);
+    if(!noves.length) return 0;
+    noves.forEach(function(x){ collabs.push(x); });
+    saveLocal(); renderAll();
+    return noves.length;
+  },
+  refreshRemote: function(d){
+    var r = d && d.collabs;
+    if(!Array.isArray(r) || !r.length) return false;
+    if(JSON.stringify(r)===JSON.stringify(collabs)) return false;
+    collabs = JSON.parse(JSON.stringify(r));
+    saveLocal(); renderAll();
+    return true;
+  },
+  jsonName: "zenkai3d-collaboracions.json",
+  csvName:  "zenkai3d-collaboracions.csv",
+  buildCSV: function(){ return buildCSV(); },
+  getPayload: function(){ return {collabs:collabs, plantilles:plantilles, updatedAt:new Date().toISOString()}; },
+  applyPayload: function(d){
+    loadLocal();
+    var had=false;
+    if(Array.isArray(d.collabs) && d.collabs.length){ collabs=JSON.parse(JSON.stringify(d.collabs)); had=true; }
+    if(d.plantilles && typeof d.plantilles==="object"){
+      for(var k in PLANTILLES_FAB) if(d.plantilles[k]!=null) plantilles[k]=d.plantilles[k];
+      desaPlantilles();
+    }
+    saveLocal();
+    return had;
+  },
+  boot: function(){
+    loadLocal();
+    carregaPlantilles();
+    renderAll();
+    connectCaps();
+  }
+};
+
+</script>
+<script src="zenkai.js"></script>
+<script>if(typeof gateInit!=="function"){var _g=document.getElementById("gate-status");
+  if(_g) _g.textContent="No s'ha pogut carregar zenkai.js. Recarrega la pàgina.";}</script>
+<script src="zenkai-nav.js"></script>
+</body>
+</html>
